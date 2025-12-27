@@ -12,3 +12,5 @@ Thumbs.db
 
 # Videos folder (optional - remove this line if you want to include videos)
 videos/
+
+secrets.json

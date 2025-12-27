@@ -68,7 +68,7 @@ body {
 }
 
 .logo img {
-    height: 50px;
+    height: 70px;
     width: auto;
     object-fit: contain;
     transition: transform 0.3s ease;
@@ -948,7 +948,7 @@ section {
 }
 
 .footer-logo img {
-    height: 80px;
+    height: 120px;
     width: auto;
     object-fit: contain;
     margin-bottom: 1rem;

@@ -56,6 +56,8 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
 });
 
 // Intersection Observer for Fade-in Animations
+// Temporarily disabled to improve mobile performance
+/*
 const observerOptions = {
     threshold: 0.1,
     rootMargin: '0px 0px -100px 0px'
@@ -87,6 +89,7 @@ cards.forEach((card, index) => {
     card.style.transition = `opacity 0.6s ease ${index * 0.1}s, transform 0.6s ease ${index * 0.1}s`;
     observer.observe(card);
 });
+*/
 
 // Dynamic Year for Footer
 const currentYear = new Date().getFullYear();

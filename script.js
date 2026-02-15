@@ -438,3 +438,38 @@ if (carouselTrack && prevBtn && nextBtn && dotsContainer) {
 
 console.log('%c🎉 Welcome to Makena! 🎉', 'color: #9333ea; font-size: 20px; font-weight: bold;');
 console.log('%cOne Life, Good Vibe, Party Hard', 'color: #ec4899; font-size: 14px;');
+
+// All Access Popup Modal
+const allAccessPopup = document.getElementById('allAccessPopup');
+const closePopup = document.getElementById('closePopup');
+
+// Show popup after 2 seconds
+setTimeout(() => {
+    if (allAccessPopup && !sessionStorage.getItem('popupShown')) {
+        allAccessPopup.classList.add('active');
+        sessionStorage.setItem('popupShown', 'true');
+    }
+}, 2000);
+
+// Close popup when clicking X button
+if (closePopup) {
+    closePopup.addEventListener('click', () => {
+        allAccessPopup.classList.remove('active');
+    });
+}
+
+// Close popup when clicking outside the content
+if (allAccessPopup) {
+    allAccessPopup.addEventListener('click', (e) => {
+        if (e.target === allAccessPopup) {
+            allAccessPopup.classList.remove('active');
+        }
+    });
+}
+
+// Close popup with Escape key
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && allAccessPopup && allAccessPopup.classList.contains('active')) {
+        allAccessPopup.classList.remove('active');
+    }
+});

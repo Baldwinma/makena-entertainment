@@ -481,14 +481,18 @@ document.addEventListener('keydown', (e) => {
 // Discount Form Functionality
 // ==============================================
 
-console.log('Initializing discount form functionality...');
+// Production mode - disable console logs
+const IS_PRODUCTION = true; // Set to false for debugging
+const log = IS_PRODUCTION ? () => {} : console.log.bind(console);
+
+log('Initializing discount form functionality...');
 
 const discountPopup = document.getElementById('discountPopup');
 const closeDiscountPopup = document.getElementById('closeDiscountPopup');
 const discountForm = document.getElementById('discountForm');
 const discountForm2 = document.getElementById('discountForm2');
 
-console.log('Discount elements found:', {
+log('Discount elements found:', {
     popup: !!discountPopup,
     closeBtn: !!closeDiscountPopup,
     form1: !!discountForm,
@@ -556,30 +560,30 @@ if (countryCodeSelect2 && customCountryCodeInput2) {
 
 // Handle form submission - Popup Form
 if (discountForm) {
-    console.log('Discount form popup found, attaching event listener');
+    log('Discount form popup found, attaching event listener');
     discountForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        console.log('Popup form submitted');
+        log('Popup form submitted');
         await handleDiscountFormSubmit(discountForm, 'discountFormContainer', 'discountCodeContainer');
     });
 } else {
-    console.log('Discount form popup NOT found');
+    log('Discount form popup NOT found');
 }
 
 // Handle form submission - Section Form
 if (discountForm2) {
-    console.log('Discount form section found, attaching event listener');
+    log('Discount form section found, attaching event listener');
     discountForm2.addEventListener('submit', async (e) => {
         e.preventDefault();
-        console.log('Section form submitted');
+        log('Section form submitted');
         await handleDiscountFormSubmit(discountForm2, 'discountFormContainer2', 'discountCodeContainer2');
     });
 } else {
-    console.log('Discount form section NOT found');
+    log('Discount form section NOT found');
 }
 
 async function handleDiscountFormSubmit(form, formContainerId, codeContainerId) {
-    console.log('handleDiscountFormSubmit called');
+    log('handleDiscountFormSubmit called');
     const formData = new FormData(form);
 
     // Validate email format
@@ -626,15 +630,17 @@ async function handleDiscountFormSubmit(form, formContainerId, codeContainerId) 
     };
 
     // Check for duplicate submission (email-based)
-    const submittedEmails = JSON.parse(localStorage.getItem('makenaSubmittedEmails') || '[]');
-    if (submittedEmails.includes(email)) {
+    // Store hashed email instead of plain text for privacy
+    const emailHash = await hashEmail(email);
+    const submittedHashes = JSON.parse(localStorage.getItem('makenaSubmittedHashes') || '[]');
+    if (submittedHashes.includes(emailHash)) {
         alert('This email has already been used to claim a discount code. Each email can only be used once.');
-        console.log('Duplicate email detected:', email);
+        log('Duplicate email detected');
         return;
     }
 
-    console.log('Form data collected:', data);
-    console.log('Google Script URL:', GOOGLE_SCRIPT_URL);
+    log('Form validation passed');
+    // DON'T log sensitive data in production
 
     // Show loading state
     const submitBtn = form.querySelector('button[type="submit"]');
@@ -643,8 +649,7 @@ async function handleDiscountFormSubmit(form, formContainerId, codeContainerId) 
     submitBtn.disabled = true;
 
     try {
-        console.log('Sending data to Google Sheets...');
-        console.log('Request payload:', JSON.stringify(data));
+        log('Sending data to Google Sheets...');
 
         const startTime = Date.now();
 
@@ -658,14 +663,7 @@ async function handleDiscountFormSubmit(form, formContainerId, codeContainerId) 
         });
 
         const endTime = Date.now();
-        console.log(`Request completed in ${endTime - startTime}ms`);
-        console.log('Response received:', response);
-        console.log('Response status:', response.status);
-        console.log('Response type:', response.type);
-
-        // Note: With mode: 'no-cors', we can't read the response body
-        // The request will still go through, but response will be opaque
-        console.log('⚠️ Note: Using no-cors mode - response is opaque, but data should still be sent');
+        log(`Request completed in ${endTime - startTime}ms`);
 
         // Simulate API call
         await new Promise(resolve => setTimeout(resolve, 1000));
@@ -677,25 +675,29 @@ async function handleDiscountFormSubmit(form, formContainerId, codeContainerId) 
         // Store in localStorage to prevent duplicate submissions
         localStorage.setItem('makenaDiscountClaimed', 'true');
 
-        // Store the email to prevent duplicate submissions
-        const submittedEmails = JSON.parse(localStorage.getItem('makenaSubmittedEmails') || '[]');
-        submittedEmails.push(email);
-        localStorage.setItem('makenaSubmittedEmails', JSON.stringify(submittedEmails));
+        // Store the hashed email to prevent duplicate submissions (privacy-preserving)
+        const submittedHashes = JSON.parse(localStorage.getItem('makenaSubmittedHashes') || '[]');
+        submittedHashes.push(emailHash);
+        localStorage.setItem('makenaSubmittedHashes', JSON.stringify(submittedHashes));
 
-        console.log('✅ Discount code displayed');
-        console.log('✅ Email stored to prevent duplicates');
+        log('✅ Discount code displayed');
 
     } catch (error) {
-        console.error('❌ Error submitting form:', error);
-        console.error('Error details:', {
-            message: error.message,
-            stack: error.stack,
-            name: error.name
-        });
+        console.error('Error submitting form'); // Only log generic error, not details
         alert('There was an error processing your request. Please try again.');
         submitBtn.textContent = originalText;
         submitBtn.disabled = false;
     }
+}
+
+// Helper function to hash emails for privacy
+async function hashEmail(email) {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(email);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    return hashHex;
 }
 
 // Copy discount code functionality
@@ -728,7 +730,7 @@ function copyDiscountCode(textElementId, button) {
 // Check if user already claimed discount and show code directly
 function checkAndShowExistingDiscount() {
     if (localStorage.getItem('makenaDiscountClaimed')) {
-        console.log('User has already claimed discount, showing code directly');
+        log('User has already claimed discount, showing code directly');
 
         // Don't show popup if already claimed
         sessionStorage.setItem('discountPopupShown', 'true');
@@ -764,7 +766,7 @@ checkAndShowExistingDiscount();
  */
 window.testGoogleSheets = async function() {
     console.log('🧪 Starting Google Sheets integration test...');
-    console.log('📍 Google Script URL:', GOOGLE_SCRIPT_URL);
+    console.log('📍 Google Script URL: [REDACTED]');
 
     const testData = {
         firstName: 'TEST',
@@ -774,7 +776,7 @@ window.testGoogleSheets = async function() {
         timestamp: new Date().toISOString()
     };
 
-    console.log('📤 Sending test data:', testData);
+    console.log('📤 Sending test data: [DATA REDACTED FOR SECURITY]');
 
     try {
         const startTime = Date.now();

@@ -10,6 +10,70 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;900&display=swap" rel="stylesheet">
 </head>
 <body>
+    <!-- Discount Form Popup Modal -->
+    <div class="popup-modal" id="discountPopup">
+        <div class="popup-content">
+            <button class="popup-close" id="closeDiscountPopup">&times;</button>
+            <div class="popup-header">
+                <h2>🎁 Get 10% Off Your Tickets!</h2>
+            </div>
+            <div class="popup-body">
+                <div id="discountFormContainer">
+                    <p>Sign up now and receive an exclusive 10% discount code instantly!</p>
+                    <form id="discountForm" class="discount-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="firstName">First Name *</label>
+                                <input type="text" id="firstName" name="firstName" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="lastName">Last Name *</label>
+                                <input type="text" id="lastName" name="lastName" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email *</label>
+                            <input type="email" id="email" name="email" required pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$" title="Please enter a valid email address">
+                        </div>
+                        <div class="form-group">
+                            <label for="phone">Phone Number *</label>
+                            <div class="phone-input-group">
+                                <select id="countryCode" name="countryCode" required class="country-code-select">
+                                    <option value="+33">🇫🇷 +33</option>
+                                    <option value="+351">🇵🇹 +351</option>
+                                    <option value="+1">🇺🇸 +1</option>
+                                    <option value="+44">🇬🇧 +44</option>
+                                    <option value="+49">🇩🇪 +49</option>
+                                    <option value="+34">🇪🇸 +34</option>
+                                    <option value="+39">🇮🇹 +39</option>
+                                    <option value="+32">🇧🇪 +32</option>
+                                    <option value="+41">🇨🇭 +41</option>
+                                    <option value="+31">🇳🇱 +31</option>
+                                    <option value="other">🌍 Other</option>
+                                </select>
+                                <input type="text" id="customCountryCode" name="customCountryCode" class="custom-country-code" style="display: none;" pattern="\+[0-9]{1,4}" placeholder="+XXX" title="Enter country code (e.g., +212)">
+                                <input type="tel" id="phone" name="phone" required pattern="[0-9]{6,15}" title="Please enter 6-15 digits only" placeholder="612345678">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Get My 10% Discount</button>
+                    </form>
+                </div>
+                <div id="discountCodeContainer" style="display: none;">
+                    <div class="discount-success">
+                        <h3>🎉 Your Discount Code</h3>
+                        <p>Here's your exclusive 10% discount code:</p>
+                        <div class="discount-code-display">
+                            <span id="discountCodeText">MAKENA10</span>
+                            <button id="copyCodeBtn" class="btn btn-secondary btn-small">Copy Code</button>
+                        </div>
+                        <p class="discount-instructions">Use this code at checkout on Eventbrite to get 10% off your tickets!</p>
+                        <p class="discount-note">💡 This code is saved - you can come back anytime to copy it again!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- All Access Popup Modal -->
     <div class="popup-modal" id="allAccessPopup">
         <div class="popup-content">
@@ -27,8 +91,8 @@
                     </div>
                     <div class="popup-offer">
                         <h3>Portimão All Access</h3>
-                        <p>13 Events • Maximum Savings</p>
-                        <a href="https://makenaallaccessportimao26.eventbrite.com" class="btn btn-primary" target="_blank">Get Portimão Pass</a>
+                        <p>14 Events • Maximum Savings</p>
+                        <a href="https://www.eventbrite.fr/e/makena-all-packages-portimao-tickets-1985722926728" class="btn btn-primary" target="_blank">Get Portimão Pass</a>
                     </div>
                 </div>
             </div>
@@ -125,12 +189,12 @@
                 <div class="event-card">
                     <div class="event-image">
                         <img src="images/Full-access-portimao.jpeg" alt="Afronation">
-                        <div class="event-badge">13 Events</div>
+                        <div class="event-badge">14 Events</div>
                     </div>
                     <div class="event-content">
                         <h3 class="event-title">Afronation (Portimao)</h3>
                         <p class="event-description">
-                            Experience the biggest celebration of Afrobeats, Amapiano, and African culture in Portugal. Join us for 13 epic events including pool parties, rooftop vibes, and unforgettable nights.
+                            Experience the biggest celebration of Afrobeats, Amapiano, and African culture in Portugal. Join us for 14 epic events including pool parties, rooftop vibes, and unforgettable nights.
                         </p>
                         <a href="afronation.html" class="btn btn-primary btn-small">View Events</a>
                     </div>
@@ -138,6 +202,76 @@
             </div>
             <div class="events-cta">
                 <a href="https://www.eventbrite.com/o/makena-entertainment-110594774951" class="btn btn-secondary" target="_blank">View All Events on Eventbrite</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Discount Section -->
+    <section class="discount-section" id="discount">
+        <div class="container">
+            <div class="discount-content">
+                <div class="discount-info">
+                    <h2>🎁 Get 10% Off Your First Ticket!</h2>
+                    <p>Join our VIP list and receive an exclusive discount code instantly. Be the first to know about new events, special offers, and more!</p>
+                    <ul class="discount-benefits">
+                        <li>✓ Instant 10% discount code</li>
+                        <li>✓ Early access to new events</li>
+                        <li>✓ Exclusive VIP offers</li>
+                    </ul>
+                </div>
+                <div class="discount-form-wrapper">
+                    <div id="discountFormContainer2">
+                        <form id="discountForm2" class="discount-form">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="firstName2">First Name *</label>
+                                    <input type="text" id="firstName2" name="firstName" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="lastName2">Last Name *</label>
+                                    <input type="text" id="lastName2" name="lastName" required>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="email2">Email *</label>
+                                <input type="email" id="email2" name="email" required pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$" title="Please enter a valid email address">
+                            </div>
+                            <div class="form-group">
+                                <label for="phone2">Phone Number *</label>
+                                <div class="phone-input-group">
+                                    <select id="countryCode2" name="countryCode" required class="country-code-select">
+                                        <option value="+33">🇫🇷 +33</option>
+                                        <option value="+351">🇵🇹 +351</option>
+                                        <option value="+1">🇺🇸 +1</option>
+                                        <option value="+44">🇬🇧 +44</option>
+                                        <option value="+49">🇩🇪 +49</option>
+                                        <option value="+34">🇪🇸 +34</option>
+                                        <option value="+39">🇮🇹 +39</option>
+                                        <option value="+32">🇧🇪 +32</option>
+                                        <option value="+41">🇨🇭 +41</option>
+                                        <option value="+31">🇳🇱 +31</option>
+                                        <option value="other">🌍 Other</option>
+                                    </select>
+                                    <input type="text" id="customCountryCode2" name="customCountryCode" class="custom-country-code" style="display: none;" pattern="\+[0-9]{1,4}" placeholder="+XXX" title="Enter country code (e.g., +212)">
+                                    <input type="tel" id="phone2" name="phone" required pattern="[0-9]{6,15}" title="Please enter 6-15 digits only" placeholder="612345678">
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Get My Discount Code</button>
+                        </form>
+                    </div>
+                    <div id="discountCodeContainer2" style="display: none;">
+                        <div class="discount-success">
+                            <h3>🎉 Your Discount Code</h3>
+                            <p>Here's your exclusive 10% discount code:</p>
+                            <div class="discount-code-display">
+                                <span id="discountCodeText2">MAKENA10</span>
+                                <button id="copyCodeBtn2" class="btn btn-secondary btn-small">Copy Code</button>
+                            </div>
+                            <p class="discount-instructions">Use this code at checkout on Eventbrite!</p>
+                            <p class="discount-note">💡 This code is saved - you can come back anytime to copy it again!</p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </section>

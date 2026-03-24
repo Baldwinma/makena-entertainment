@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Get 10% Off - Makena Entertainment</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        .discount-page {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 2rem;
+        }
+
+        .discount-page-content {
+            background: white;
+            border-radius: 20px;
+            padding: 3rem;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .discount-page-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .discount-page-header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .discount-page-header p {
+            font-size: 1.1rem;
+            color: #666;
+        }
+
+        .logo-container {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .logo-container img {
+            max-width: 150px;
+            height: auto;
+        }
+
+        @media (max-width: 768px) {
+            .discount-page-content {
+                padding: 2rem;
+            }
+
+            .discount-page-header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <section class="discount-page">
+        <div class="discount-page-content">
+            <div class="logo-container">
+                <img src="images/logo-transparent.png" alt="Makena Logo">
+            </div>
+
+            <div class="discount-page-header">
+                <h1>🎁 Get 10% Off!</h1>
+                <p>Sign up and receive your exclusive discount code instantly</p>
+            </div>
+
+            <div id="discountFormContainer">
+                <form id="discountForm" class="discount-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="firstName">First Name *</label>
+                            <input type="text" id="firstName" name="firstName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="lastName">Last Name *</label>
+                            <input type="text" id="lastName" name="lastName" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email *</label>
+                        <input type="email" id="email" name="email" required pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$" title="Please enter a valid email address">
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">Phone Number *</label>
+                        <div class="phone-input-group">
+                            <select id="countryCode" name="countryCode" required class="country-code-select">
+                                <option value="+33">🇫🇷 +33</option>
+                                <option value="+351">🇵🇹 +351</option>
+                                <option value="+1">🇺🇸 +1</option>
+                                <option value="+44">🇬🇧 +44</option>
+                                <option value="+49">🇩🇪 +49</option>
+                                <option value="+34">🇪🇸 +34</option>
+                                <option value="+39">🇮🇹 +39</option>
+                                <option value="+32">🇧🇪 +32</option>
+                                <option value="+41">🇨🇭 +41</option>
+                                <option value="+31">🇳🇱 +31</option>
+                                <option value="other">🌍 Other</option>
+                            </select>
+                            <input type="text" id="customCountryCode" name="customCountryCode" class="custom-country-code" style="display: none;" pattern="\+[0-9]{1,4}" placeholder="+XXX" title="Enter country code (e.g., +212)">
+                            <input type="tel" id="phone" name="phone" required pattern="[0-9]{6,15}" title="Please enter 6-15 digits only" placeholder="612345678">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">Get My 10% Discount</button>
+                </form>
+            </div>
+
+            <div id="discountCodeContainer" style="display: none;">
+                <div class="discount-success">
+                    <h3>🎉 Your Discount Code</h3>
+                    <p>Here's your exclusive 10% discount code:</p>
+                    <div class="discount-code-display">
+                        <span id="discountCodeText">MAKENA10</span>
+                        <button id="copyCodeBtn" class="btn btn-secondary btn-small">Copy Code</button>
+                    </div>
+                    <p class="discount-instructions">Use this code at checkout on Eventbrite to get 10% off your tickets!</p>
+                    <p class="discount-note">💡 Click "Copy Code" to copy and be redirected to browse events!</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        // Google Apps Script Web App URL
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx_OtILjzBuiIfS9UXeMK03KIgNYgyjyy2LxJSx5xjJapjGZyNzqZiPKHvYqv0bF8FH/exec';
+
+        // Country code dropdown handler
+        const countryCodeSelect = document.getElementById('countryCode');
+        const customCountryCodeInput = document.getElementById('customCountryCode');
+
+        if (countryCodeSelect && customCountryCodeInput) {
+            countryCodeSelect.addEventListener('change', function() {
+                if (this.value === 'other') {
+                    customCountryCodeInput.style.display = 'block';
+                    customCountryCodeInput.required = true;
+                } else {
+                    customCountryCodeInput.style.display = 'none';
+                    customCountryCodeInput.required = false;
+                    customCountryCodeInput.value = '';
+                }
+            });
+        }
+
+        // Handle form submission
+        const discountForm = document.getElementById('discountForm');
+        if (discountForm) {
+            discountForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                await handleDiscountFormSubmit();
+            });
+        }
+
+        async function handleDiscountFormSubmit() {
+            const formData = new FormData(discountForm);
+
+            // Validate email format
+            const email = formData.get('email').toLowerCase().trim();
+            const emailRegex = /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/;
+            if (!emailRegex.test(email)) {
+                alert('Please enter a valid email address');
+                return;
+            }
+
+            // Combine country code with phone number
+            let countryCode = formData.get('countryCode');
+
+            // Check if "Other" was selected and use custom country code
+            if (countryCode === 'other') {
+                const customCode = formData.get('customCountryCode');
+                if (!customCode || !customCode.trim()) {
+                    alert('Please enter your country code');
+                    return;
+                }
+                // Validate custom country code format (+XXX)
+                if (!/^\+[0-9]{1,4}$/.test(customCode.trim())) {
+                    alert('Please enter a valid country code (e.g., +212, +91)');
+                    return;
+                }
+                countryCode = customCode.trim();
+            }
+
+            const phoneNumber = formData.get('phone').replace(/\s+/g, ''); // Remove spaces
+            const fullPhone = countryCode + phoneNumber;
+
+            // Validate phone number (6-15 digits)
+            if (!/^[0-9]{6,15}$/.test(phoneNumber)) {
+                alert('Please enter a valid phone number (6-15 digits)');
+                return;
+            }
+
+            const data = {
+                firstName: formData.get('firstName').trim(),
+                lastName: formData.get('lastName').trim(),
+                email: email,
+                phone: fullPhone,
+                timestamp: new Date().toISOString()
+            };
+
+            // Check for duplicate submission (email-based)
+            const emailHash = await hashEmail(email);
+            const submittedHashes = JSON.parse(localStorage.getItem('makenaSubmittedHashes') || '[]');
+            if (submittedHashes.includes(emailHash)) {
+                alert('This email has already been used to claim a discount code. Each email can only be used once.');
+                return;
+            }
+
+            // Show loading state
+            const submitBtn = discountForm.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = 'Processing...';
+            submitBtn.disabled = true;
+
+            try {
+                await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                // Simulate API call
+                await new Promise(resolve => setTimeout(resolve, 1000));
+
+                // Hide form, show code
+                document.getElementById('discountFormContainer').style.display = 'none';
+                document.getElementById('discountCodeContainer').style.display = 'block';
+
+                // Store in localStorage to prevent duplicate submissions
+                localStorage.setItem('makenaDiscountClaimed', 'true');
+
+                // Store the hashed email to prevent duplicate submissions
+                const submittedHashes = JSON.parse(localStorage.getItem('makenaSubmittedHashes') || '[]');
+                submittedHashes.push(emailHash);
+                localStorage.setItem('makenaSubmittedHashes', JSON.stringify(submittedHashes));
+
+            } catch (error) {
+                console.error('Error submitting form');
+                alert('There was an error processing your request. Please try again.');
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            }
+        }
+
+        // Helper function to hash emails for privacy
+        async function hashEmail(email) {
+            const encoder = new TextEncoder();
+            const data = encoder.encode(email);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+            return hashHex;
+        }
+
+        // Copy discount code and redirect to home page
+        const copyCodeBtn = document.getElementById('copyCodeBtn');
+        if (copyCodeBtn) {
+            copyCodeBtn.addEventListener('click', () => {
+                const codeText = document.getElementById('discountCodeText').textContent;
+                navigator.clipboard.writeText(codeText).then(() => {
+                    copyCodeBtn.textContent = 'Copied! Redirecting...';
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 1000);
+                });
+            });
+        }
+
+        // Check if user already claimed discount and show code directly
+        function checkAndShowExistingDiscount() {
+            if (localStorage.getItem('makenaDiscountClaimed')) {
+                document.getElementById('discountFormContainer').style.display = 'none';
+                document.getElementById('discountCodeContainer').style.display = 'block';
+            }
+        }
+
+        // Run on page load
+        checkAndShowExistingDiscount();
+    </script>
+</body>
+</html>

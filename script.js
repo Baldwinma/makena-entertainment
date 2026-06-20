@@ -192,6 +192,57 @@ buttons.forEach(button => {
     });
 });
 
+// Sold-out/completed ticket notice
+const ticketModal = document.getElementById('ticketModal');
+const ticketModalTitle = document.getElementById('ticketModalTitle');
+const ticketModalMessage = document.getElementById('ticketModalMessage');
+const unavailableTicketLinks = document.querySelectorAll('.unavailable-ticket');
+
+function openTicketModal(title, message) {
+    if (!ticketModal) {
+        return;
+    }
+
+    if (ticketModalTitle && title) {
+        ticketModalTitle.textContent = title;
+    }
+
+    if (ticketModalMessage && message) {
+        ticketModalMessage.textContent = message;
+    }
+
+    ticketModal.classList.add('is-open');
+    ticketModal.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeTicketModal() {
+    if (!ticketModal) {
+        return;
+    }
+
+    ticketModal.classList.remove('is-open');
+    ticketModal.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+}
+
+unavailableTicketLinks.forEach(link => {
+    link.addEventListener('click', (e) => {
+        e.preventDefault();
+        openTicketModal(link.dataset.modalTitle, link.dataset.modalMessage);
+    });
+});
+
+document.querySelectorAll('[data-close-ticket-modal]').forEach(closeControl => {
+    closeControl.addEventListener('click', closeTicketModal);
+});
+
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && ticketModal && ticketModal.classList.contains('is-open')) {
+        closeTicketModal();
+    }
+});
+
 // Loading State Handler
 window.addEventListener('load', () => {
     document.body.classList.add('loaded');

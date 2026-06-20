@@ -552,6 +552,105 @@ section {
     text-align: center;
 }
 
+.event-group {
+    margin-bottom: 3rem;
+}
+
+.event-group--past {
+    padding-top: 1.5rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.event-group-title {
+    margin-bottom: 1.5rem;
+    color: var(--text-primary);
+    font-size: 1.8rem;
+    font-weight: 700;
+    text-align: center;
+}
+
+.ticket-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+}
+
+.ticket-modal.is-open {
+    display: flex;
+}
+
+.ticket-modal__backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.78);
+    backdrop-filter: blur(8px);
+}
+
+.ticket-modal__card {
+    position: relative;
+    width: min(100%, 420px);
+    padding: 2rem;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 18px;
+    background:
+        linear-gradient(135deg, rgba(147, 51, 234, 0.22), rgba(236, 72, 153, 0.18)),
+        var(--dark-bg-card);
+    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.5);
+    text-align: center;
+}
+
+.ticket-modal__close {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.85rem;
+    width: 2.25rem;
+    height: 2.25rem;
+    border: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+    font-size: 1.6rem;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.ticket-modal__close:hover,
+.ticket-modal__close:focus {
+    background: rgba(255, 255, 255, 0.18);
+    outline: none;
+}
+
+.ticket-modal__mark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+    padding: 0.35rem 0.85rem;
+    border-radius: 999px;
+    background: var(--gradient-secondary);
+    color: #ffffff;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.ticket-modal__card h2 {
+    margin-bottom: 0.75rem;
+    color: var(--text-primary);
+    font-size: 2rem;
+}
+
+.ticket-modal__card p {
+    margin-bottom: 1.5rem;
+    color: var(--text-secondary);
+    font-size: 1rem;
+}
+
 /* Announcements Section */
 .announcements {
     background: var(--dark-bg-alt);

@@ -5,6 +5,8 @@
 /get-discount.html /get-discount 301
 /checkout-test.html /checkout-test 301
 /check-in.html /check-in 301
+/admin.html /admin 301
+/ticket.html /ticket 301
 /afronation-after-parties-portimao.html /afronation-after-parties-portimao 301
 /afronation-after-party-portimao.html /afronation-after-party-portimao 301
 /pool-parties-portimao.html /pool-parties-portimao 301
@@ -17,6 +19,8 @@
 /get-discount /get-discount.html 200
 /checkout-test /checkout-test.html 200
 /check-in /check-in.html 200
+/admin /admin.html 200
+/ticket /ticket.html 200
 /afronation-after-parties-portimao /afronation-after-parties-portimao.html 200
 /afronation-after-party-portimao /afronation-after-party-portimao.html 200
 /pool-parties-portimao /pool-parties-portimao.html 200

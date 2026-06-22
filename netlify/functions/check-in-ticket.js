@@ -1,4 +1,5 @@
 const { getSupabase } = require('./lib/supabase');
+const { requireAdmin } = require('./lib/admin-auth');
 
 function json(statusCode, body) {
     return {
@@ -17,6 +18,11 @@ function cleanCode(code) {
 exports.handler = async function(event) {
     if (event.httpMethod !== 'POST') {
         return json(405, { error: 'Method not allowed' });
+    }
+
+    const admin = requireAdmin(event);
+    if (!admin) {
+        return json(401, { error: 'Admin login required.' });
     }
 
     const supabase = getSupabase();
@@ -65,7 +71,7 @@ exports.handler = async function(event) {
         .update({
             checked_in: true,
             checked_in_at: checkedInAt,
-            checked_in_by: payload.checkedInBy || 'Makena staff',
+            checked_in_by: payload.checkedInBy || admin.username || 'Makena admin',
             updated_at: checkedInAt
         })
         .eq('ticket_code', code)

@@ -16,16 +16,12 @@ function cleanCode(code) {
 }
 
 function getBaseUrl(event) {
-    if (process.env.SITE_URL) {
-        return process.env.SITE_URL.replace(/\/$/, '');
-    }
-
     const proto = event.headers['x-forwarded-proto'] || 'https';
     const host = event.headers.host;
-    return `${proto}://${host}`;
+    return host ? `${proto}://${host}` : (process.env.SITE_URL || '').replace(/\/$/, '');
 }
 
-function buildEmailHtml({ ticket, checkInUrl, qrImageUrl }) {
+function buildEmailHtml({ ticket, ticketPageUrl, qrImageUrl }) {
     return `
         <div style="font-family: Arial, sans-serif; color: #111827; line-height: 1.5;">
             <h1 style="margin-bottom: 8px;">Your Makena Ticket</h1>
@@ -35,10 +31,9 @@ function buildEmailHtml({ ticket, checkInUrl, qrImageUrl }) {
                 <p style="margin: 0 0 6px;"><strong>Name:</strong> ${ticket.holder_name || 'Guest'}</p>
                 <p style="margin: 0 0 14px;"><strong>Ticket Code:</strong> ${ticket.ticket_code}</p>
                 <img src="${qrImageUrl}" alt="Ticket QR Code" width="220" height="220" style="display: block; width: 220px; height: 220px; border: 1px solid #e5e7eb; border-radius: 10px;">
-                <p style="font-size: 13px; color: #6b7280;">If the QR code does not display, open it here: <a href="${qrImageUrl}">${qrImageUrl}</a></p>
-                <p style="font-size: 13px; color: #6b7280;">For local testing, the QR code is also attached to this email as <strong>${ticket.ticket_code}.png</strong>.</p>
+                <p style="font-size: 13px; color: #6b7280;">Open your ticket page here: <a href="${ticketPageUrl}">${ticketPageUrl}</a></p>
+                <p style="font-size: 13px; color: #6b7280;">If the QR code does not display, open the ticket page above or use the attached <strong>${ticket.ticket_code}.png</strong>.</p>
                 <p style="font-size: 13px; color: #6b7280;">You can also use this ticket code at the door: ${ticket.ticket_code}</p>
-                <p style="font-size: 13px; color: #6b7280;">Check-in link: <a href="${checkInUrl}">${checkInUrl}</a></p>
             </div>
         </div>
     `;
@@ -102,7 +97,8 @@ exports.handler = async function(event) {
     }
 
     const baseUrl = getBaseUrl(event);
-    const checkInUrl = `${baseUrl}/check-in?ticket=${encodeURIComponent(ticket.ticket_code)}`;
+    const checkInUrl = `${baseUrl}/admin?ticket=${encodeURIComponent(ticket.ticket_code)}`;
+    const ticketPageUrl = `${baseUrl}/ticket?ticket=${encodeURIComponent(ticket.ticket_code)}`;
     const qrImageUrl = `${baseUrl}/.netlify/functions/ticket-qr?ticket=${encodeURIComponent(ticket.ticket_code)}`;
     const qrPng = await QRCode.toBuffer(checkInUrl, {
         margin: 1,
@@ -119,7 +115,7 @@ exports.handler = async function(event) {
             from: fromEmail,
             to,
             subject: `Your Makena ticket: ${ticket.event_name}`,
-            html: buildEmailHtml({ ticket, checkInUrl, qrImageUrl }),
+            html: buildEmailHtml({ ticket, ticketPageUrl, qrImageUrl }),
             attachments: [
                 {
                     filename: `${ticket.ticket_code}.png`,

@@ -108,7 +108,7 @@
                     </div>
                     <img class="ticket-preview__qr" src="${ticket.qrCode}" alt="QR code for ${ticket.code}">
                     <div class="ticket-preview__code" aria-label="Ticket code">${ticket.code}</div>
-                    <a class="btn btn-secondary btn-small" href="${ticket.checkInUrl}" target="_blank">Open Check-In Link</a>
+                    <a class="btn btn-secondary btn-small" href="${ticket.ticketPageUrl}" target="_blank">Open Ticket Page</a>
                     <form class="ticket-email-form" data-ticket-code="${ticket.code}">
                         <label for="email-${ticket.code}">Send this ticket by email</label>
                         <div class="ticket-email-form__row">

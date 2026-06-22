@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Makena Admin Check-In</title>
+    <meta name="description" content="Makena admin ticket check-in.">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar" id="navbar">
+        <div class="container">
+            <div class="nav-content">
+                <div class="logo">
+                    <a href="index.html">
+                        <img src="images/logo-transparent.png" alt="Makena Logo">
+                    </a>
+                </div>
+                <ul class="nav-links" id="navLinks">
+                    <li><a href="afronation.html">Afronation</a></li>
+                    <li><a href="#" id="logoutLink" hidden>Logout</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <section class="page-header">
+        <div class="hero-overlay"></div>
+        <div class="container">
+            <h1 class="page-title">Admin Check-In</h1>
+            <p class="page-subtitle">Login to scan Makena tickets and mark entry.</p>
+            <p class="page-subtitle">Use Scan Tickets to open your camera and automatically check guests in.</p>
+        </div>
+    </section>
+
+    <section class="events">
+        <div class="container">
+            <div class="check-in-panel" id="loginPanel">
+                <form class="checkout-test-form" id="adminLoginForm">
+                    <label for="adminUsername">Username</label>
+                    <input id="adminUsername" class="check-in-input check-in-input--login" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" required>
+                    <label for="adminPassword">Password</label>
+                    <div class="password-field">
+                        <input id="adminPassword" class="check-in-input check-in-input--login password-field__input" type="password" autocomplete="current-password" autocapitalize="none" autocorrect="off" spellcheck="false" required>
+                        <button type="button" class="password-field__toggle" id="passwordToggle" aria-label="Show password" aria-pressed="false">
+                            <svg class="password-field__icon password-field__icon--show" viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path>
+                                <circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.8"></circle>
+                            </svg>
+                            <svg class="password-field__icon password-field__icon--hide" viewBox="0 0 24 24" aria-hidden="true" hidden>
+                                <path d="M3 3l18 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path>
+                                <path d="M10.6 10.6a2.5 2.5 0 0 0 3.5 3.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path>
+                                <path d="M6.5 6.8C4.5 8.2 3 12 3 12s3.5 7 9 7c1.6 0 3-.4 4.2-1.1" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path>
+                                <path d="M14.5 5.4C15.8 5 17.4 5 19 5c5.5 0 9 7 9 7s-1.5 3.4-4.1 5.6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" transform="translate(-3)"></path>
+                            </svg>
+                        </button>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Login</button>
+                </form>
+                <div class="check-in-result" id="loginResult"></div>
+            </div>
+
+            <div class="check-in-panel" id="scannerPanel" hidden>
+                <div class="section-header" style="margin-bottom: 1.5rem;">
+                    <h2 class="section-title" style="font-size: 1.8rem;">Scan Tickets</h2>
+                    <div class="title-underline"></div>
+                    <p class="section-description">Keep this page open on your phone or tablet. Each successful scan marks the ticket as checked in.</p>
+                </div>
+
+                <form class="checkout-test-form" id="checkInForm">
+                    <label for="ticketCode">Ticket Code</label>
+                    <input id="ticketCode" name="ticketCode" class="check-in-input" autocomplete="off" placeholder="MKN-XXXXXXXX-01">
+                    <div class="check-in-actions">
+                        <button type="button" class="btn btn-secondary" id="validateButton">Validate</button>
+                        <button type="submit" class="btn btn-primary">Check In</button>
+                    </div>
+                </form>
+
+                <div class="check-in-actions">
+                    <button type="button" class="btn btn-secondary" id="scanButton">Start Camera Scan</button>
+                    <button type="button" class="btn btn-secondary" id="stopScanButton" hidden>Stop Camera</button>
+                </div>
+
+                <div class="qr-scanner" id="qrScanner" hidden></div>
+                <div class="check-in-result" id="checkInResult"></div>
+            </div>
+        </div>
+    </section>
+
+    <script src="script.js"></script>
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const tokenKey = 'makena_admin_token';
+        const loginPanel = document.getElementById('loginPanel');
+        const scannerPanel = document.getElementById('scannerPanel');
+        const logoutLink = document.getElementById('logoutLink');
+        const loginResult = document.getElementById('loginResult');
+        const ticketInput = document.getElementById('ticketCode');
+        const passwordInput = document.getElementById('adminPassword');
+        const passwordToggle = document.getElementById('passwordToggle');
+        const result = document.getElementById('checkInResult');
+        const scanner = document.getElementById('qrScanner');
+        const scanButton = document.getElementById('scanButton');
+        const stopScanButton = document.getElementById('stopScanButton');
+        let html5QrCode = null;
+        let isScanning = false;
+        let isProcessingScan = false;
+        let lastScannedCode = '';
+        let lastScannedAt = 0;
+
+        function getToken() {
+            return localStorage.getItem(tokenKey);
+        }
+
+        function setLoggedInState(isLoggedIn) {
+            loginPanel.hidden = isLoggedIn;
+            scannerPanel.hidden = !isLoggedIn;
+            logoutLink.hidden = !isLoggedIn;
+        }
+
+        function extractTicketCode(value) {
+            const text = String(value || '').trim();
+            try {
+                const url = new URL(text);
+                return (url.searchParams.get('ticket') || text).trim().toUpperCase();
+            } catch (error) {
+                return text.trim().toUpperCase();
+            }
+        }
+
+        function showResult(target, type, title, body) {
+            target.className = `check-in-result check-in-result--${type}`;
+            target.innerHTML = `<h3>${title}</h3><p>${body}</p>`;
+        }
+
+        function setPasswordVisibility(isVisible) {
+            passwordInput.type = isVisible ? 'text' : 'password';
+            passwordToggle.setAttribute('aria-pressed', String(isVisible));
+            passwordToggle.setAttribute('aria-label', isVisible ? 'Hide password' : 'Show password');
+            passwordToggle.querySelector('.password-field__icon--show').hidden = isVisible;
+            passwordToggle.querySelector('.password-field__icon--hide').hidden = !isVisible;
+        }
+
+        function describeTicket(ticket) {
+            return `${ticket.event_name}<br>${ticket.holder_name || 'Guest'}${ticket.holder_email ? ` | ${ticket.holder_email}` : ''}<br>${ticket.ticket_code}`;
+        }
+
+        async function authedFetch(url, options = {}) {
+            const headers = {
+                ...(options.headers || {}),
+                Authorization: `Bearer ${getToken()}`
+            };
+            return fetch(url, { ...options, headers });
+        }
+
+        async function validateTicket() {
+            const code = extractTicketCode(ticketInput.value);
+            ticketInput.value = code;
+
+            if (!code) {
+                showResult(result, 'error', 'Missing Code', 'Enter or scan a ticket code first.');
+                return null;
+            }
+
+            const response = await authedFetch(`/.netlify/functions/validate-ticket?ticket=${encodeURIComponent(code)}`);
+            const data = await response.json();
+
+            if (response.status === 401) {
+                localStorage.removeItem(tokenKey);
+                setLoggedInState(false);
+                showResult(loginResult, 'error', 'Login Required', 'Please login again.');
+                return null;
+            }
+
+            if (!response.ok) {
+                showResult(result, 'error', 'Invalid Ticket', data.error || data.message || 'Ticket could not be validated.');
+                return null;
+            }
+
+            if (data.status === 'already_checked_in') {
+                showResult(result, 'warning', 'Already Used', `${describeTicket(data.ticket)}<br>Checked in at ${data.ticket.checked_in_at}`);
+                return data.ticket;
+            }
+
+            showResult(result, 'success', 'Valid Ticket', describeTicket(data.ticket));
+            return data.ticket;
+        }
+
+        async function checkInCode(code) {
+            code = extractTicketCode(code);
+            ticketInput.value = code;
+
+            const response = await authedFetch('/.netlify/functions/check-in-ticket', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    ticket: code,
+                    checkedInBy: 'Makena admin'
+                })
+            });
+            const data = await response.json();
+
+            if (response.status === 401) {
+                localStorage.removeItem(tokenKey);
+                setLoggedInState(false);
+                showResult(loginResult, 'error', 'Login Required', 'Please login again.');
+                return;
+            }
+
+            if (!response.ok) {
+                const ticket = data.ticket ? `<br>${describeTicket(data.ticket)}` : '';
+                showResult(result, data.status === 'already_checked_in' ? 'warning' : 'error', data.error || 'Check-In Failed', ticket || 'Please try again.');
+                return;
+            }
+
+            showResult(result, 'success', 'Checked In', describeTicket(data.ticket));
+            return data.ticket;
+        }
+
+        async function checkInTicket(event) {
+            event.preventDefault();
+            await checkInCode(ticketInput.value);
+        }
+
+        async function stopScanner() {
+            if (html5QrCode && isScanning) {
+                await html5QrCode.stop();
+                html5QrCode.clear();
+            }
+
+            isScanning = false;
+            isProcessingScan = false;
+            scanner.hidden = true;
+            stopScanButton.hidden = true;
+            scanButton.hidden = false;
+            scanButton.textContent = 'Start Camera Scan';
+        }
+
+        async function startScanner() {
+            if (!window.Html5Qrcode) {
+                showResult(result, 'warning', 'Scanner Not Loaded', 'The camera scanner could not load. Use your phone Camera app to scan the QR code, or enter the code manually.');
+                return;
+            }
+
+            if (isScanning) {
+                return;
+            }
+
+            html5QrCode = html5QrCode || new Html5Qrcode('qrScanner');
+            scanner.hidden = false;
+            stopScanButton.hidden = false;
+            scanButton.hidden = true;
+            showResult(result, 'success', 'Scanner Ready', 'Point the camera at a ticket QR code. Successful scans check in automatically.');
+
+            try {
+                await html5QrCode.start(
+                    { facingMode: 'environment' },
+                    {
+                        fps: 10,
+                        qrbox: { width: 260, height: 260 },
+                        aspectRatio: 1
+                    },
+                    async decodedText => {
+                        const code = extractTicketCode(decodedText);
+                        const now = Date.now();
+
+                        if (!code || isProcessingScan || (code === lastScannedCode && now - lastScannedAt < 3500)) {
+                            return;
+                        }
+
+                        isProcessingScan = true;
+                        lastScannedCode = code;
+                        lastScannedAt = now;
+                        ticketInput.value = code;
+
+                        try {
+                            await checkInCode(code);
+                        } finally {
+                            setTimeout(() => {
+                                isProcessingScan = false;
+                            }, 1200);
+                        }
+                    },
+                    () => {}
+                );
+                isScanning = true;
+            } catch (error) {
+                showResult(result, 'error', 'Camera Error', `${error.message || error}. Use your phone Camera app or enter the ticket code manually.`);
+                await stopScanner();
+            }
+        }
+
+        document.getElementById('adminLoginForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const response = await fetch('/.netlify/functions/admin-login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    username: document.getElementById('adminUsername').value,
+                    password: document.getElementById('adminPassword').value
+                })
+            });
+            const data = await response.json();
+
+            if (!response.ok) {
+                showResult(loginResult, 'error', 'Login Failed', data.error || 'Invalid credentials.');
+                return;
+            }
+
+            localStorage.setItem(tokenKey, data.token);
+            setLoggedInState(true);
+            if (params.get('ticket')) {
+                ticketInput.value = extractTicketCode(params.get('ticket'));
+                validateTicket();
+            }
+        });
+
+        logoutLink.addEventListener('click', (event) => {
+            event.preventDefault();
+            localStorage.removeItem(tokenKey);
+            setLoggedInState(false);
+        });
+
+        document.getElementById('validateButton').addEventListener('click', validateTicket);
+        document.getElementById('checkInForm').addEventListener('submit', checkInTicket);
+        scanButton.addEventListener('click', startScanner);
+        stopScanButton.addEventListener('click', stopScanner);
+        passwordToggle.addEventListener('click', () => {
+            setPasswordVisibility(passwordInput.type === 'password');
+        });
+
+        if (getToken()) {
+            setLoggedInState(true);
+            if (params.get('ticket')) {
+                ticketInput.value = extractTicketCode(params.get('ticket'));
+                validateTicket();
+            }
+        } else {
+            setLoggedInState(false);
+        }
+
+        setPasswordVisibility(false);
+    </script>
+</body>
+</html>

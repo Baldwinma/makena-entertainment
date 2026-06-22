@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Makena Ticket</title>
+    <meta name="description" content="View your Makena ticket QR code.">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar" id="navbar">
+        <div class="container">
+            <div class="nav-content">
+                <div class="logo">
+                    <a href="index.html">
+                        <img src="images/logo-transparent.png" alt="Makena Logo">
+                    </a>
+                </div>
+                <ul class="nav-links" id="navLinks">
+                    <li><a href="afronation.html">Afronation</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <section class="page-header">
+        <div class="hero-overlay"></div>
+        <div class="container">
+            <h1 class="page-title">Your Ticket</h1>
+            <p class="page-subtitle">Show this QR code at the door.</p>
+        </div>
+    </section>
+
+    <section class="events">
+        <div class="container">
+            <div class="ticket-preview__grid" id="ticketGrid"></div>
+            <p class="checkout-test-note" id="ticketMessage"></p>
+        </div>
+    </section>
+
+    <script src="script.js"></script>
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const ticketGrid = document.getElementById('ticketGrid');
+        const message = document.getElementById('ticketMessage');
+
+        async function loadTicket() {
+            const code = params.get('ticket');
+            if (!code) {
+                message.textContent = 'Missing ticket code.';
+                return;
+            }
+
+            try {
+                const response = await fetch(`/.netlify/functions/public-ticket?ticket=${encodeURIComponent(code)}`);
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || 'Unable to load ticket.');
+                }
+
+                const ticket = data.ticket;
+                ticketGrid.innerHTML = `
+                    <article class="ticket-preview__ticket">
+                        <div>
+                            <span class="ticket-preview__label">Makena Ticket</span>
+                            <h3>${ticket.eventName}</h3>
+                            <p>${ticket.holderName}</p>
+                        </div>
+                        <img class="ticket-preview__qr" src="${ticket.qrImageUrl}" alt="QR code for ${ticket.code}">
+                        <div class="ticket-preview__code" aria-label="Ticket code">${ticket.code}</div>
+                        <p class="ticket-preview__status">${ticket.status}</p>
+                    </article>
+                `;
+            } catch (error) {
+                message.textContent = error.message;
+            }
+        }
+
+        loadTicket();
+    </script>
+</body>
+</html>

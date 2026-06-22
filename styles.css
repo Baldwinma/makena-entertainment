@@ -844,6 +844,50 @@ section {
     text-transform: uppercase;
 }
 
+.check-in-input--login {
+    text-transform: none;
+}
+
+.password-field {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.password-field__input {
+    padding-right: 3rem;
+}
+
+.password-field__toggle {
+    position: absolute;
+    right: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border: none;
+    border-radius: 999px;
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: color 0.2s ease, background-color 0.2s ease;
+}
+
+.password-field__toggle:hover,
+.password-field__toggle:focus-visible {
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.08);
+    outline: none;
+}
+
+.password-field__icon {
+    width: 1.1rem;
+    height: 1.1rem;
+}
+
 .check-in-actions {
     display: flex;
     flex-wrap: wrap;
@@ -853,10 +897,21 @@ section {
 
 .qr-scanner {
     width: 100%;
-    max-height: 420px;
     margin-top: 1rem;
     border-radius: 12px;
     background: #000000;
+    overflow: hidden;
+}
+
+.qr-scanner video {
+    width: 100% !important;
+    border-radius: 12px;
+}
+
+.qr-scanner__help {
+    margin-top: 0.75rem;
+    color: var(--text-muted);
+    font-size: 0.9rem;
 }
 
 .check-in-result {

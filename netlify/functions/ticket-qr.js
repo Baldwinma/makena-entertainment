@@ -6,13 +6,9 @@ function cleanCode(code) {
 }
 
 function getBaseUrl(event) {
-    if (process.env.SITE_URL) {
-        return process.env.SITE_URL.replace(/\/$/, '');
-    }
-
     const proto = event.headers['x-forwarded-proto'] || 'https';
     const host = event.headers.host;
-    return `${proto}://${host}`;
+    return host ? `${proto}://${host}` : (process.env.SITE_URL || '').replace(/\/$/, '');
 }
 
 exports.handler = async function(event) {
@@ -60,7 +56,7 @@ exports.handler = async function(event) {
         };
     }
 
-    const checkInUrl = `${getBaseUrl(event)}/check-in?ticket=${encodeURIComponent(ticket.ticket_code)}`;
+    const checkInUrl = `${getBaseUrl(event)}/admin?ticket=${encodeURIComponent(ticket.ticket_code)}`;
     const png = await QRCode.toBuffer(checkInUrl, {
         margin: 1,
         width: 320

@@ -1,4 +1,5 @@
 const { getSupabase } = require('./lib/supabase');
+const { requireAdmin } = require('./lib/admin-auth');
 
 function json(statusCode, body) {
     return {
@@ -17,6 +18,10 @@ function cleanCode(code) {
 exports.handler = async function(event) {
     if (event.httpMethod !== 'GET') {
         return json(405, { error: 'Method not allowed' });
+    }
+
+    if (!requireAdmin(event)) {
+        return json(401, { error: 'Admin login required.' });
     }
 
     const supabase = getSupabase();

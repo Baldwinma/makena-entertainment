@@ -25,13 +25,9 @@ function buildTicketCode(sessionId, index) {
 }
 
 function getBaseUrl(event) {
-    if (process.env.SITE_URL) {
-        return process.env.SITE_URL.replace(/\/$/, '');
-    }
-
     const proto = event.headers['x-forwarded-proto'] || 'https';
     const host = event.headers.host;
-    return `${proto}://${host}`;
+    return host ? `${proto}://${host}` : (process.env.SITE_URL || '').replace(/\/$/, '');
 }
 
 async function saveTicketsToSupabase(session, lineItem, quantity) {
@@ -134,7 +130,8 @@ exports.handler = async function(event) {
         }));
 
         const tickets = await Promise.all(sourceTickets.map(async ticket => {
-            const checkInUrl = `${baseUrl}/check-in?ticket=${encodeURIComponent(ticket.ticket_code)}`;
+            const checkInUrl = `${baseUrl}/admin?ticket=${encodeURIComponent(ticket.ticket_code)}`;
+            const ticketPageUrl = `${baseUrl}/ticket?ticket=${encodeURIComponent(ticket.ticket_code)}`;
             return {
                 code: ticket.ticket_code,
                 holderName: ticket.holder_name || 'Guest',
@@ -142,6 +139,7 @@ exports.handler = async function(event) {
                 eventName: ticket.event_name,
                 status: ticket.checked_in ? 'Already Checked In' : 'Valid',
                 checkInUrl,
+                ticketPageUrl,
                 qrCode: await QRCode.toDataURL(checkInUrl, {
                     margin: 1,
                     width: 220

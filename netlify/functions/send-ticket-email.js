@@ -53,7 +53,11 @@ exports.handler = async function(event) {
         return json(500, { error: 'Email is not configured. Add RESEND_API_KEY to .env, then restart Netlify Dev.' });
     }
 
-    const fromEmail = process.env.TICKET_FROM_EMAIL || 'Makena Tickets <onboarding@resend.dev>';
+    if (!process.env.TICKET_FROM_EMAIL) {
+        return json(500, { error: 'Ticket sender email is not configured. Add TICKET_FROM_EMAIL to your environment.' });
+    }
+
+    const fromEmail = process.env.TICKET_FROM_EMAIL;
 
     const supabase = getSupabase();
     if (!supabase) {

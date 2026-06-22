@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Makena Checkout Test | Afronation Portimao</title>
+    <meta name="description" content="Test Makena's direct checkout for Afronation Portimao tickets.">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar" id="navbar">
+        <div class="container">
+            <div class="nav-content">
+                <div class="logo">
+                    <a href="index.html">
+                        <img src="images/logo-transparent.png" alt="Makena Logo">
+                    </a>
+                </div>
+                <ul class="nav-links" id="navLinks">
+                    <li><a href="index.html#events">Events</a></li>
+                    <li><a href="afronation.html">Afronation</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <section class="page-header">
+        <div class="hero-overlay"></div>
+        <div class="container">
+            <h1 class="page-title">Makena Checkout Test</h1>
+            <p class="page-subtitle">Try direct ticket checkout for Afronation Portimao.</p>
+            <a href="afronation.html" class="btn btn-secondary">Back to Afronation Events</a>
+        </div>
+    </section>
+
+    <section class="events">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Test Ticket</h2>
+                <div class="title-underline"></div>
+                <p class="section-description">This uses Stripe test mode. No real money moves when your Stripe test key is configured.</p>
+            </div>
+
+            <div class="checkout-test-card">
+                <div class="event-image">
+                    <img src="images/wet-dreams.jpeg" alt="Wet Dreams Pool Party">
+                    <div class="event-badge">Test Checkout</div>
+                </div>
+                <div class="event-content">
+                    <h3 class="event-title">Wet Dreams Pool Party - Test Ticket</h3>
+                    <p class="event-date">📅 July 1, 2026 | 12 PM - 9 PM</p>
+                    <p class="event-location">📍 Portimão, Portugal</p>
+                    <p class="event-description">Use this page to test Makena direct checkout before replacing Eventbrite links.</p>
+
+                    <form class="checkout-test-form" id="checkoutTestForm">
+                        <label for="ticketQuantity">Quantity</label>
+                        <select id="ticketQuantity" name="quantity">
+                            <option value="1">1 ticket - $25.00</option>
+                            <option value="2">2 tickets - $50.00</option>
+                            <option value="3">3 tickets - $75.00</option>
+                            <option value="4">4 tickets - $100.00</option>
+                        </select>
+                        <button type="submit" class="btn btn-primary" id="checkoutTestButton">Buy Test Ticket</button>
+                    </form>
+                    <p class="checkout-test-note" id="checkoutTestMessage"></p>
+                </div>
+            </div>
+
+            <div class="ticket-preview" id="ticketPreview" hidden>
+                <div class="section-header">
+                    <h2 class="section-title">Ticket Preview</h2>
+                    <div class="title-underline"></div>
+                    <p class="section-description">This is the information customers would see after a successful payment.</p>
+                </div>
+                <div class="ticket-preview__summary" id="ticketSummary"></div>
+                <div class="ticket-preview__grid" id="ticketGrid"></div>
+            </div>
+        </div>
+    </section>
+
+    <script src="script.js"></script>
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const message = document.getElementById('checkoutTestMessage');
+
+        function renderTicketPreview(data) {
+            const preview = document.getElementById('ticketPreview');
+            const summary = document.getElementById('ticketSummary');
+            const grid = document.getElementById('ticketGrid');
+
+            summary.innerHTML = `
+                <p><strong>Order:</strong> ${data.order.id}</p>
+                <p><strong>Name:</strong> ${data.order.customerName || 'Not provided'}</p>
+                <p><strong>Email:</strong> ${data.order.customerEmail || 'Not provided'}</p>
+                <p><strong>Amount paid:</strong> ${data.order.amountPaid}</p>
+                <p><strong>Tickets:</strong> ${data.order.quantity}</p>
+            `;
+
+            grid.innerHTML = data.tickets.map(ticket => `
+                <article class="ticket-preview__ticket">
+                    <div>
+                        <span class="ticket-preview__label">Makena Ticket</span>
+                        <h3>${ticket.eventName}</h3>
+                        <p>${ticket.holderName}</p>
+                    </div>
+                    <img class="ticket-preview__qr" src="${ticket.qrCode}" alt="QR code for ${ticket.code}">
+                    <div class="ticket-preview__code" aria-label="Ticket code">${ticket.code}</div>
+                    <a class="btn btn-secondary btn-small" href="${ticket.checkInUrl}" target="_blank">Open Check-In Link</a>
+                    <form class="ticket-email-form" data-ticket-code="${ticket.code}">
+                        <label for="email-${ticket.code}">Send this ticket by email</label>
+                        <div class="ticket-email-form__row">
+                            <input id="email-${ticket.code}" name="email" type="email" placeholder="you@example.com" value="${data.order.customerEmail || ''}" required>
+                            <button class="btn btn-primary btn-small" type="submit">Send Ticket</button>
+                        </div>
+                        <p class="ticket-email-form__message" aria-live="polite"></p>
+                    </form>
+                    <p class="ticket-preview__status">${ticket.status}</p>
+                </article>
+            `).join('');
+
+            preview.hidden = false;
+        }
+
+        async function loadTicketInformation(sessionId) {
+            message.textContent = 'Loading ticket information...';
+
+            try {
+                const response = await fetch(`/.netlify/functions/get-checkout-session?session_id=${encodeURIComponent(sessionId)}`);
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || 'Unable to load ticket information.');
+                }
+
+                message.textContent = 'Payment test successful. Ticket information loaded below.';
+                renderTicketPreview(data);
+            } catch (error) {
+                message.textContent = error.message;
+            }
+        }
+
+        if (params.get('success') === 'true') {
+            const sessionId = params.get('session_id');
+            if (sessionId) {
+                loadTicketInformation(sessionId);
+            } else {
+                message.textContent = 'Payment test successful, but no checkout session was returned.';
+            }
+        }
+
+        if (params.get('canceled') === 'true') {
+            message.textContent = 'Checkout was canceled. You can try again whenever you are ready.';
+        }
+
+        document.getElementById('checkoutTestForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            const button = document.getElementById('checkoutTestButton');
+            const quantity = document.getElementById('ticketQuantity').value;
+
+            button.disabled = true;
+            button.textContent = 'Starting checkout...';
+            message.textContent = '';
+
+            try {
+                const response = await fetch('/.netlify/functions/create-checkout-session', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        ticketId: 'wet_dreams_test',
+                        quantity
+                    })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || 'Unable to start checkout.');
+                }
+
+                window.location.href = data.url;
+            } catch (error) {
+                message.textContent = error.message;
+                button.disabled = false;
+                button.textContent = 'Buy Test Ticket';
+            }
+        });
+
+        document.addEventListener('submit', async (event) => {
+            const form = event.target.closest('.ticket-email-form');
+            if (!form) {
+                return;
+            }
+
+            event.preventDefault();
+
+            const button = form.querySelector('button');
+            const input = form.querySelector('input[name="email"]');
+            const formMessage = form.querySelector('.ticket-email-form__message');
+
+            button.disabled = true;
+            button.textContent = 'Sending...';
+            formMessage.textContent = '';
+
+            try {
+                const response = await fetch('/.netlify/functions/send-ticket-email', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        ticketCode: form.dataset.ticketCode,
+                        email: input.value
+                    })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || 'Unable to send ticket email.');
+                }
+
+                formMessage.textContent = 'Ticket email sent. Check your inbox.';
+            } catch (error) {
+                formMessage.textContent = error.message;
+            } finally {
+                button.disabled = false;
+                button.textContent = 'Send Ticket';
+            }
+        });
+    </script>
+</body>
+</html>

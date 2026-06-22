@@ -10,6 +10,13 @@ Thumbs.db
 *.tmp
 *.log
 
+# Dependencies and local environment
+node_modules/
+.env
+.env.*
+!.env.example
+.netlify/
+
 # Videos folder (optional - remove this line if you want to include videos)
 videos/
 

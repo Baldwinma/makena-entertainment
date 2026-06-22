@@ -132,9 +132,55 @@
             }
         }
 
+        function playSuccessSound() {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const t = ctx.currentTime;
+                [523.25, 659.25, 783.99].forEach((freq, i) => {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.type = 'sine';
+                    osc.frequency.value = freq;
+                    gain.gain.setValueAtTime(0.001, t + i * 0.13);
+                    gain.gain.linearRampToValueAtTime(0.28, t + i * 0.13 + 0.03);
+                    gain.gain.exponentialRampToValueAtTime(0.001, t + i * 0.13 + 0.28);
+                    osc.start(t + i * 0.13);
+                    osc.stop(t + i * 0.13 + 0.28);
+                });
+            } catch (e) {}
+        }
+
+        function playErrorSound() {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const t = ctx.currentTime;
+                [0, 0.22].forEach(offset => {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.type = 'sawtooth';
+                    osc.frequency.value = 180;
+                    gain.gain.setValueAtTime(0.001, t + offset);
+                    gain.gain.linearRampToValueAtTime(0.28, t + offset + 0.02);
+                    gain.gain.exponentialRampToValueAtTime(0.001, t + offset + 0.18);
+                    osc.start(t + offset);
+                    osc.stop(t + offset + 0.18);
+                });
+            } catch (e) {}
+        }
+
         function showResult(target, type, title, body) {
+            let icon = '';
+            if (type === 'success') {
+                icon = `<svg class="check-in-status-icon check-in-status-icon--success" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M6.5 12.5l3.5 3.5 7.5-8" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+            } else if (type === 'warning' || type === 'error') {
+                icon = `<svg class="check-in-status-icon check-in-status-icon--fail" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 8l8 8M16 8l-8 8" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>`;
+            }
             target.className = `check-in-result check-in-result--${type}`;
-            target.innerHTML = `<h3>${title}</h3><p>${body}</p>`;
+            target.innerHTML = `${icon}<h3>${title}</h3><p>${body}</p>`;
         }
 
         function setPasswordVisibility(isVisible) {
@@ -215,10 +261,12 @@
 
             if (!response.ok) {
                 const ticket = data.ticket ? `<br>${describeTicket(data.ticket)}` : '';
+                playErrorSound();
                 showResult(result, data.status === 'already_checked_in' ? 'warning' : 'error', data.error || 'Check-In Failed', ticket || 'Please try again.');
                 return;
             }
 
+            playSuccessSound();
             showResult(result, 'success', 'Checked In', describeTicket(data.ticket));
             return data.ticket;
         }

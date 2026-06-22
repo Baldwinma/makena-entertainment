@@ -243,44 +243,12 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
-// Makena direct Stripe checkout buttons
+// Makena direct Stripe checkout — suspended while prices are confirmed
 document.querySelectorAll('.stripe-ticket-button').forEach(button => {
-    button.addEventListener('click', async () => {
-        const originalText = button.textContent;
-        const ticketId = button.dataset.ticketId;
-
-        if (!ticketId) {
-            return;
-        }
-
-        button.disabled = true;
-        button.textContent = 'Opening checkout...';
-
-        try {
-            const response = await fetch('/.netlify/functions/create-checkout-session', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    ticketId,
-                    quantity: 1
-                })
-            });
-
-            const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(data.error || 'Unable to start checkout.');
-            }
-
-            window.location.href = data.url;
-        } catch (error) {
-            alert(error.message);
-            button.disabled = false;
-            button.textContent = originalText;
-        }
-    });
+    const notice = document.createElement('p');
+    notice.className = 'stripe-checkout-notice';
+    notice.textContent = 'Makena checkout coming soon — book via Eventbrite for now';
+    button.replaceWith(notice);
 });
 
 // Loading State Handler

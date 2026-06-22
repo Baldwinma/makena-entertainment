@@ -39,34 +39,15 @@
     <section class="events">
         <div class="container">
             <div class="section-header">
-                <h2 class="section-title">Test Ticket</h2>
+                <h2 class="section-title">Checkout Paused</h2>
                 <div class="title-underline"></div>
-                <p class="section-description">This uses Stripe test mode. No real money moves when your Stripe test key is configured.</p>
+                <p class="section-description">Makena direct checkout is temporarily unavailable while we finalise pricing. Book your tickets via Eventbrite in the meantime.</p>
             </div>
 
-            <div class="checkout-test-card">
-                <div class="event-image">
-                    <img src="images/wet-dreams.jpeg" alt="Wet Dreams Pool Party">
-                    <div class="event-badge">Test Checkout</div>
-                </div>
-                <div class="event-content">
-                    <h3 class="event-title">Wet Dreams Pool Party - Test Ticket</h3>
-                    <p class="event-date">📅 July 1, 2026 | 12 PM - 9 PM</p>
-                    <p class="event-location">📍 Portimão, Portugal</p>
-                    <p class="event-description">Use this page to test Makena direct checkout before replacing Eventbrite links.</p>
-
-                    <form class="checkout-test-form" id="checkoutTestForm">
-                        <label for="ticketQuantity">Quantity</label>
-                        <select id="ticketQuantity" name="quantity">
-                            <option value="1">1 ticket - $25.00</option>
-                            <option value="2">2 tickets - $50.00</option>
-                            <option value="3">3 tickets - $75.00</option>
-                            <option value="4">4 tickets - $100.00</option>
-                        </select>
-                        <button type="submit" class="btn btn-primary" id="checkoutTestButton">Buy Test Ticket</button>
-                    </form>
-                    <p class="checkout-test-note" id="checkoutTestMessage"></p>
-                </div>
+            <div class="stripe-checkout-suspended-banner">
+                <p class="stripe-checkout-suspended-banner__heading">Makena Checkout — Coming Soon</p>
+                <p>We're finalising a few things before opening direct checkout. For now, all tickets are available on Eventbrite.</p>
+                <a href="afronation.html" class="btn btn-primary" style="margin-top: 1rem;">Browse Events &amp; Eventbrite Links</a>
             </div>
 
             <div class="ticket-preview" id="ticketPreview" hidden>

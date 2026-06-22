@@ -947,6 +947,46 @@ section {
     border: 1px solid rgba(248, 113, 113, 0.55);
 }
 
+.check-in-status-icon {
+    display: block;
+    width: 88px;
+    height: 88px;
+    margin: 0.25rem auto 1rem;
+}
+
+.check-in-status-icon--success {
+    color: #86EFA9;
+}
+
+.check-in-status-icon--fail {
+    color: #F87171;
+}
+
+.stripe-checkout-notice {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin: 0;
+    font-style: italic;
+}
+
+.stripe-checkout-suspended-banner {
+    max-width: 540px;
+    margin: 0 auto 3rem;
+    padding: 2rem;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    text-align: center;
+    color: var(--text-secondary);
+}
+
+.stripe-checkout-suspended-banner__heading {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
 @media (max-width: 768px) {
     .checkout-test-card {
         grid-template-columns: 1fr;

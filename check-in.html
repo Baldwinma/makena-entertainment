@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Makena Ticket Check-In</title>
+    <meta name="description" content="Makena staff ticket check-in page.">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar" id="navbar">
+        <div class="container">
+            <div class="nav-content">
+                <div class="logo">
+                    <a href="index.html">
+                        <img src="images/logo-transparent.png" alt="Makena Logo">
+                    </a>
+                </div>
+                <ul class="nav-links" id="navLinks">
+                    <li><a href="checkout-test.html">Checkout Test</a></li>
+                    <li><a href="afronation.html">Afronation</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <section class="page-header">
+        <div class="hero-overlay"></div>
+        <div class="container">
+            <h1 class="page-title">Ticket Check-In</h1>
+            <p class="page-subtitle">Scan or enter a Makena ticket code to validate entry.</p>
+        </div>
+    </section>
+
+    <section class="events">
+        <div class="container">
+            <div class="check-in-panel">
+                <form class="checkout-test-form" id="checkInForm">
+                    <label for="ticketCode">Ticket Code</label>
+                    <input id="ticketCode" name="ticketCode" class="check-in-input" autocomplete="off" placeholder="MKN-XXXXXXXX-01">
+                    <div class="check-in-actions">
+                        <button type="button" class="btn btn-secondary" id="validateButton">Validate</button>
+                        <button type="submit" class="btn btn-primary">Check In</button>
+                    </div>
+                </form>
+
+                <div class="check-in-actions">
+                    <button type="button" class="btn btn-secondary" id="scanButton">Scan QR</button>
+                    <button type="button" class="btn btn-secondary" id="stopScanButton" hidden>Stop Camera</button>
+                </div>
+
+                <video class="qr-scanner" id="qrScanner" playsinline hidden></video>
+                <div class="check-in-result" id="checkInResult"></div>
+            </div>
+        </div>
+    </section>
+
+    <script src="script.js"></script>
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const ticketInput = document.getElementById('ticketCode');
+        const result = document.getElementById('checkInResult');
+        const scanner = document.getElementById('qrScanner');
+        const scanButton = document.getElementById('scanButton');
+        const stopScanButton = document.getElementById('stopScanButton');
+        let stream = null;
+        let scanInterval = null;
+
+        function extractTicketCode(value) {
+            const text = String(value || '').trim();
+            try {
+                const url = new URL(text);
+                return (url.searchParams.get('ticket') || text).trim().toUpperCase();
+            } catch (error) {
+                return text.trim().toUpperCase();
+            }
+        }
+
+        function showResult(type, title, body) {
+            result.className = `check-in-result check-in-result--${type}`;
+            result.innerHTML = `<h3>${title}</h3><p>${body}</p>`;
+        }
+
+        function describeTicket(ticket) {
+            return `${ticket.event_name}<br>${ticket.holder_name || 'Guest'}${ticket.holder_email ? ` | ${ticket.holder_email}` : ''}<br>${ticket.ticket_code}`;
+        }
+
+        async function validateTicket() {
+            const code = extractTicketCode(ticketInput.value);
+            ticketInput.value = code;
+
+            if (!code) {
+                showResult('error', 'Missing Code', 'Enter or scan a ticket code first.');
+                return null;
+            }
+
+            const response = await fetch(`/.netlify/functions/validate-ticket?ticket=${encodeURIComponent(code)}`);
+            const data = await response.json();
+
+            if (!response.ok) {
+                showResult('error', 'Invalid Ticket', data.error || data.message || 'Ticket could not be validated.');
+                return null;
+            }
+
+            if (data.status === 'already_checked_in') {
+                showResult('warning', 'Already Used', `${describeTicket(data.ticket)}<br>Checked in at ${data.ticket.checked_in_at}`);
+                return data.ticket;
+            }
+
+            showResult('success', 'Valid Ticket', describeTicket(data.ticket));
+            return data.ticket;
+        }
+
+        async function checkInTicket(event) {
+            event.preventDefault();
+            const code = extractTicketCode(ticketInput.value);
+            ticketInput.value = code;
+
+            const response = await fetch('/.netlify/functions/check-in-ticket', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    ticket: code,
+                    checkedInBy: 'Makena staff'
+                })
+            });
+            const data = await response.json();
+
+            if (!response.ok) {
+                const ticket = data.ticket ? `<br>${describeTicket(data.ticket)}` : '';
+                showResult(data.status === 'already_checked_in' ? 'warning' : 'error', data.error || 'Check-In Failed', ticket || 'Please try again.');
+                return;
+            }
+
+            showResult('success', 'Checked In', describeTicket(data.ticket));
+        }
+
+        async function stopScanner() {
+            if (scanInterval) {
+                clearInterval(scanInterval);
+                scanInterval = null;
+            }
+
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+                stream = null;
+            }
+
+            scanner.hidden = true;
+            stopScanButton.hidden = true;
+        }
+
+        async function startScanner() {
+            if (!('BarcodeDetector' in window)) {
+                showResult('warning', 'Scanner Not Supported', 'This browser does not support camera QR scanning. Enter the code manually.');
+                return;
+            }
+
+            const detector = new BarcodeDetector({ formats: ['qr_code'] });
+            stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+            scanner.srcObject = stream;
+            scanner.hidden = false;
+            stopScanButton.hidden = false;
+            await scanner.play();
+
+            scanInterval = setInterval(async () => {
+                try {
+                    const codes = await detector.detect(scanner);
+                    if (codes.length > 0) {
+                        ticketInput.value = extractTicketCode(codes[0].rawValue);
+                        await stopScanner();
+                        await validateTicket();
+                    }
+                } catch (error) {
+                    showResult('error', 'Scanner Error', error.message);
+                    await stopScanner();
+                }
+            }, 700);
+        }
+
+        document.getElementById('validateButton').addEventListener('click', validateTicket);
+        document.getElementById('checkInForm').addEventListener('submit', checkInTicket);
+        scanButton.addEventListener('click', startScanner);
+        stopScanButton.addEventListener('click', stopScanner);
+
+        if (params.get('ticket')) {
+            ticketInput.value = extractTicketCode(params.get('ticket'));
+            validateTicket();
+        }
+    </script>
+</body>
+</html>

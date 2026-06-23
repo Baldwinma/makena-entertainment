@@ -39,15 +39,16 @@
     <section class="events">
         <div class="container">
             <div class="section-header">
-                <h2 class="section-title">Checkout Paused</h2>
+                <h2 class="section-title">Checkout Live</h2>
                 <div class="title-underline"></div>
-                <p class="section-description">Makena direct checkout is temporarily unavailable while we finalise pricing. Book your tickets via Eventbrite in the meantime.</p>
+                <p class="section-description">Makena direct checkout is available on the Afronation event page.</p>
             </div>
 
             <div class="stripe-checkout-suspended-banner">
-                <p class="stripe-checkout-suspended-banner__heading">Makena Checkout — Coming Soon</p>
-                <p>We're finalising a few things before opening direct checkout. For now, all tickets are available on Eventbrite.</p>
-                <a href="afronation.html" class="btn btn-primary" style="margin-top: 1rem;">Browse Events &amp; Eventbrite Links</a>
+                <p class="stripe-checkout-suspended-banner__heading">Makena Checkout Is Available</p>
+                <p>Use the Welcome Party Makena Checkout button for the temporary $1 live payment test.</p>
+                <a href="afronation.html" class="btn btn-primary" style="margin-top: 1rem;">Open Afronation Checkout</a>
+                <p class="checkout-test-note" id="checkoutTestMessage"></p>
             </div>
 
             <div class="ticket-preview" id="ticketPreview" hidden>
@@ -67,38 +68,48 @@
         const params = new URLSearchParams(window.location.search);
         const message = document.getElementById('checkoutTestMessage');
 
+        function escapeHtml(value) {
+            return String(value || '').replace(/[&<>"']/g, char => ({
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#39;'
+            }[char]));
+        }
+
         function renderTicketPreview(data) {
             const preview = document.getElementById('ticketPreview');
             const summary = document.getElementById('ticketSummary');
             const grid = document.getElementById('ticketGrid');
 
             summary.innerHTML = `
-                <p><strong>Order:</strong> ${data.order.id}</p>
-                <p><strong>Name:</strong> ${data.order.customerName || 'Not provided'}</p>
-                <p><strong>Email:</strong> ${data.order.customerEmail || 'Not provided'}</p>
-                <p><strong>Amount paid:</strong> ${data.order.amountPaid}</p>
-                <p><strong>Tickets:</strong> ${data.order.quantity}</p>
+                <p><strong>Order:</strong> ${escapeHtml(data.order.id)}</p>
+                <p><strong>Name:</strong> ${escapeHtml(data.order.customerName || 'Not provided')}</p>
+                <p><strong>Email:</strong> ${escapeHtml(data.order.customerEmail || 'Not provided')}</p>
+                <p><strong>Amount paid:</strong> ${escapeHtml(data.order.amountPaid)}</p>
+                <p><strong>Tickets:</strong> ${escapeHtml(data.order.quantity)}</p>
             `;
 
             grid.innerHTML = data.tickets.map(ticket => `
                 <article class="ticket-preview__ticket">
                     <div>
                         <span class="ticket-preview__label">Makena Ticket</span>
-                        <h3>${ticket.eventName}</h3>
-                        <p>${ticket.holderName}</p>
+                        <h3>${escapeHtml(ticket.eventName)}</h3>
+                        <p>${escapeHtml(ticket.holderName)}</p>
                     </div>
-                    <img class="ticket-preview__qr" src="${ticket.qrCode}" alt="QR code for ${ticket.code}">
-                    <div class="ticket-preview__code" aria-label="Ticket code">${ticket.code}</div>
-                    <a class="btn btn-secondary btn-small" href="${ticket.ticketPageUrl}" target="_blank">Open Ticket Page</a>
-                    <form class="ticket-email-form" data-ticket-code="${ticket.code}">
-                        <label for="email-${ticket.code}">Send this ticket by email</label>
+                    <img class="ticket-preview__qr" src="${escapeHtml(ticket.qrCode)}" alt="QR code for ${escapeHtml(ticket.code)}">
+                    <div class="ticket-preview__code" aria-label="Ticket code">${escapeHtml(ticket.code)}</div>
+                    <a class="btn btn-secondary btn-small" href="${escapeHtml(ticket.ticketPageUrl)}" target="_blank" rel="noopener">Open Ticket Page</a>
+                    <form class="ticket-email-form" data-ticket-code="${escapeHtml(ticket.code)}">
+                        <label for="email-${escapeHtml(ticket.code)}">Send this ticket by email</label>
                         <div class="ticket-email-form__row">
-                            <input id="email-${ticket.code}" name="email" type="email" placeholder="you@example.com" value="${data.order.customerEmail || ''}" required>
+                            <input id="email-${escapeHtml(ticket.code)}" name="email" type="email" placeholder="you@example.com" value="${escapeHtml(data.order.customerEmail || '')}" required>
                             <button class="btn btn-primary btn-small" type="submit">Send Ticket</button>
                         </div>
                         <p class="ticket-email-form__message" aria-live="polite"></p>
                     </form>
-                    <p class="ticket-preview__status">${ticket.status}</p>
+                    <p class="ticket-preview__status">${escapeHtml(ticket.status)}</p>
                 </article>
             `).join('');
 
@@ -135,42 +146,6 @@
         if (params.get('canceled') === 'true') {
             message.textContent = 'Checkout was canceled. You can try again whenever you are ready.';
         }
-
-        document.getElementById('checkoutTestForm').addEventListener('submit', async (event) => {
-            event.preventDefault();
-
-            const button = document.getElementById('checkoutTestButton');
-            const quantity = document.getElementById('ticketQuantity').value;
-
-            button.disabled = true;
-            button.textContent = 'Starting checkout...';
-            message.textContent = '';
-
-            try {
-                const response = await fetch('/.netlify/functions/create-checkout-session', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        ticketId: 'wet_dreams_test',
-                        quantity
-                    })
-                });
-
-                const data = await response.json();
-
-                if (!response.ok) {
-                    throw new Error(data.error || 'Unable to start checkout.');
-                }
-
-                window.location.href = data.url;
-            } catch (error) {
-                message.textContent = error.message;
-                button.disabled = false;
-                button.textContent = 'Buy Test Ticket';
-            }
-        });
 
         document.addEventListener('submit', async (event) => {
             const form = event.target.closest('.ticket-email-form');

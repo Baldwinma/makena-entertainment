@@ -6,9 +6,13 @@ function cleanCode(code) {
 }
 
 function getBaseUrl(event) {
+    if (process.env.SITE_URL) {
+        return process.env.SITE_URL.replace(/\/$/, '');
+    }
+
     const proto = event.headers['x-forwarded-proto'] || 'https';
     const host = event.headers.host;
-    return host ? `${proto}://${host}` : (process.env.SITE_URL || '').replace(/\/$/, '');
+    return host ? `${proto}://${host}` : '';
 }
 
 exports.handler = async function(event) {

@@ -243,13 +243,301 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
-// Makena direct Stripe checkout — suspended while prices are confirmed
-document.querySelectorAll('.stripe-ticket-button').forEach(button => {
-    const notice = document.createElement('p');
-    notice.className = 'stripe-checkout-notice';
-    notice.textContent = 'Makena checkout coming soon — book via Eventbrite for now';
-    button.replaceWith(notice);
-});
+// Makena cart and embedded Stripe checkout
+(function () {
+
+    // ── Ticket catalog (mirrors backend) ─────────────────────────────────────
+    var TICKETS = {
+        welcome_party:            { name: 'Welcome Party',                  price: 100 },
+        wet_dreams_pool_party:    { name: 'Wet Dreams Pool Party',          price: 2500 },
+        french_connection:        { name: 'French Connection',              price: 2500 },
+        festival_kick_off:        { name: 'Festival Kick Off',              price: 2500 },
+        makena_boat_party:        { name: 'Makena Boat Party',              price: 7000 },
+        all_white_party:          { name: 'All White Party',                price: 2500 },
+        rep_your_flag:            { name: 'Rep Your Flag',                  price: 2500 },
+        afro_beats_vs_amapiano:   { name: 'Afro Beats vs Amapiano',        price: 2500 },
+        rnb_old_school_day_party: { name: 'RnB & Old School Day Party',    price: 2500 },
+        caribbean_energy:         { name: 'Soca × Reggaeton × Kompa',      price: 2500 },
+        where_tall_people_meet:   { name: 'Where Tall People Meet',        price: 2500 },
+        red_flag_party:           { name: 'Red Flag Party',                 price: 2500 },
+        all_orange_day_party:     { name: 'All Orange Day Party',           price: 2500 },
+        closing_party_in_style:   { name: 'Closing Party in Style',        price: 2500 }
+    };
+
+    function fmt(cents) { return '$' + (cents / 100).toFixed(2); }
+
+    function escapeHtml(value) {
+        return String(value || '').replace(/[&<>"']/g, function (char) {
+            return {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#39;'
+            }[char];
+        });
+    }
+
+    // ── Cart state (localStorage) ─────────────────────────────────────────────
+    var CART_KEY = 'makena_cart';
+
+    function getCart() {
+        try { return JSON.parse(localStorage.getItem(CART_KEY)) || []; } catch (e) { return []; }
+    }
+
+    function saveCart(cart) {
+        localStorage.setItem(CART_KEY, JSON.stringify(cart));
+        syncCartUI();
+    }
+
+    function addToCart(ticketId) {
+        var cart = getCart();
+        var existing = cart.find(function (i) { return i.ticketId === ticketId; });
+        if (existing) { existing.quantity = Math.min(existing.quantity + 1, 10); }
+        else { cart.push({ ticketId: ticketId, quantity: 1 }); }
+        saveCart(cart);
+        openCartPanel();
+    }
+
+    function setQty(ticketId, delta) {
+        var cart = getCart();
+        var item = cart.find(function (i) { return i.ticketId === ticketId; });
+        if (!item) return;
+        item.quantity = Math.max(1, Math.min(item.quantity + delta, 10));
+        saveCart(cart);
+    }
+
+    function removeItem(ticketId) {
+        saveCart(getCart().filter(function (i) { return i.ticketId !== ticketId; }));
+    }
+
+    function cartCount() {
+        return getCart().reduce(function (s, i) { return s + i.quantity; }, 0);
+    }
+
+    function cartTotal() {
+        return getCart().reduce(function (s, i) {
+            var t = TICKETS[i.ticketId];
+            return s + (t ? t.price * i.quantity : 0);
+        }, 0);
+    }
+
+    // ── Cart UI ───────────────────────────────────────────────────────────────
+    function syncCartUI() {
+        var badge = document.getElementById('makena-cart-badge');
+        if (badge) { var n = cartCount(); badge.textContent = n; badge.hidden = n === 0; }
+        renderCartItems();
+    }
+
+    function renderCartItems() {
+        var list = document.getElementById('makena-cart-items');
+        var footer = document.getElementById('makena-cart-footer');
+        if (!list) return;
+        var cart = getCart();
+
+        if (cart.length === 0) {
+            list.innerHTML = '<p class="cart-panel__empty">Your cart is empty.<br>Add events to get started.</p>';
+            if (footer) footer.hidden = true;
+            return;
+        }
+        if (footer) footer.hidden = false;
+
+        list.innerHTML = cart.map(function (item) {
+            var t = TICKETS[item.ticketId];
+            if (!t) return '';
+            return '<div class="cart-item" data-id="' + item.ticketId + '">' +
+                '<div class="cart-item__info">' +
+                    '<span class="cart-item__name">' + t.name + '</span>' +
+                    '<span class="cart-item__price">' + fmt(t.price) + ' each</span>' +
+                '</div>' +
+                '<div class="cart-item__controls">' +
+                    '<button class="cart-item__qty-btn" data-action="dec" data-id="' + item.ticketId + '" aria-label="Decrease">−</button>' +
+                    '<span class="cart-item__qty">' + item.quantity + '</span>' +
+                    '<button class="cart-item__qty-btn" data-action="inc" data-id="' + item.ticketId + '" aria-label="Increase">+</button>' +
+                    '<button class="cart-item__remove" data-id="' + item.ticketId + '" aria-label="Remove">×</button>' +
+                '</div>' +
+            '</div>';
+        }).join('');
+
+        var totalEl = document.getElementById('makena-cart-total');
+        if (totalEl) totalEl.textContent = fmt(cartTotal());
+    }
+
+    function buildCartPanel() {
+        var panel = document.createElement('div');
+        panel.id = 'makena-cart-panel';
+        panel.className = 'cart-panel';
+        panel.innerHTML =
+            '<div class="cart-panel__header">' +
+                '<h2 class="cart-panel__title">Your Cart</h2>' +
+                '<button class="cart-panel__close" id="makena-cart-close" aria-label="Close cart">×</button>' +
+            '</div>' +
+            '<div class="cart-panel__items" id="makena-cart-items"></div>' +
+            '<div class="cart-panel__footer" id="makena-cart-footer" hidden>' +
+                '<div class="cart-panel__total-row"><span>Total</span><span id="makena-cart-total">$0.00</span></div>' +
+                '<button class="btn btn-primary cart-panel__checkout-btn" id="makena-cart-checkout">Checkout</button>' +
+            '</div>';
+        document.body.appendChild(panel);
+
+        var overlay = document.createElement('div');
+        overlay.id = 'makena-cart-overlay';
+        overlay.className = 'cart-overlay';
+        document.body.appendChild(overlay);
+
+        document.getElementById('makena-cart-close').addEventListener('click', closeCartPanel);
+        overlay.addEventListener('click', closeCartPanel);
+
+        panel.addEventListener('click', function (e) {
+            var btn = e.target.closest('[data-action]');
+            if (btn) {
+                if (btn.dataset.action === 'inc') setQty(btn.dataset.id, 1);
+                if (btn.dataset.action === 'dec') setQty(btn.dataset.id, -1);
+            }
+            var rem = e.target.closest('.cart-item__remove');
+            if (rem) removeItem(rem.dataset.id);
+        });
+
+        document.getElementById('makena-cart-checkout').addEventListener('click', function () {
+            var items = getCart();
+            if (!items.length) return;
+            closeCartPanel();
+            openCheckout(null, null, items);
+        });
+    }
+
+    function openCartPanel() {
+        if (!document.getElementById('makena-cart-panel')) buildCartPanel();
+        renderCartItems();
+        document.getElementById('makena-cart-panel').classList.add('cart-panel--open');
+        document.getElementById('makena-cart-overlay').classList.add('cart-overlay--open');
+        document.body.classList.add('checkout-modal-open');
+    }
+
+    function closeCartPanel() {
+        var p = document.getElementById('makena-cart-panel');
+        var o = document.getElementById('makena-cart-overlay');
+        if (p) p.classList.remove('cart-panel--open');
+        if (o) o.classList.remove('cart-overlay--open');
+        document.body.classList.remove('checkout-modal-open');
+    }
+
+    // ── Navbar cart icon ──────────────────────────────────────────────────────
+    var navLinks = document.querySelector('.nav-links');
+    if (navLinks) {
+        var li = document.createElement('li');
+        li.innerHTML =
+            '<button class="cart-nav-btn" id="makena-cart-nav-btn" aria-label="View cart">' +
+                '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+                    '<path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/>' +
+                    '<line x1="3" y1="6" x2="21" y2="6"/>' +
+                    '<path d="M16 10a4 4 0 01-8 0"/>' +
+                '</svg>' +
+                '<span class="cart-badge" id="makena-cart-badge" hidden>0</span>' +
+            '</button>';
+        navLinks.appendChild(li);
+        li.querySelector('#makena-cart-nav-btn').addEventListener('click', openCartPanel);
+    }
+
+    // ── Embedded Stripe checkout modal ────────────────────────────────────────
+    var stripeInstance = null;
+    var embeddedCheckout = null;
+
+    function buildCheckoutModal() {
+        var modal = document.createElement('div');
+        modal.id = 'makena-checkout-modal';
+        modal.className = 'checkout-modal';
+        modal.innerHTML =
+            '<div class="checkout-modal__backdrop"></div>' +
+            '<div class="checkout-modal__dialog">' +
+                '<button class="checkout-modal__close" aria-label="Close checkout">×</button>' +
+                '<div id="makena-checkout-container" class="checkout-modal__container"></div>' +
+            '</div>';
+        document.body.appendChild(modal);
+        modal.querySelector('.checkout-modal__backdrop').addEventListener('click', closeCheckoutModal);
+        modal.querySelector('.checkout-modal__close').addEventListener('click', closeCheckoutModal);
+    }
+
+    function closeCheckoutModal() {
+        var modal = document.getElementById('makena-checkout-modal');
+        if (modal) modal.classList.remove('checkout-modal--open');
+        document.body.classList.remove('checkout-modal-open');
+        if (embeddedCheckout) { embeddedCheckout.destroy(); embeddedCheckout = null; }
+        var c = document.getElementById('makena-checkout-container');
+        if (c) c.innerHTML = '';
+    }
+
+    function loadStripeJs() {
+        return new Promise(function (resolve, reject) {
+            if (window.Stripe) { resolve(); return; }
+            var s = document.createElement('script');
+            s.src = 'https://js.stripe.com/v3/';
+            s.onload = resolve;
+            s.onerror = function () { reject(new Error('Could not load Stripe.')); };
+            document.head.appendChild(s);
+        });
+    }
+
+    // ticketId+quantity for Buy Now, items[] for cart checkout
+    async function openCheckout(ticketId, quantity, items) {
+        if (!document.getElementById('makena-checkout-modal')) buildCheckoutModal();
+        document.getElementById('makena-checkout-modal').classList.add('checkout-modal--open');
+        document.body.classList.add('checkout-modal-open');
+        var container = document.getElementById('makena-checkout-container');
+        container.innerHTML = '<p class="checkout-modal__loading">Loading secure checkout…</p>';
+
+        try {
+            var body = items ? { items: items } : { ticketId: ticketId, quantity: quantity };
+            var response = await fetch('/.netlify/functions/create-checkout-session', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            });
+            var data = await response.json();
+            if (!response.ok) throw new Error(data.error || 'Unable to start checkout.');
+
+            await loadStripeJs();
+            if (!stripeInstance) stripeInstance = window.Stripe(data.publishableKey);
+            if (embeddedCheckout) { embeddedCheckout.destroy(); embeddedCheckout = null; }
+            container.innerHTML = '';
+            embeddedCheckout = await stripeInstance.initEmbeddedCheckout({ clientSecret: data.clientSecret });
+            embeddedCheckout.mount('#makena-checkout-container');
+        } catch (error) {
+            container.innerHTML = '<p class="checkout-modal__error">' + escapeHtml(error.message) + '</p>';
+        }
+    }
+
+    // ── Global Escape handler ─────────────────────────────────────────────────
+    document.addEventListener('keydown', function (e) {
+        if (e.key !== 'Escape') return;
+        var checkoutModal = document.getElementById('makena-checkout-modal');
+        if (checkoutModal && checkoutModal.classList.contains('checkout-modal--open')) {
+            closeCheckoutModal();
+        } else {
+            closeCartPanel();
+        }
+    });
+
+    // ── Wire up event card buttons ────────────────────────────────────────────
+    document.querySelectorAll('.stripe-ticket-button').forEach(function (button) {
+        var ticketId = button.dataset.ticketId;
+        if (!ticketId) return;
+
+        button.textContent = 'Buy Now';
+
+        var addBtn = document.createElement('button');
+        addBtn.type = 'button';
+        addBtn.className = 'btn btn-cart btn-small';
+        addBtn.textContent = 'Add to Cart';
+        button.parentNode.insertBefore(addBtn, button);
+
+        addBtn.addEventListener('click', function () { addToCart(ticketId); });
+        button.addEventListener('click', function () { openCheckout(ticketId, 1, null); });
+    });
+
+    // ── Init badge ────────────────────────────────────────────────────────────
+    syncCartUI();
+
+}());
 
 // Loading State Handler
 window.addEventListener('load', () => {

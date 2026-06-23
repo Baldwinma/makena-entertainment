@@ -1,6 +1,8 @@
 const Stripe = require('stripe');
 const QRCode = require('qrcode');
 const { getSupabase } = require('./lib/supabase');
+const { sendTicketEmail } = require('./send-ticket-email');
+const { getTicketDefinitionByName, summarizePurchasedItems } = require('./lib/ticket-catalog');
 
 function json(statusCode, body) {
     return {
@@ -25,17 +27,22 @@ function buildTicketCode(sessionId, index) {
 }
 
 function getBaseUrl(event) {
+    if (process.env.SITE_URL) {
+        return process.env.SITE_URL.replace(/\/$/, '');
+    }
+
     const proto = event.headers['x-forwarded-proto'] || 'https';
     const host = event.headers.host;
-    return host ? `${proto}://${host}` : (process.env.SITE_URL || '').replace(/\/$/, '');
+    return host ? `${proto}://${host}` : '';
 }
 
-async function saveTicketsToSupabase(session, lineItem, quantity) {
+async function saveTicketsToSupabase(session, lineItems) {
     const supabase = getSupabase();
     if (!supabase) {
         return { stored: false, reason: 'Supabase is not configured.' };
     }
 
+    const totalQuantity = lineItems.reduce((s, li) => s + li.quantity, 0);
     const orderPayload = {
         stripe_session_id: session.id,
         stripe_payment_intent_id: typeof session.payment_intent === 'string' ? session.payment_intent : session.payment_intent && session.payment_intent.id,
@@ -44,31 +51,53 @@ async function saveTicketsToSupabase(session, lineItem, quantity) {
         amount_total: session.amount_total,
         currency: session.currency,
         payment_status: session.payment_status,
-        event_name: session.metadata.ticketName || lineItem.description,
-        quantity,
+        quantity: totalQuantity,
         purchased_at: new Date(session.created * 1000).toISOString(),
         updated_at: new Date().toISOString()
     };
 
+    const purchasedItems = lineItems.map(lineItem => {
+        const ticketDefinition = getTicketDefinitionByName(lineItem.description);
+        const eventName = (ticketDefinition && ticketDefinition.name) || lineItem.description || 'Event';
+        return [{
+            name: eventName,
+            quantity: lineItem.quantity,
+            date: (ticketDefinition && ticketDefinition.date) || null,
+            time: (ticketDefinition && ticketDefinition.time) || null,
+            location: (ticketDefinition && ticketDefinition.location) || null
+        }];
+    }).flat();
+
+    orderPayload.event_name = purchasedItems.map(item => item.name).join(', ');
+
     const { data: order, error: orderError } = await supabase
         .from('event_orders')
         .upsert(orderPayload, { onConflict: 'stripe_session_id' })
-        .select('id')
+        .select('id, customer_email, customer_name, ticket_email_sent_at')
         .single();
 
     if (orderError) {
         throw orderError;
     }
 
-    const ticketPayloads = Array.from({ length: quantity }, (_, index) => ({
-        order_id: order.id,
-        ticket_code: buildTicketCode(session.id, index),
-        event_name: orderPayload.event_name,
-        holder_name: orderPayload.customer_name || 'Guest',
-        holder_email: orderPayload.customer_email,
-        status: 'valid',
-        updated_at: new Date().toISOString()
-    }));
+    let ticketIndex = 0;
+    const ticketPayloads = lineItems.flatMap(lineItem =>
+        (() => {
+            const ticketDefinition = getTicketDefinitionByName(lineItem.description);
+            return Array.from({ length: lineItem.quantity }, () => ({
+                order_id: order.id,
+                ticket_code: buildTicketCode(session.id, ticketIndex++),
+                event_name: (ticketDefinition && ticketDefinition.name) || lineItem.description || 'Event',
+                event_date: ticketDefinition && ticketDefinition.date || null,
+                event_time: ticketDefinition && ticketDefinition.time || null,
+                event_location: ticketDefinition && ticketDefinition.location || null,
+                holder_name: (session.customer_details && session.customer_details.name) || 'Guest',
+                holder_email: session.customer_details && session.customer_details.email,
+                status: 'valid',
+                updated_at: new Date().toISOString()
+            }));
+        })()
+    );
 
     const { error: ticketsError } = await supabase
         .from('event_tickets')
@@ -80,7 +109,7 @@ async function saveTicketsToSupabase(session, lineItem, quantity) {
 
     const { data: tickets, error: readError } = await supabase
         .from('event_tickets')
-        .select('ticket_code, event_name, holder_name, holder_email, status, checked_in, checked_in_at')
+        .select('ticket_code, event_name, event_date, event_time, event_location, holder_name, holder_email, status, checked_in, checked_in_at')
         .eq('order_id', order.id)
         .order('ticket_code', { ascending: true });
 
@@ -88,7 +117,51 @@ async function saveTicketsToSupabase(session, lineItem, quantity) {
         throw readError;
     }
 
-    return { stored: true, tickets };
+    return { stored: true, order, tickets, purchasedItems };
+}
+
+async function markOrderEmailStatus(orderId, values) {
+    const supabase = getSupabase();
+    if (!supabase) {
+        return;
+    }
+
+    await supabase
+        .from('event_orders')
+        .update({
+            ...values,
+            updated_at: new Date().toISOString()
+        })
+        .eq('id', orderId);
+}
+
+async function sendTicketsAutomatically(event, order, tickets) {
+    if (!order || !order.id) {
+        return { sent: false, reason: 'Ticket records are not available for automatic delivery.' };
+    }
+
+    if (!order.customer_email) {
+        return { sent: false, reason: 'No customer email available for automatic delivery.' };
+    }
+
+    if (order.ticket_email_sent_at) {
+        return { sent: true, reason: 'Tickets were already emailed.' };
+    }
+
+    for (const ticket of tickets) {
+        await sendTicketEmail({
+            event,
+            ticket,
+            to: order.customer_email
+        });
+    }
+
+    await markOrderEmailStatus(order.id, {
+        ticket_email_sent_at: new Date().toISOString(),
+        ticket_email_error: null
+    });
+
+    return { sent: true };
 }
 
 exports.handler = async function(event) {
@@ -116,18 +189,44 @@ exports.handler = async function(event) {
             return json(402, { error: 'Payment is not complete yet.' });
         }
 
-        const lineItem = session.line_items.data[0];
-        const quantity = lineItem.quantity || Number.parseInt(session.metadata.quantity, 10) || 1;
-        const storage = await saveTicketsToSupabase(session, lineItem, quantity);
+        const lineItems = session.line_items.data;
+        const totalQuantity = lineItems.reduce((s, li) => s + li.quantity, 0);
+        const storage = await saveTicketsToSupabase(session, lineItems);
         const baseUrl = getBaseUrl(event);
-        const sourceTickets = storage.stored ? storage.tickets : Array.from({ length: quantity }, (_, index) => ({
-            ticket_code: buildTicketCode(session.id, index),
-            holder_name: session.customer_details && session.customer_details.name ? session.customer_details.name : 'Guest',
-            holder_email: session.customer_details && session.customer_details.email,
-            event_name: session.metadata.ticketName || lineItem.description || lineItem.price.product.name,
-            status: 'valid',
-            checked_in: false
-        }));
+        const order = storage.order || {
+            customer_email: session.customer_details && session.customer_details.email,
+            ticket_email_sent_at: null
+        };
+        let fallbackIndex = 0;
+        const sourceTickets = storage.stored ? storage.tickets : lineItems.flatMap(lineItem =>
+            Array.from({ length: lineItem.quantity }, () => ({
+                ticket_code: buildTicketCode(session.id, fallbackIndex++),
+                holder_name: (session.customer_details && session.customer_details.name) || 'Guest',
+                holder_email: session.customer_details && session.customer_details.email,
+                event_name: lineItem.description || session.metadata.ticketName || 'Event',
+                event_date: null,
+                event_time: null,
+                event_location: null,
+                status: 'valid',
+                checked_in: false
+            }))
+        );
+
+        let emailDelivery = { sent: false };
+        try {
+            emailDelivery = await sendTicketsAutomatically(event, order, sourceTickets);
+        } catch (emailError) {
+            console.error('Automatic ticket email error:', emailError);
+            if (order.id) {
+                await markOrderEmailStatus(order.id, {
+                    ticket_email_error: emailError.message || 'Unable to send ticket email.'
+                });
+            }
+            emailDelivery = {
+                sent: false,
+                reason: emailError.message || 'Unable to send ticket email.'
+            };
+        }
 
         const tickets = await Promise.all(sourceTickets.map(async ticket => {
             const checkInUrl = `${baseUrl}/admin?ticket=${encodeURIComponent(ticket.ticket_code)}`;
@@ -137,6 +236,9 @@ exports.handler = async function(event) {
                 holderName: ticket.holder_name || 'Guest',
                 holderEmail: ticket.holder_email,
                 eventName: ticket.event_name,
+                eventDate: ticket.event_date,
+                eventTime: ticket.event_time,
+                eventLocation: ticket.event_location,
                 status: ticket.checked_in ? 'Already Checked In' : 'Valid',
                 checkInUrl,
                 ticketPageUrl,
@@ -154,11 +256,13 @@ exports.handler = async function(event) {
                 customerName: session.customer_details && session.customer_details.name,
                 customerEmail: session.customer_details && session.customer_details.email,
                 amountPaid: formatAmount(session.amount_total, session.currency),
-                eventName: session.metadata.ticketName || lineItem.description,
-                quantity,
+                quantity: totalQuantity,
                 purchasedAt: new Date(session.created * 1000).toISOString(),
                 storedInSupabase: storage.stored,
-                storageNote: storage.reason
+                storageNote: storage.reason,
+                emailDelivery,
+                itemsPurchased: storage.purchasedItems || [],
+                itemsPurchasedSummary: summarizePurchasedItems(storage.purchasedItems || [])
             },
             tickets
         });

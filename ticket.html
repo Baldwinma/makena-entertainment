@@ -47,6 +47,16 @@
         const ticketGrid = document.getElementById('ticketGrid');
         const message = document.getElementById('ticketMessage');
 
+        function escapeHtml(value) {
+            return String(value || '').replace(/[&<>"']/g, char => ({
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#39;'
+            }[char]));
+        }
+
         async function loadTicket() {
             const code = params.get('ticket');
             if (!code) {
@@ -63,16 +73,22 @@
                 }
 
                 const ticket = data.ticket;
+                const details = [
+                    ticket.eventDate ? `<p><strong>Date:</strong> ${escapeHtml(ticket.eventDate)}</p>` : '',
+                    ticket.eventTime ? `<p><strong>Time:</strong> ${escapeHtml(ticket.eventTime)}</p>` : '',
+                    ticket.eventLocation ? `<p><strong>Location:</strong> ${escapeHtml(ticket.eventLocation)}</p>` : ''
+                ].join('');
                 ticketGrid.innerHTML = `
                     <article class="ticket-preview__ticket">
                         <div>
                             <span class="ticket-preview__label">Makena Ticket</span>
-                            <h3>${ticket.eventName}</h3>
-                            <p>${ticket.holderName}</p>
+                            <h3>${escapeHtml(ticket.eventName)}</h3>
+                            <p>${escapeHtml(ticket.holderName)}</p>
+                            ${details}
                         </div>
-                        <img class="ticket-preview__qr" src="${ticket.qrImageUrl}" alt="QR code for ${ticket.code}">
-                        <div class="ticket-preview__code" aria-label="Ticket code">${ticket.code}</div>
-                        <p class="ticket-preview__status">${ticket.status}</p>
+                        <img class="ticket-preview__qr" src="${escapeHtml(ticket.qrImageUrl)}" alt="QR code for ${escapeHtml(ticket.code)}">
+                        <div class="ticket-preview__code" aria-label="Ticket code">${escapeHtml(ticket.code)}</div>
+                        <p class="ticket-preview__status">${escapeHtml(ticket.status)}</p>
                     </article>
                 `;
             } catch (error) {

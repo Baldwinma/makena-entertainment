@@ -15,6 +15,10 @@ function cleanCode(code) {
     return String(code || '').trim().toUpperCase();
 }
 
+function normalizeEventName(name) {
+    return String(name || '').trim().toLowerCase();
+}
+
 exports.handler = async function(event) {
     if (event.httpMethod !== 'GET') {
         return json(405, { error: 'Method not allowed' });
@@ -29,7 +33,9 @@ exports.handler = async function(event) {
         return json(500, { error: 'Supabase is not configured.' });
     }
 
-    const code = cleanCode(event.queryStringParameters && event.queryStringParameters.ticket);
+    const params = event.queryStringParameters || {};
+    const code = cleanCode(params.ticket);
+    const selectedEventName = String(params.eventName || '').trim();
     if (!code) {
         return json(400, { error: 'Missing ticket code.' });
     }
@@ -62,6 +68,15 @@ exports.handler = async function(event) {
 
     if (!data) {
         return json(404, { valid: false, status: 'not_found', message: 'Ticket not found.' });
+    }
+
+    if (selectedEventName && normalizeEventName(data.event_name) !== normalizeEventName(selectedEventName)) {
+        return json(409, {
+            valid: false,
+            status: 'wrong_event',
+            message: `Wrong event ticket. This ticket is for ${data.event_name}, not ${selectedEventName}.`,
+            ticket: data
+        });
     }
 
     return json(200, {

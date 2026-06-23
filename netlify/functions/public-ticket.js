@@ -15,9 +15,13 @@ function cleanCode(code) {
 }
 
 function getBaseUrl(event) {
+    if (process.env.SITE_URL) {
+        return process.env.SITE_URL.replace(/\/$/, '');
+    }
+
     const proto = event.headers['x-forwarded-proto'] || 'https';
     const host = event.headers.host;
-    return host ? `${proto}://${host}` : (process.env.SITE_URL || '').replace(/\/$/, '');
+    return host ? `${proto}://${host}` : '';
 }
 
 exports.handler = async function(event) {
@@ -37,7 +41,7 @@ exports.handler = async function(event) {
 
     const { data: ticket, error } = await supabase
         .from('event_tickets')
-        .select('ticket_code, event_name, holder_name, holder_email, status, checked_in, checked_in_at')
+        .select('ticket_code, event_name, event_date, event_time, event_location, holder_name, holder_email, status, checked_in, checked_in_at')
         .eq('ticket_code', ticketCode)
         .maybeSingle();
 
@@ -56,6 +60,9 @@ exports.handler = async function(event) {
         ticket: {
             code: ticket.ticket_code,
             eventName: ticket.event_name,
+            eventDate: ticket.event_date,
+            eventTime: ticket.event_time,
+            eventLocation: ticket.event_location,
             holderName: ticket.holder_name || 'Guest',
             holderEmail: ticket.holder_email,
             status: ticket.checked_in ? 'Already Checked In' : 'Valid',

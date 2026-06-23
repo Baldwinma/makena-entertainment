@@ -67,8 +67,19 @@
                 <div class="section-header" style="margin-bottom: 1.5rem;">
                     <h2 class="section-title" style="font-size: 1.8rem;">Scan Tickets</h2>
                     <div class="title-underline"></div>
-                    <p class="section-description">Keep this page open on your phone or tablet. Each successful scan marks the ticket as checked in.</p>
+                    <p class="section-description">Choose the event first. Scans will only check in tickets for the selected event.</p>
                 </div>
+
+                <div class="event-scan-selector">
+                    <div class="event-scan-selector__header">
+                        <h3>Select Event</h3>
+                        <button type="button" class="btn btn-secondary event-scan-selector__refresh" id="refreshEventsButton">Refresh Counts</button>
+                    </div>
+                    <input id="eventSearchInput" class="check-in-input check-in-input--login event-scan-search" autocomplete="off" placeholder="Search events">
+                    <div class="event-scan-list" id="eventScanList"></div>
+                </div>
+
+                <div class="selected-event-summary" id="selectedEventSummary" hidden></div>
 
                 <form class="checkout-test-form" id="checkInForm">
                     <label for="ticketCode">Ticket Code</label>
@@ -86,6 +97,14 @@
 
                 <div class="qr-scanner" id="qrScanner" hidden></div>
                 <div class="check-in-result" id="checkInResult"></div>
+
+                <div class="recent-scans" id="recentScansPanel">
+                    <div class="recent-scans__header">
+                        <h3>Recent Scans</h3>
+                        <span id="currentAdminLabel"></span>
+                    </div>
+                    <div class="recent-scans__list" id="recentScansList"></div>
+                </div>
             </div>
         </div>
     </section>
@@ -106,20 +125,69 @@
         const scanner = document.getElementById('qrScanner');
         const scanButton = document.getElementById('scanButton');
         const stopScanButton = document.getElementById('stopScanButton');
+        const eventScanList = document.getElementById('eventScanList');
+        const selectedEventSummary = document.getElementById('selectedEventSummary');
+        const refreshEventsButton = document.getElementById('refreshEventsButton');
+        const eventSearchInput = document.getElementById('eventSearchInput');
+        const recentScansList = document.getElementById('recentScansList');
+        const currentAdminLabel = document.getElementById('currentAdminLabel');
         let html5QrCode = null;
         let isScanning = false;
         let isProcessingScan = false;
         let lastScannedCode = '';
         let lastScannedAt = 0;
+        let events = [];
+        let recentScans = [];
+        let selectedEvent = null;
+        let currentAdminUsername = '';
+        let eventRefreshTimer = null;
 
         function getToken() {
             return localStorage.getItem(tokenKey);
+        }
+
+        function startEventRefresh() {
+            stopEventRefresh();
+            eventRefreshTimer = window.setInterval(() => {
+                if (getToken()) {
+                    loadEvents({ silent: true });
+                }
+            }, 30000);
+        }
+
+        function stopEventRefresh() {
+            if (eventRefreshTimer) {
+                window.clearInterval(eventRefreshTimer);
+                eventRefreshTimer = null;
+            }
         }
 
         function setLoggedInState(isLoggedIn) {
             loginPanel.hidden = isLoggedIn;
             scannerPanel.hidden = !isLoggedIn;
             logoutLink.hidden = !isLoggedIn;
+            if (isLoggedIn) {
+                loadEvents();
+                startEventRefresh();
+            } else {
+                stopEventRefresh();
+                selectedEvent = null;
+                events = [];
+                recentScans = [];
+                currentAdminUsername = '';
+                renderEvents();
+                renderRecentScans();
+            }
+        }
+
+        function escapeHtml(value) {
+            return String(value || '').replace(/[&<>"']/g, char => ({
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#39;'
+            }[char]));
         }
 
         function extractTicketCode(value) {
@@ -176,11 +244,190 @@
             let icon = '';
             if (type === 'success') {
                 icon = `<svg class="check-in-status-icon check-in-status-icon--success" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M6.5 12.5l3.5 3.5 7.5-8" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
-            } else if (type === 'warning' || type === 'error') {
+            } else if (type === 'warning' || type === 'error' || type === 'wrong-event') {
                 icon = `<svg class="check-in-status-icon check-in-status-icon--fail" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 8l8 8M16 8l-8 8" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>`;
             }
             target.className = `check-in-result check-in-result--${type}`;
-            target.innerHTML = `${icon}<h3>${title}</h3><p>${body}</p>`;
+            target.innerHTML = `${icon}<h3>${escapeHtml(title)}</h3><p>${body}</p>`;
+        }
+
+        function getScanPercent(event) {
+            if (!event || !event.totalTickets) {
+                return 0;
+            }
+            return Math.round((event.checkedInTickets / event.totalTickets) * 100);
+        }
+
+        function formatScanTime(value) {
+            if (!value) {
+                return '';
+            }
+            try {
+                return new Intl.DateTimeFormat([], {
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                }).format(new Date(value));
+            } catch (error) {
+                return value;
+            }
+        }
+
+        function showWrongEvent(ticket, expectedEventName, message) {
+            playErrorSound();
+            const actualEventName = ticket && ticket.event_name ? ticket.event_name : 'another event';
+            showResult(
+                result,
+                'wrong-event',
+                'Wrong Event Ticket',
+                `${escapeHtml(message || 'This ticket is not for the selected event.')}<br><strong>Selected:</strong> ${escapeHtml(expectedEventName)}<br><strong>Ticket event:</strong> ${escapeHtml(actualEventName)}${ticket ? `<br>${describeTicket(ticket)}` : ''}`
+            );
+        }
+
+        function updateSelectedEventSummary() {
+            if (!selectedEvent) {
+                selectedEventSummary.hidden = true;
+                selectedEventSummary.innerHTML = '';
+                scanButton.disabled = true;
+                document.getElementById('validateButton').disabled = true;
+                document.querySelector('#checkInForm button[type="submit"]').disabled = true;
+                return;
+            }
+
+            selectedEventSummary.hidden = false;
+            selectedEventSummary.innerHTML = `
+                <div>
+                    <span class="selected-event-summary__label">Scanning</span>
+                    <strong>${escapeHtml(selectedEvent.name)}</strong>
+                    <small>${escapeHtml(selectedEvent.date)} | ${escapeHtml(selectedEvent.time)}</small>
+                </div>
+                <div class="selected-event-summary__count">
+                    <strong>${selectedEvent.checkedInTickets}</strong>
+                    <span>/ ${selectedEvent.totalTickets} scanned</span>
+                    <small>${getScanPercent(selectedEvent)}% checked in</small>
+                </div>
+            `;
+            scanButton.disabled = false;
+            document.getElementById('validateButton').disabled = false;
+            document.querySelector('#checkInForm button[type="submit"]').disabled = false;
+        }
+
+        function renderEvents() {
+            if (!eventScanList) {
+                return;
+            }
+
+            const searchTerm = String(eventSearchInput.value || '').trim().toLowerCase();
+            const visibleEvents = searchTerm
+                ? events.filter(event => `${event.name} ${event.date} ${event.time}`.toLowerCase().includes(searchTerm))
+                : events;
+
+            if (!visibleEvents.length) {
+                eventScanList.innerHTML = '<p class="event-scan-list__empty">No events found yet.</p>';
+                updateSelectedEventSummary();
+                return;
+            }
+
+            eventScanList.innerHTML = visibleEvents.map(event => {
+                const isSelected = selectedEvent && selectedEvent.name === event.name;
+                const percent = getScanPercent(event);
+                return `
+                    <button type="button" class="event-scan-card${isSelected ? ' is-selected' : ''}" data-event-name="${escapeHtml(event.name)}">
+                        <span class="event-scan-card__name">${escapeHtml(event.name)}</span>
+                        <span class="event-scan-card__meta">${escapeHtml(event.date)} | ${escapeHtml(event.time)}</span>
+                        <span class="event-scan-card__stats">
+                            <strong>${event.checkedInTickets}</strong> scanned
+                            <span>${event.totalTickets} bought</span>
+                        </span>
+                        <span class="event-scan-card__percent">${percent}% checked in</span>
+                    </button>
+                `;
+            }).join('');
+            updateSelectedEventSummary();
+        }
+
+        function renderRecentScans() {
+            currentAdminLabel.textContent = currentAdminUsername ? `Logged in as ${currentAdminUsername}` : '';
+
+            if (!recentScans.length) {
+                recentScansList.innerHTML = '<p class="recent-scans__empty">No check-ins yet.</p>';
+                return;
+            }
+
+            recentScansList.innerHTML = recentScans.map(scan => `
+                <div class="recent-scan-row">
+                    <div>
+                        <strong>${escapeHtml(scan.holder_name || 'Guest')}</strong>
+                        <span>${escapeHtml(scan.event_name)}</span>
+                        <small>${escapeHtml(scan.ticket_code)}</small>
+                    </div>
+                    <div class="recent-scan-row__meta">
+                        <span>${escapeHtml(formatScanTime(scan.checked_in_at))}</span>
+                        <small>${escapeHtml(scan.checked_in_by || 'Makena admin')}</small>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function selectEvent(eventName) {
+            selectedEvent = events.find(event => event.name === eventName) || null;
+            renderEvents();
+            if (selectedEvent) {
+                showResult(result, 'success', 'Event Selected', `Now scanning only ${escapeHtml(selectedEvent.name)} tickets.`);
+            }
+        }
+
+        function updateEventCount(eventName, checkedInTickets, totalTickets) {
+            events = events.map(event => {
+                if (event.name !== eventName) {
+                    return event;
+                }
+
+                return {
+                    ...event,
+                    checkedInTickets: Number.isFinite(checkedInTickets) ? checkedInTickets : event.checkedInTickets + 1,
+                    totalTickets: Number.isFinite(totalTickets) ? totalTickets : event.totalTickets
+                };
+            });
+            if (selectedEvent && selectedEvent.name === eventName) {
+                selectedEvent = events.find(event => event.name === eventName) || selectedEvent;
+            }
+            renderEvents();
+        }
+
+        async function loadEvents(options = {}) {
+            if (!getToken()) {
+                return;
+            }
+
+            if (!options.silent) {
+                eventScanList.innerHTML = '<p class="event-scan-list__empty">Loading events...</p>';
+            }
+            const response = await authedFetch('/.netlify/functions/admin-events');
+            const data = await response.json();
+
+            if (response.status === 401) {
+                localStorage.removeItem(tokenKey);
+                setLoggedInState(false);
+                showResult(loginResult, 'error', 'Login Required', 'Please login again.');
+                return;
+            }
+
+            if (!response.ok) {
+                eventScanList.innerHTML = '<p class="event-scan-list__empty">Unable to load events.</p>';
+                showResult(result, 'error', 'Events Unavailable', escapeHtml(data.error || 'Refresh and try again.'));
+                return;
+            }
+
+            events = data.events || [];
+            recentScans = data.recentScans || [];
+            currentAdminUsername = data.admin && data.admin.username ? data.admin.username : currentAdminUsername;
+            if (selectedEvent) {
+                selectedEvent = events.find(event => event.name === selectedEvent.name) || null;
+            }
+            renderEvents();
+            renderRecentScans();
         }
 
         function setPasswordVisibility(isVisible) {
@@ -192,7 +439,7 @@
         }
 
         function describeTicket(ticket) {
-            return `${ticket.event_name}<br>${ticket.holder_name || 'Guest'}${ticket.holder_email ? ` | ${ticket.holder_email}` : ''}<br>${ticket.ticket_code}`;
+            return `${escapeHtml(ticket.event_name)}<br>${escapeHtml(ticket.holder_name || 'Guest')}${ticket.holder_email ? ` | ${escapeHtml(ticket.holder_email)}` : ''}<br>${escapeHtml(ticket.ticket_code)}`;
         }
 
         async function authedFetch(url, options = {}) {
@@ -204,6 +451,11 @@
         }
 
         async function validateTicket() {
+            if (!selectedEvent) {
+                showResult(result, 'error', 'Select Event', 'Choose the event you are scanning before validating tickets.');
+                return null;
+            }
+
             const code = extractTicketCode(ticketInput.value);
             ticketInput.value = code;
 
@@ -212,7 +464,7 @@
                 return null;
             }
 
-            const response = await authedFetch(`/.netlify/functions/validate-ticket?ticket=${encodeURIComponent(code)}`);
+            const response = await authedFetch(`/.netlify/functions/validate-ticket?ticket=${encodeURIComponent(code)}&eventName=${encodeURIComponent(selectedEvent.name)}`);
             const data = await response.json();
 
             if (response.status === 401) {
@@ -223,12 +475,17 @@
             }
 
             if (!response.ok) {
-                showResult(result, 'error', 'Invalid Ticket', data.error || data.message || 'Ticket could not be validated.');
+                const ticket = data.ticket ? `<br>${describeTicket(data.ticket)}` : '';
+                if (data.status === 'wrong_event') {
+                    showWrongEvent(data.ticket, selectedEvent.name, data.error || data.message);
+                } else {
+                    showResult(result, 'error', data.error || data.message || 'Ticket could not be validated.', ticket || 'Ticket could not be validated.');
+                }
                 return null;
             }
 
             if (data.status === 'already_checked_in') {
-                showResult(result, 'warning', 'Already Used', `${describeTicket(data.ticket)}<br>Checked in at ${data.ticket.checked_in_at}`);
+                showResult(result, 'warning', 'Already Used', `${describeTicket(data.ticket)}<br>Checked in at ${escapeHtml(data.ticket.checked_in_at)}`);
                 return data.ticket;
             }
 
@@ -237,6 +494,12 @@
         }
 
         async function checkInCode(code) {
+            if (!selectedEvent) {
+                playErrorSound();
+                showResult(result, 'error', 'Select Event', 'Choose the event you are scanning before checking in tickets.');
+                return null;
+            }
+
             code = extractTicketCode(code);
             ticketInput.value = code;
 
@@ -247,7 +510,7 @@
                 },
                 body: JSON.stringify({
                     ticket: code,
-                    checkedInBy: 'Makena admin'
+                    eventName: selectedEvent.name
                 })
             });
             const data = await response.json();
@@ -261,13 +524,21 @@
 
             if (!response.ok) {
                 const ticket = data.ticket ? `<br>${describeTicket(data.ticket)}` : '';
-                playErrorSound();
-                showResult(result, data.status === 'already_checked_in' ? 'warning' : 'error', data.error || 'Check-In Failed', ticket || 'Please try again.');
+                if (data.status === 'wrong_event') {
+                    showWrongEvent(data.ticket, selectedEvent.name, data.error);
+                } else {
+                    playErrorSound();
+                    showResult(result, data.status === 'already_checked_in' ? 'warning' : 'error', data.error || 'Check-In Failed', ticket || 'Please try again.');
+                }
                 return;
             }
 
             playSuccessSound();
             showResult(result, 'success', 'Checked In', describeTicket(data.ticket));
+            if (data.ticket && data.ticket.event_name === selectedEvent.name) {
+                updateEventCount(selectedEvent.name);
+                loadEvents();
+            }
             return data.ticket;
         }
 
@@ -291,6 +562,11 @@
         }
 
         async function startScanner() {
+            if (!selectedEvent) {
+                showResult(result, 'error', 'Select Event', 'Choose the event you are scanning before starting the camera.');
+                return;
+            }
+
             if (!window.Html5Qrcode) {
                 showResult(result, 'warning', 'Scanner Not Loaded', 'The camera scanner could not load. Use your phone Camera app to scan the QR code, or enter the code manually.');
                 return;
@@ -304,7 +580,7 @@
             scanner.hidden = false;
             stopScanButton.hidden = false;
             scanButton.hidden = true;
-            showResult(result, 'success', 'Scanner Ready', 'Point the camera at a ticket QR code. Successful scans check in automatically.');
+            showResult(result, 'success', 'Scanner Ready', `Point the camera at a ${escapeHtml(selectedEvent.name)} ticket QR code.`);
 
             try {
                 await html5QrCode.start(
@@ -381,6 +657,15 @@
         document.getElementById('checkInForm').addEventListener('submit', checkInTicket);
         scanButton.addEventListener('click', startScanner);
         stopScanButton.addEventListener('click', stopScanner);
+        refreshEventsButton.addEventListener('click', loadEvents);
+        eventSearchInput.addEventListener('input', renderEvents);
+        eventScanList.addEventListener('click', event => {
+            const card = event.target.closest('.event-scan-card');
+            if (!card) {
+                return;
+            }
+            selectEvent(card.dataset.eventName);
+        });
         passwordToggle.addEventListener('click', () => {
             setPasswordVisibility(passwordInput.type === 'password');
         });

@@ -1,97 +1,5 @@
 const Stripe = require('stripe');
-
-const tickets = {
-    wet_dreams_test: {
-        name: 'Wet Dreams Pool Party',
-        description: 'Makena Afronation Portimao ticket',
-        amount: 2500,
-        currency: 'usd'
-    },
-    welcome_party: {
-        name: 'Welcome Party',
-        description: 'Makena Afronation Portimao ticket',
-        amount: 2500,
-        currency: 'usd'
-    },
-    wet_dreams_pool_party: {
-        name: 'Wet Dreams Pool Party',
-        description: 'Makena Afronation Portimao ticket',
-        amount: 2500,
-        currency: 'usd'
-    },
-    french_connection: {
-        name: 'French Connection',
-        description: 'Makena Afronation Portimao ticket',
-        amount: 2500,
-        currency: 'usd'
-    },
-    festival_kick_off: {
-        name: 'Festival Kick OFF',
-        description: 'Makena Afronation Portimao ticket',
-        amount: 2500,
-        currency: 'usd'
-    },
-    makena_boat_party: {
-        name: 'Makena Boat Party',
-        description: 'Makena Afronation Portimao boat party ticket',
-        amount: 7000,
-        currency: 'usd'
-    },
-    all_white_party: {
-        name: 'All White Party',
-        description: 'Makena Afronation Portimao ticket',
-        amount: 2500,
-        currency: 'usd'
-    },
-    rep_your_flag: {
-        name: 'Rep Your Flag',
-        description: 'Makena Afronation Portimao ticket',
-        amount: 2500,
-        currency: 'usd'
-    },
-    afro_beats_vs_amapiano: {
-        name: 'Afro Beats vs Amapiano',
-        description: 'Makena Afronation Portimao ticket',
-        amount: 2500,
-        currency: 'usd'
-    },
-    rnb_old_school_day_party: {
-        name: 'RnB & Old School Day Party',
-        description: 'Makena Afronation Portimao ticket',
-        amount: 2500,
-        currency: 'usd'
-    },
-    caribbean_energy: {
-        name: 'Soca X Reggaeton X Kompa Caribbean Energy',
-        description: 'Makena Afronation Portimao ticket',
-        amount: 2500,
-        currency: 'usd'
-    },
-    where_tall_people_meet: {
-        name: 'Where Tall People Meet',
-        description: 'Makena Afronation Portimao ticket',
-        amount: 2500,
-        currency: 'usd'
-    },
-    red_flag_party: {
-        name: 'Red Flag Party',
-        description: 'Makena Afronation Portimao ticket',
-        amount: 2500,
-        currency: 'usd'
-    },
-    all_orange_day_party: {
-        name: 'All Orange Day Party',
-        description: 'Makena Afronation Portimao ticket',
-        amount: 2500,
-        currency: 'usd'
-    },
-    closing_party_in_style: {
-        name: 'Makena Closing Party in Style',
-        description: 'Makena Afronation Portimao ticket',
-        amount: 2500,
-        currency: 'usd'
-    }
-};
+const { getTicketDefinition } = require('./lib/ticket-catalog');
 
 function json(statusCode, body) {
     return {
@@ -104,9 +12,13 @@ function json(statusCode, body) {
 }
 
 function getBaseUrl(event) {
+    if (process.env.SITE_URL) {
+        return process.env.SITE_URL.replace(/\/$/, '');
+    }
+
     const proto = event.headers['x-forwarded-proto'] || 'https';
     const host = event.headers.host;
-    return host ? `${proto}://${host}` : (process.env.SITE_URL || '').replace(/\/$/, '');
+    return host ? `${proto}://${host}` : '';
 }
 
 exports.handler = async function(event) {
@@ -118,6 +30,10 @@ exports.handler = async function(event) {
         return json(500, { error: 'Stripe is not configured. Add STRIPE_SECRET_KEY to your environment.' });
     }
 
+    if (!process.env.STRIPE_PUBLISHABLE_KEY) {
+        return json(500, { error: 'Stripe publishable key is not configured. Add STRIPE_PUBLISHABLE_KEY to your environment.' });
+    }
+
     let payload;
     try {
         payload = JSON.parse(event.body || '{}');
@@ -125,53 +41,91 @@ exports.handler = async function(event) {
         return json(400, { error: 'Invalid request body.' });
     }
 
-    const ticket = tickets[payload.ticketId];
-    if (!ticket) {
-        return json(400, { error: 'Unknown ticket.' });
-    }
-
-    const quantity = Number.parseInt(payload.quantity, 10);
-    if (!Number.isInteger(quantity) || quantity < 1 || quantity > 10) {
-        return json(400, { error: 'Quantity must be between 1 and 10.' });
-    }
-
     const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
     const baseUrl = getBaseUrl(event);
+
+    let lineItems;
+    let sessionMetadata;
+
+    if (payload.items && Array.isArray(payload.items) && payload.items.length > 0) {
+        // Cart checkout — multiple ticket types
+        const validated = [];
+        for (const item of payload.items) {
+            const ticket = getTicketDefinition(item.ticketId);
+            if (!ticket) return json(400, { error: `Unknown ticket: ${item.ticketId}` });
+            const qty = Number.parseInt(item.quantity, 10);
+            if (!Number.isInteger(qty) || qty < 1 || qty > 10) {
+                return json(400, { error: `Invalid quantity for ${item.ticketId}.` });
+            }
+            validated.push({ ticketId: item.ticketId, ticket, quantity: qty });
+        }
+        lineItems = validated.map(({ ticketId, ticket, quantity }) => ({
+            price_data: {
+                currency: ticket.currency,
+                product_data: {
+                    name: ticket.name,
+                    description: ticket.description,
+                    metadata: {
+                        ticket_id: ticketId
+                    }
+                },
+                unit_amount: ticket.amount
+            },
+            quantity
+        }));
+        sessionMetadata = {
+            cart: 'true',
+            quantity: String(validated.reduce((s, { quantity }) => s + quantity, 0))
+        };
+    } else {
+        // Buy Now — single ticket
+        const ticket = getTicketDefinition(payload.ticketId);
+        if (!ticket) return json(400, { error: 'Unknown ticket.' });
+        const quantity = Number.parseInt(payload.quantity, 10);
+        if (!Number.isInteger(quantity) || quantity < 1 || quantity > 10) {
+            return json(400, { error: 'Quantity must be between 1 and 10.' });
+        }
+        lineItems = [{
+            price_data: {
+                currency: ticket.currency,
+                product_data: {
+                    name: ticket.name,
+                    description: ticket.description,
+                    metadata: {
+                        ticket_id: payload.ticketId
+                    }
+                },
+                unit_amount: ticket.amount
+            },
+            quantity
+        }];
+        sessionMetadata = {
+            ticketId: payload.ticketId,
+            ticketName: ticket.name,
+            quantity: String(quantity)
+        };
+    }
 
     try {
         const session = await stripe.checkout.sessions.create({
             mode: 'payment',
-            payment_method_types: ['card'],
-            line_items: [
-                {
-                    price_data: {
-                        currency: ticket.currency,
-                        product_data: {
-                            name: ticket.name,
-                            description: ticket.description
-                        },
-                        unit_amount: ticket.amount
-                    },
-                    quantity
-                }
-            ],
+            ui_mode: 'embedded',
+            line_items: lineItems,
             allow_promotion_codes: true,
             billing_address_collection: 'auto',
-            success_url: `${baseUrl}/checkout-test?success=true&session_id={CHECKOUT_SESSION_ID}`,
-            cancel_url: `${baseUrl}/checkout-test?canceled=true`,
-            metadata: {
-                ticketId: payload.ticketId,
-                ticketName: ticket.name,
-                quantity: String(quantity)
-            }
+            return_url: `${baseUrl}/checkout-success?session_id={CHECKOUT_SESSION_ID}`,
+            metadata: sessionMetadata
         });
 
-        return json(200, { url: session.url });
+        return json(200, {
+            clientSecret: session.client_secret,
+            publishableKey: process.env.STRIPE_PUBLISHABLE_KEY
+        });
     } catch (error) {
         console.error('Stripe checkout error:', error);
 
         if (error.type === 'StripeAuthenticationError') {
-            return json(500, { error: 'Stripe rejected the API key. Add a valid test secret key that starts with sk_test_ to your .env file, then restart Netlify Dev.' });
+            return json(500, { error: 'Stripe rejected the API key. Add a valid Stripe secret key to your environment, then restart the server.' });
         }
 
         return json(500, { error: 'Unable to start checkout.' });

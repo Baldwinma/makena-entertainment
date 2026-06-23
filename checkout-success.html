@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Tickets | Makena</title>
+    <meta name="description" content="Your Makena event tickets.">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar" id="navbar">
+        <div class="container">
+            <div class="nav-content">
+                <div class="logo">
+                    <a href="index.html">
+                        <img src="images/logo-transparent.png" alt="Makena Logo">
+                    </a>
+                </div>
+                <ul class="nav-links" id="navLinks">
+                    <li><a href="afronation.html">Afronation</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <section class="page-header">
+        <div class="hero-overlay"></div>
+        <div class="container">
+            <h1 class="page-title" id="pageTitle">Your Tickets</h1>
+            <p class="page-subtitle" id="pageSubtitle">Thank you for your purchase!</p>
+        </div>
+    </section>
+
+    <section class="events">
+        <div class="container">
+            <p class="checkout-success-message" id="statusMessage"></p>
+
+            <div class="ticket-preview" id="ticketPreview" hidden>
+                <div class="section-header">
+                    <h2 class="section-title">Your Tickets</h2>
+                    <div class="title-underline"></div>
+                    <p class="section-description">Save the QR codes below — you'll need them at the door. A copy has been sent to your email.</p>
+                </div>
+                <div class="ticket-preview__summary" id="ticketSummary"></div>
+                <div class="ticket-preview__grid" id="ticketGrid"></div>
+                <div style="text-align:center; margin-top: 2rem;">
+                    <a href="afronation.html" class="btn btn-secondary">Browse More Events</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script src="script.js"></script>
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const statusMessage = document.getElementById('statusMessage');
+        const pageTitle = document.getElementById('pageTitle');
+        const pageSubtitle = document.getElementById('pageSubtitle');
+
+        function escapeHtml(value) {
+            return String(value || '').replace(/[&<>"']/g, char => ({
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#39;'
+            }[char]));
+        }
+
+        function renderTicketPreview(data) {
+            const preview = document.getElementById('ticketPreview');
+            const summary = document.getElementById('ticketSummary');
+            const grid = document.getElementById('ticketGrid');
+
+            pageTitle.textContent = 'Payment Successful';
+            pageSubtitle.textContent = 'Your tickets are ready. See you at the event!';
+
+            summary.innerHTML = `
+                <p><strong>Event:</strong> ${escapeHtml(data.order.itemsPurchasedSummary || 'Makena Event')}</p>
+                <p><strong>Name:</strong> ${escapeHtml(data.order.customerName || 'Guest')}</p>
+                <p><strong>Email:</strong> ${escapeHtml(data.order.customerEmail || '-')}</p>
+                <p><strong>Amount paid:</strong> ${escapeHtml(data.order.amountPaid)}</p>
+                <p><strong>Tickets:</strong> ${escapeHtml(data.order.quantity)}</p>
+            `;
+
+            grid.innerHTML = data.tickets.map(ticket => `
+                <article class="ticket-preview__ticket">
+                    <div>
+                        <span class="ticket-preview__label">Makena Ticket</span>
+                        <h3>${escapeHtml(ticket.eventName)}</h3>
+                        <p>${escapeHtml(ticket.holderName)}</p>
+                    </div>
+                    <img class="ticket-preview__qr" src="${escapeHtml(ticket.qrCode)}" alt="QR code for ${escapeHtml(ticket.code)}">
+                    <div class="ticket-preview__code" aria-label="Ticket code">${escapeHtml(ticket.code)}</div>
+                    <a class="btn btn-secondary btn-small" href="${escapeHtml(ticket.ticketPageUrl)}" target="_blank" rel="noopener">Open Ticket Page</a>
+                    <p class="ticket-preview__status">${escapeHtml(ticket.status)}</p>
+                </article>
+            `).join('');
+
+            preview.hidden = false;
+        }
+
+        function formatPurchaseMessage(itemsPurchased, fallbackQuantity) {
+            if (itemsPurchased && itemsPurchased.length) {
+                return `Thanks for your purchase of ${itemsPurchased}. Please check your email for your ticket information.`;
+            }
+
+            const count = Number(fallbackQuantity || 0);
+            const ticketWord = count === 1 ? 'ticket' : 'tickets';
+            return `Thanks for your purchase of ${count} ${ticketWord}. Please check your email for your ticket information.`;
+        }
+
+        async function loadTickets(sessionId) {
+            statusMessage.textContent = 'Loading your tickets…';
+
+            try {
+                const response = await fetch(`/.netlify/functions/get-checkout-session?session_id=${encodeURIComponent(sessionId)}`);
+                const data = await response.json();
+
+                if (!response.ok) throw new Error(data.error || 'Unable to load tickets.');
+
+                renderTicketPreview(data);
+                statusMessage.textContent = formatPurchaseMessage(data.order.itemsPurchasedSummary, data.order.quantity);
+                if (data.order.emailDelivery && data.order.emailDelivery.sent) {
+                    statusMessage.textContent = `${statusMessage.textContent} Your ticket email has been sent automatically.`;
+                } else if (data.order.emailDelivery && data.order.emailDelivery.reason) {
+                    statusMessage.textContent = `${statusMessage.textContent} ${data.order.emailDelivery.reason}`;
+                }
+            } catch (error) {
+                pageTitle.textContent = 'Something went wrong';
+                pageSubtitle.textContent = '';
+                statusMessage.textContent = error.message + ' — if you completed payment, your tickets will arrive by email shortly.';
+            }
+        }
+
+        // Clear cart on successful payment return
+        localStorage.removeItem('makena_cart');
+
+        const sessionId = params.get('session_id');
+        if (sessionId) {
+            loadTickets(sessionId);
+        } else {
+            pageTitle.textContent = 'No order found';
+            pageSubtitle.textContent = '';
+            statusMessage.textContent = 'No session ID found. If you completed a purchase, check your email for your tickets.';
+        }
+    </script>
+</body>
+</html>

@@ -8,8 +8,13 @@ create table if not exists public.event_orders (
     currency text not null,
     payment_status text not null,
     event_name text not null,
+    event_date text,
+    event_time text,
+    event_location text,
     quantity integer not null,
     purchased_at timestamptz not null,
+    ticket_email_sent_at timestamptz,
+    ticket_email_error text,
     created_at timestamptz not null default now(),
     updated_at timestamptz not null default now()
 );
@@ -19,6 +24,9 @@ create table if not exists public.event_tickets (
     order_id uuid not null references public.event_orders(id) on delete cascade,
     ticket_code text not null unique,
     event_name text not null,
+    event_date text,
+    event_time text,
+    event_location text,
     holder_name text,
     holder_email text,
     status text not null default 'valid',

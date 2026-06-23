@@ -15,6 +15,10 @@ function cleanCode(code) {
     return String(code || '').trim().toUpperCase();
 }
 
+function normalizeEventName(name) {
+    return String(name || '').trim().toLowerCase();
+}
+
 exports.handler = async function(event) {
     if (event.httpMethod !== 'POST') {
         return json(405, { error: 'Method not allowed' });
@@ -38,6 +42,7 @@ exports.handler = async function(event) {
     }
 
     const code = cleanCode(payload.ticket);
+    const selectedEventName = String(payload.eventName || '').trim();
     if (!code) {
         return json(400, { error: 'Missing ticket code.' });
     }
@@ -57,6 +62,14 @@ exports.handler = async function(event) {
         return json(404, { status: 'not_found', error: 'Ticket not found.' });
     }
 
+    if (selectedEventName && normalizeEventName(ticket.event_name) !== normalizeEventName(selectedEventName)) {
+        return json(409, {
+            status: 'wrong_event',
+            error: `Wrong event ticket. This ticket is for ${ticket.event_name}, not ${selectedEventName}.`,
+            ticket
+        });
+    }
+
     if (ticket.status !== 'valid') {
         return json(409, { status: ticket.status, error: 'Ticket is not valid.', ticket });
     }
@@ -66,17 +79,18 @@ exports.handler = async function(event) {
     }
 
     const checkedInAt = new Date().toISOString();
+    const checkedInBy = admin.username || 'Makena admin';
     const { data: updatedTicket, error: updateError } = await supabase
         .from('event_tickets')
         .update({
             checked_in: true,
             checked_in_at: checkedInAt,
-            checked_in_by: payload.checkedInBy || admin.username || 'Makena admin',
+            checked_in_by: checkedInBy,
             updated_at: checkedInAt
         })
         .eq('ticket_code', code)
         .eq('checked_in', false)
-        .select('ticket_code, event_name, holder_name, holder_email, status, checked_in, checked_in_at')
+        .select('ticket_code, event_name, holder_name, holder_email, status, checked_in, checked_in_at, checked_in_by')
         .single();
 
     if (updateError) {

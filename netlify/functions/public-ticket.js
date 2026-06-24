@@ -41,7 +41,7 @@ exports.handler = async function(event) {
 
     const { data: ticket, error } = await supabase
         .from('event_tickets')
-        .select('ticket_code, event_name, event_date, event_time, event_location, holder_name, holder_email, status, checked_in, checked_in_at')
+        .select('ticket_code, event_name, event_date, event_time, event_location, ticket_tier_name, holder_name, holder_email, status, checked_in, checked_in_at')
         .eq('ticket_code', ticketCode)
         .maybeSingle();
 
@@ -63,6 +63,7 @@ exports.handler = async function(event) {
             eventDate: ticket.event_date,
             eventTime: ticket.event_time,
             eventLocation: ticket.event_location,
+            tierName: ticket.ticket_tier_name,
             holderName: ticket.holder_name || 'Guest',
             holderEmail: ticket.holder_email,
             status: ticket.checked_in ? 'Already Checked In' : 'Valid',

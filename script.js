@@ -157,7 +157,7 @@ const socialLinks = {
     instagram: 'https://www.instagram.com/makena_entertainment',
     eventbrite: 'https://www.eventbrite.com/e/makena-brunch-pool-party-tickets-1635855119699#organizer-card',
     whatsapp: 'https://chat.whatsapp.com/BiAHKgTKzhQ3KXasjOwDRs',
-    email: 'mailto:info@makenaentertainment.com'
+    email: 'mailto:admin@makenaevents.com'
 };
 
 // Update all social media links (this is a placeholder - update with actual links)
@@ -248,23 +248,33 @@ document.addEventListener('keydown', (e) => {
 
     // ── Ticket catalog (mirrors backend) ─────────────────────────────────────
     var TICKETS = {
-        welcome_party:            { name: 'Welcome Party',                  price: 100 },
-        wet_dreams_pool_party:    { name: 'Wet Dreams Pool Party',          price: 2500 },
-        french_connection:        { name: 'French Connection',              price: 2500 },
-        festival_kick_off:        { name: 'Festival Kick Off',              price: 2500 },
-        makena_boat_party:        { name: 'Makena Boat Party',              price: 7000 },
-        all_white_party:          { name: 'All White Party',                price: 2500 },
-        rep_your_flag:            { name: 'Rep Your Flag',                  price: 2500 },
-        afro_beats_vs_amapiano:   { name: 'Afro Beats vs Amapiano',        price: 2500 },
-        rnb_old_school_day_party: { name: 'RnB & Old School Day Party',    price: 2500 },
-        caribbean_energy:         { name: 'Soca × Reggaeton × Kompa',      price: 2500 },
-        where_tall_people_meet:   { name: 'Where Tall People Meet',        price: 2500 },
-        red_flag_party:           { name: 'Red Flag Party',                 price: 2500 },
-        all_orange_day_party:     { name: 'All Orange Day Party',           price: 2500 },
-        closing_party_in_style:   { name: 'Closing Party in Style',        price: 2500 }
+        flex_trio_pass:           { name: '3X ACCESS PASS | The Flex Trio', price: 8000, currency: 'eur' },
+        five_elite_pass:          { name: 'FIVE ELITE PASS',                price: 12000, currency: 'eur' },
+        weekend_pulse_pass:       { name: 'WEEK-END PULSE',                 price: 14000, currency: 'eur' },
+        vip_infinite_pass:        { name: 'VIP INFINITE PASS',              price: 30000, currency: 'eur' },
+        welcome_party:            { name: 'Welcome Party',                  price: 3000, currency: 'usd' },
+        wet_dreams_pool_party:    { name: 'Wet Dreams Pool Party',          price: 2500, currency: 'usd' },
+        french_connection:        { name: 'French Connection',              price: 2500, currency: 'usd' },
+        festival_kick_off:        { name: 'Festival Kick Off',              price: 2500, currency: 'usd' },
+        makena_boat_party:        { name: 'Makena Boat Party',              price: 7000, currency: 'usd' },
+        all_white_party:          { name: 'All White Party',                price: 2500, currency: 'usd' },
+        rep_your_flag:            { name: 'SEXIEST PRE GAME',                  price: 2500, currency: 'usd' },
+        afro_beats_vs_amapiano:   { name: 'Afro Beats vs Amapiano',        price: 2500, currency: 'usd' },
+        rnb_old_school_day_party: { name: 'RnB & Old School Day Party',    price: 2500, currency: 'usd' },
+        caribbean_energy:         { name: 'Soca × Reggaeton × Kompa',      price: 2500, currency: 'usd' },
+        where_tall_people_meet:   { name: 'Where Tall People Meet',        price: 2500, currency: 'usd' },
+        red_flag_party:           { name: 'Red Flag Party',                 price: 2500, currency: 'usd' },
+        all_orange_day_party:     { name: 'All Orange Day Party',           price: 2500, currency: 'usd' },
+        closing_party_in_style:   { name: 'Closing Party in Style',        price: 2500, currency: 'usd' }
     };
+    var ticketAvailability = {};
 
-    function fmt(cents) { return '$' + (cents / 100).toFixed(2); }
+    function fmt(cents, currency) {
+        return new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: (currency || 'usd').toUpperCase()
+        }).format(cents / 100);
+    }
 
     function escapeHtml(value) {
         return String(value || '').replace(/[&<>"']/g, function (char) {
@@ -291,7 +301,19 @@ document.addEventListener('keydown', (e) => {
     }
 
     function addToCart(ticketId) {
+        if (ticketAvailability[ticketId] && ticketAvailability[ticketId].soldOut) {
+            alert('This event is sold out.');
+            return;
+        }
+
         var cart = getCart();
+        var ticket = TICKETS[ticketId];
+        var cartCurrency = getCartCurrency(cart);
+        if (ticket && cartCurrency && ticket.currency !== cartCurrency) {
+            alert('Please checkout tickets in one currency at a time.');
+            return;
+        }
+
         var existing = cart.find(function (i) { return i.ticketId === ticketId; });
         if (existing) { existing.quantity = Math.min(existing.quantity + 1, 10); }
         else { cart.push({ ticketId: ticketId, quantity: 1 }); }
@@ -322,6 +344,19 @@ document.addEventListener('keydown', (e) => {
         }, 0);
     }
 
+    function getCartCurrency(cart) {
+        cart = cart || getCart();
+        var firstTicket = cart.map(function (item) { return TICKETS[item.ticketId]; }).find(Boolean);
+        return firstTicket ? firstTicket.currency : null;
+    }
+
+    function updateTicketPrice(ticketId, amount, currency) {
+        if (TICKETS[ticketId] && Number.isFinite(amount)) {
+            TICKETS[ticketId].price = amount;
+            if (currency) TICKETS[ticketId].currency = currency;
+        }
+    }
+
     // ── Cart UI ───────────────────────────────────────────────────────────────
     function syncCartUI() {
         var badge = document.getElementById('makena-cart-badge');
@@ -348,7 +383,7 @@ document.addEventListener('keydown', (e) => {
             return '<div class="cart-item" data-id="' + item.ticketId + '">' +
                 '<div class="cart-item__info">' +
                     '<span class="cart-item__name">' + t.name + '</span>' +
-                    '<span class="cart-item__price">' + fmt(t.price) + ' each</span>' +
+                    '<span class="cart-item__price">' + fmt(t.price, t.currency) + ' each</span>' +
                 '</div>' +
                 '<div class="cart-item__controls">' +
                     '<button class="cart-item__qty-btn" data-action="dec" data-id="' + item.ticketId + '" aria-label="Decrease">−</button>' +
@@ -360,7 +395,68 @@ document.addEventListener('keydown', (e) => {
         }).join('');
 
         var totalEl = document.getElementById('makena-cart-total');
-        if (totalEl) totalEl.textContent = fmt(cartTotal());
+        if (totalEl) totalEl.textContent = fmt(cartTotal(), getCartCurrency(cart));
+    }
+
+    function renderTicketTierSummary(button, availability) {
+        var actions = button.closest('.ticket-actions');
+        if (!actions || actions.querySelector('.ticket-tier-summary')) return;
+
+        var summary = document.createElement('div');
+        summary.className = 'ticket-tier-summary';
+        actions.parentNode.insertBefore(summary, actions);
+
+        summary.innerHTML = availability.tiers.map(function (tier) {
+            var status = '';
+            if (tier.soldOut) status = '<span class="ticket-tier-summary__status">Sold out</span>';
+            else if (tier.lowInventory && tier.remaining !== null) status = '<span class="ticket-tier-summary__status ticket-tier-summary__status--low">Almost sold out: ' + tier.remaining + ' left</span>';
+            else if (tier.active) status = '<span class="ticket-tier-summary__status ticket-tier-summary__status--active">Available now</span>';
+
+            return '<div class="ticket-tier-summary__row' + (tier.soldOut ? ' is-sold-out' : '') + (tier.active ? ' is-active' : '') + '">' +
+                '<span>' + escapeHtml(tier.name) + '</span>' +
+                '<strong>' + fmt(tier.amount, tier.currency) + '</strong>' +
+                status +
+            '</div>';
+        }).join('');
+    }
+
+    function applyAvailabilityToButtons() {
+        document.querySelectorAll('.stripe-ticket-button').forEach(function (button) {
+            var ticketId = button.dataset.ticketId;
+            var availability = ticketAvailability[ticketId];
+            if (!availability) return;
+
+            if (availability.activeTier) {
+                updateTicketPrice(ticketId, availability.activeTier.amount, availability.activeTier.currency);
+                button.textContent = 'Buy Now - ' + fmt(availability.activeTier.amount, availability.activeTier.currency);
+            }
+
+            if (availability.soldOut) {
+                button.disabled = true;
+                button.textContent = 'Sold Out';
+                var addBtn = button.parentNode.querySelector('.btn-cart');
+                if (addBtn) addBtn.disabled = true;
+            }
+
+            renderTicketTierSummary(button, availability);
+        });
+        syncCartUI();
+    }
+
+    async function loadTicketAvailability() {
+        try {
+            var response = await fetch('/.netlify/functions/ticket-availability');
+            var data = await response.json();
+            if (!response.ok) throw new Error(data.error || 'Unable to load ticket availability.');
+
+            ticketAvailability = {};
+            (data.events || []).forEach(function (eventAvailability) {
+                ticketAvailability[eventAvailability.ticketId] = eventAvailability;
+            });
+            applyAvailabilityToButtons();
+        } catch (error) {
+            console.warn('Ticket availability unavailable:', error.message || error);
+        }
     }
 
     function buildCartPanel() {
@@ -536,6 +632,7 @@ document.addEventListener('keydown', (e) => {
 
     // ── Init badge ────────────────────────────────────────────────────────────
     syncCartUI();
+    loadTicketAvailability();
 
 }());
 

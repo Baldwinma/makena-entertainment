@@ -98,6 +98,15 @@
                 <div class="qr-scanner" id="qrScanner" hidden></div>
                 <div class="check-in-result" id="checkInResult"></div>
 
+                <div class="event-attendees" id="eventAttendeesPanel">
+                    <div class="event-attendees__header">
+                        <h3>Ticket Buyers</h3>
+                        <span id="eventAttendeesCount"></span>
+                    </div>
+                    <input id="attendeeSearchInput" class="check-in-input check-in-input--login event-attendees__search" autocomplete="off" placeholder="Search buyers by name, email, or ticket code">
+                    <div class="event-attendees__list" id="eventAttendeesList"></div>
+                </div>
+
                 <div class="recent-scans" id="recentScansPanel">
                     <div class="recent-scans__header">
                         <h3>Recent Scans</h3>
@@ -131,12 +140,16 @@
         const eventSearchInput = document.getElementById('eventSearchInput');
         const recentScansList = document.getElementById('recentScansList');
         const currentAdminLabel = document.getElementById('currentAdminLabel');
+        const attendeeSearchInput = document.getElementById('attendeeSearchInput');
+        const eventAttendeesList = document.getElementById('eventAttendeesList');
+        const eventAttendeesCount = document.getElementById('eventAttendeesCount');
         let html5QrCode = null;
         let isScanning = false;
         let isProcessingScan = false;
         let lastScannedCode = '';
         let lastScannedAt = 0;
         let events = [];
+        let attendees = [];
         let recentScans = [];
         let selectedEvent = null;
         let currentAdminUsername = '';
@@ -173,9 +186,11 @@
                 stopEventRefresh();
                 selectedEvent = null;
                 events = [];
+                attendees = [];
                 recentScans = [];
                 currentAdminUsername = '';
                 renderEvents();
+                renderAttendees();
                 renderRecentScans();
             }
         }
@@ -259,6 +274,22 @@
         }
 
         function formatScanTime(value) {
+            if (!value) {
+                return '';
+            }
+            try {
+                return new Intl.DateTimeFormat([], {
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                }).format(new Date(value));
+            } catch (error) {
+                return value;
+            }
+        }
+
+        function formatDateTime(value) {
             if (!value) {
                 return '';
             }
@@ -370,9 +401,65 @@
             `).join('');
         }
 
+        function getSelectedEventAttendees() {
+            if (!selectedEvent) {
+                return [];
+            }
+
+            const searchTerm = String(attendeeSearchInput.value || '').trim().toLowerCase();
+            return attendees
+                .filter(attendee => attendee.eventName === selectedEvent.name)
+                .filter(attendee => {
+                    if (!searchTerm) {
+                        return true;
+                    }
+
+                    return `${attendee.holderName} ${attendee.holderEmail} ${attendee.ticketCode}`.toLowerCase().includes(searchTerm);
+                });
+        }
+
+        function renderAttendees() {
+            const selectedAttendees = getSelectedEventAttendees();
+            const totalForEvent = selectedEvent
+                ? attendees.filter(attendee => attendee.eventName === selectedEvent.name).length
+                : 0;
+
+            eventAttendeesCount.textContent = selectedEvent
+                ? `${selectedAttendees.length} shown / ${totalForEvent} tickets bought`
+                : 'Select an event';
+
+            if (!selectedEvent) {
+                eventAttendeesList.innerHTML = '<p class="event-attendees__empty">Select a party to see ticket buyers.</p>';
+                return;
+            }
+
+            if (!selectedAttendees.length) {
+                eventAttendeesList.innerHTML = '<p class="event-attendees__empty">No ticket buyers found for this party yet.</p>';
+                return;
+            }
+
+            eventAttendeesList.innerHTML = selectedAttendees.map(attendee => `
+                <div class="event-attendee-row">
+                    <div class="event-attendee-row__person">
+                        <strong>${escapeHtml(attendee.holderName || 'Guest')}</strong>
+                        <span>${escapeHtml(attendee.holderEmail || 'No email')}</span>
+                        <span>${escapeHtml(attendee.tierName || 'General Admission')}${attendee.tierAmount ? ` - $${(attendee.tierAmount / 100).toFixed(2)}` : ''}</span>
+                        <small>${escapeHtml(attendee.ticketCode)}</small>
+                    </div>
+                    <div class="event-attendee-row__status">
+                        <span class="event-attendee-row__badge${attendee.checkedIn ? ' is-checked-in' : ''}">
+                            ${attendee.checkedIn ? 'Scanned' : 'Not scanned'}
+                        </span>
+                        <small>${attendee.checkedIn ? `At ${escapeHtml(formatDateTime(attendee.checkedInAt))}` : `Bought ${escapeHtml(formatDateTime(attendee.purchasedAt))}`}</small>
+                    </div>
+                </div>
+            `).join('');
+        }
+
         function selectEvent(eventName) {
             selectedEvent = events.find(event => event.name === eventName) || null;
             renderEvents();
+            renderAttendees();
             if (selectedEvent) {
                 showResult(result, 'success', 'Event Selected', `Now scanning only ${escapeHtml(selectedEvent.name)} tickets.`);
             }
@@ -421,12 +508,14 @@
             }
 
             events = data.events || [];
+            attendees = data.attendees || [];
             recentScans = data.recentScans || [];
             currentAdminUsername = data.admin && data.admin.username ? data.admin.username : currentAdminUsername;
             if (selectedEvent) {
                 selectedEvent = events.find(event => event.name === selectedEvent.name) || null;
             }
             renderEvents();
+            renderAttendees();
             renderRecentScans();
         }
 
@@ -659,6 +748,7 @@
         stopScanButton.addEventListener('click', stopScanner);
         refreshEventsButton.addEventListener('click', loadEvents);
         eventSearchInput.addEventListener('input', renderEvents);
+        attendeeSearchInput.addEventListener('input', renderAttendees);
         eventScanList.addEventListener('click', event => {
             const card = event.target.closest('.event-scan-card');
             if (!card) {

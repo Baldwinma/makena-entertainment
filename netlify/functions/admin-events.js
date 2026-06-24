@@ -33,7 +33,8 @@ exports.handler = async function(event) {
 
     const { data: tickets, error } = await supabase
         .from('event_tickets')
-        .select('event_name, status, checked_in');
+        .select('ticket_code, event_name, holder_name, holder_email, ticket_tier_name, ticket_tier_amount, status, checked_in, checked_in_at, created_at')
+        .order('created_at', { ascending: false });
 
     const { data: recentScans, error: recentError } = await supabase
         .from('event_tickets')
@@ -98,6 +99,18 @@ exports.handler = async function(event) {
             username: admin.username || 'Makena admin'
         },
         events,
+        attendees: (tickets || []).map(ticket => ({
+            ticketCode: ticket.ticket_code,
+            eventName: ticket.event_name,
+            holderName: ticket.holder_name || 'Guest',
+            holderEmail: ticket.holder_email || '',
+            tierName: ticket.ticket_tier_name || 'General Admission',
+            tierAmount: ticket.ticket_tier_amount,
+            status: ticket.status,
+            checkedIn: Boolean(ticket.checked_in),
+            checkedInAt: ticket.checked_in_at,
+            purchasedAt: ticket.created_at
+        })),
         recentScans: recentScans || []
     });
 };

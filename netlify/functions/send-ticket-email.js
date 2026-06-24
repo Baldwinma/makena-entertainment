@@ -37,6 +37,7 @@ function escapeHtml(value) {
 
 function buildEmailHtml({ ticket, ticketPageUrl, qrImageUrl }) {
     const details = [
+        ticket.ticket_tier_name ? `<p style="margin: 0 0 6px;"><strong>Tier:</strong> ${escapeHtml(ticket.ticket_tier_name)}</p>` : '',
         ticket.event_date ? `<p style="margin: 0 0 6px;"><strong>Date:</strong> ${escapeHtml(ticket.event_date)}</p>` : '',
         ticket.event_time ? `<p style="margin: 0 0 6px;"><strong>Time:</strong> ${escapeHtml(ticket.event_time)}</p>` : '',
         ticket.event_location ? `<p style="margin: 0 0 6px;"><strong>Location:</strong> ${escapeHtml(ticket.event_location)}</p>` : ''
@@ -54,6 +55,7 @@ function buildEmailHtml({ ticket, ticketPageUrl, qrImageUrl }) {
                 <img src="${qrImageUrl}" alt="Ticket QR Code" width="220" height="220" style="display: block; width: 220px; height: 220px; border: 1px solid #e5e7eb; border-radius: 10px;">
                 <p style="font-size: 13px; color: #6b7280;">Open your ticket page here: <a href="${ticketPageUrl}">${ticketPageUrl}</a></p>
                 <p style="font-size: 13px; color: #6b7280;">If the QR code does not display, open the ticket page above or use the attached <strong>${escapeHtml(ticket.ticket_code)}.png</strong>.</p>
+                <p style="font-size: 13px; color: #6b7280;">If you do not receive the QR code in your email, contact <a href="mailto:admin@makenaevents.com">admin@makenaevents.com</a>.</p>
                 <p style="font-size: 13px; color: #6b7280;">You can also use this ticket code at the door: ${escapeHtml(ticket.ticket_code)}</p>
             </div>
         </div>
@@ -139,7 +141,7 @@ exports.handler = async function(event) {
 
     const { data: ticket, error: ticketError } = await supabase
         .from('event_tickets')
-        .select('ticket_code, event_name, event_date, event_time, event_location, holder_name, holder_email, status, checked_in')
+        .select('ticket_code, event_name, event_date, event_time, event_location, ticket_tier_name, holder_name, holder_email, status, checked_in')
         .eq('ticket_code', ticketCode)
         .maybeSingle();
 

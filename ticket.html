@@ -74,6 +74,7 @@
 
                 const ticket = data.ticket;
                 const details = [
+                    ticket.tierName ? `<p><strong>Tier:</strong> ${escapeHtml(ticket.tierName)}</p>` : '',
                     ticket.eventDate ? `<p><strong>Date:</strong> ${escapeHtml(ticket.eventDate)}</p>` : '',
                     ticket.eventTime ? `<p><strong>Time:</strong> ${escapeHtml(ticket.eventTime)}</p>` : '',
                     ticket.eventLocation ? `<p><strong>Location:</strong> ${escapeHtml(ticket.eventLocation)}</p>` : ''

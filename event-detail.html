@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <title>Makena Event | Makena Events</title>
+    <meta name="description" content="View Makena Portimao event details, ticket tiers, and checkout options.">
+    <link rel="canonical" href="https://makenaevents.com/afronation">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar" id="navbar">
+        <div class="container">
+            <div class="nav-content">
+                <div class="logo">
+                    <a href="index.html">
+                        <img src="images/logo-transparent.png" alt="Makena Logo">
+                    </a>
+                </div>
+                <ul class="nav-links" id="navLinks">
+                    <li><a href="afronation.html">Afronation</a></li>
+                    <li><a href="makena-all-packages-portimao.html">Packages</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <section class="page-header">
+        <div class="hero-overlay"></div>
+        <div class="container">
+            <h1 class="page-title" id="eventTitle">Makena Event</h1>
+            <p class="page-subtitle" id="eventSubtitle">Portimão, Portugal</p>
+            <a href="afronation.html" class="btn btn-secondary">← Back to Events</a>
+        </div>
+    </section>
+
+    <section class="event-detail">
+        <div class="container" id="eventDetailRoot">
+            <div class="event-detail__layout">
+                <div class="event-detail__aside">
+                    <div class="event-detail__media">
+                        <img id="eventImage" src="images/logo-transparent.png" alt="Makena Event">
+                    </div>
+                    <div class="event-detail__tickets event-detail__tickets--aside">
+                        <h3>Tickets</h3>
+                        <p>Available tiers update automatically based on current sales.</p>
+                        <div class="ticket-actions" id="eventTicketActions"></div>
+                    </div>
+                </div>
+                <div class="event-detail__content">
+                    <span class="event-detail__eyebrow" id="eventBadge">Makena Event</span>
+                    <h2 id="eventHeading">Makena Event</h2>
+                    <p id="eventDescription">Event details are loading.</p>
+                    <div class="event-detail__facts" id="eventFacts"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-bottom">
+                <p>&copy; 2025 Makena Entertainment. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        (function () {
+            var events = {
+                'wet-dreams-pool-party-portimao': {
+                    title: 'Wet Dreams Pool Party',
+                    badge: 'Pool Party',
+                    image: 'images/wet-dreams.jpeg',
+                    alt: 'Makena Wet Dreams Pool Party',
+                    date: 'July 1, 2026',
+                    time: '12 PM - 6 PM',
+                    location: 'Portimão, Portugal',
+                    description: 'Dive in. The MAKENA Pool Party at the Villa is calling on July 1 from 12 PM to 6 PM with sun, beats, and refreshing vibes.',
+                    descriptionHtml:
+                        '<p><strong>Dive in! The MAKENA Pool Party at the Villa is calling.</strong> July 1st, 12 PM - 6 PM. Sun, beats, and refreshing vibes. Do not miss the splash!</p>' +
+                        '<p><strong>⚡ If you are here, you know Makena parties are not jokes — make a splash at our exclusive Makena Pool Party at the Villa.</strong></p>' +
+                        '<p>Escape the ordinary and dive into pure luxury. On July 1st, from 12 PM to 6 PM, our stunning private villa transforms into Portimão&apos;s most sought-after aquatic playground.</p>' +
+                        '<p>This is not just a pool party. It is a vibrant oasis where sun-drenched beats meet refreshing dips, all set against a backdrop of sophisticated indulgence. Expect an atmosphere that is both exhilarating and relaxed, perfect for soaking up the Algarve sun.</p>' +
+                        '<p><strong>🎫 Entry from $25.</strong> Dive into an immersive afternoon experience designed for ultimate enjoyment, filled with music, stylish company, and pure, refreshing energy.</p>' +
+                        '<p><strong>🥂 Bar on site.</strong> Serving ice-cold signature cocktails and refreshing drinks to keep you cool while the party heats up around the shimmering pool.</p>' +
+                        '<h3>The Vibe: Luxe & Wet</h3>' +
+                        '<p>Feel the rhythm as our DJs drop the perfect summer soundtrack, setting the tone for unforgettable moments. Connect, dance by the poolside, and toast to the good life.</p>' +
+                        '<p>From the midday kick-off to the golden hour cool-down, this is where your summer memories truly begin. Swim. Dance. Repeat.</p>' +
+                        '<p><strong>📅 July 1st — Portimão | From 12 PM.</strong> Where strangers meet, and memories are made.</p>' +
+                        '<p><strong>📳 IG:</strong> makena_entertainment<br><strong>📱 WhatsApp Support:</strong> +1 (202) 766-6056</p>' +
+                        '<p><strong>⚠️ Please note:</strong> By attending this event, you acknowledge that you are responsible for your actions and personal belongings. The organizers assume no liability in case of incidents. Respect for the villa, the neighborhood, and other guests is mandatory to ensure everyone’s safety and enjoyment. Any inappropriate behavior or damage will result in immediate and permanent removal.</p>',
+                    ticketId: 'wet_dreams_pool_party',
+                    eventbrite: 'https://www.eventbrite.com/e/makena-wet-dreams-pool-party-tickets-1985726757185'
+                },
+                'french-connection-portimao': {
+                    title: 'French Connection',
+                    badge: 'Night Party',
+                    image: 'images/French Connection.jpeg',
+                    alt: 'Makena French Connection',
+                    date: 'July 1, 2026',
+                    time: '10 PM',
+                    location: 'Portimão, Portugal',
+                    description: 'Keep the energy going at the MAKENA After Party at the Villa on July 1st at 10 PM with elite vibes and private luxury.',
+                    descriptionHtml:
+                        '<p><strong>The night is young.</strong> Keep the energy going at MAKENA After Party at the Villa, July 1st, 10 PM. Elite vibes, private luxury. Do not stop now.</p>' +
+                        '<p><strong>⚡ 🇫🇷👑 FRENCH CONNECTION – L’ÉVÉNEMENT QUI VA FAIRE PARLER TOUT L’ALGARVE 👑🇫🇷</strong></p>' +
+                        '<p><strong>⚠️ Si tu vois cette page, c’est que tu fais partie des premiers à avoir accès aux billets.</strong></p>' +
+                        '<p>Après plusieurs éditions sold out, Makena Entertainment présente une expérience unique réunissant les communautés francophones d’Europe et d’Afrique dans un cadre exceptionnel.</p>' +
+                        '<h3>Villa de Luxe</h3>' +
+                        '<ul>' +
+                            '<li>Villa de luxe</li>' +
+                            '<li>Pool Party by Night</li>' +
+                            '<li>Les meilleurs sons francophones</li>' +
+                            '<li>Une ambiance que tu ne trouveras nulle part ailleurs</li>' +
+                        '</ul>' +
+                        '<h3>Au Programme</h3>' +
+                        '<ul>' +
+                            '<li>Coupé-Décalé</li>' +
+                            '<li>Bikutsi</li>' +
+                            '<li>Mbolé</li>' +
+                            '<li>Biama</li>' +
+                            '<li>Paiya</li>' +
+                            '<li>Rumba Congolaise</li>' +
+                            '<li>Afro Urbain</li>' +
+                            '<li>Rap Français</li>' +
+                            '<li>Hits du moment et surprises toute la nuit</li>' +
+                        '</ul>' +
+                        '<p><strong>📍 Secret Mansion – Portimão</strong><br><strong>📅 1er Juillet | À partir de 22h</strong></p>' +
+                        '<p><strong>🎧 Avec:</strong> DJ TEEYA, DJ GENERAL DAREAL, and surprise guests.</p>' +
+                        '<p><strong>🚨 Billets limités.</strong> Entrée à partir de $25. Les tarifs augmentent à chaque palier de vente. Plus tu attends, plus tu paies.</p>' +
+                        '<p><strong>🔥 Le 1er juillet, il y aura deux catégories de personnes:</strong> ceux qui étaient à French Connection, et ceux qui verront les vidéos le lendemain en regrettant de ne pas avoir pris leur place.</p>' +
+                        '<p><strong>🎟️ Réserve maintenant avant la prochaine augmentation des prix.</strong></p>' +
+                        '<p><strong>📳 IG:</strong> makena_entertainment<br><strong>📱 WhatsApp Support:</strong> +1 (202) 766-6056</p>' +
+                        '<p><strong>⚠️ Please note:</strong> By attending this event, you acknowledge that you are responsible for your actions and personal belongings. The organizers assume no liability in case of incidents. Respect for the villa, the neighborhood, and other guests is mandatory to ensure everyone’s safety and enjoyment. Any inappropriate behavior or damage will result in immediate and permanent removal.</p>',
+                    ticketId: 'french_connection',
+                    eventbrite: 'https://www.eventbrite.com/e/makena-french-connection-tickets-1985726940734'
+                },
+                'festival-kick-off-portimao': {
+                    title: 'Festival Kick OFF',
+                    badge: 'Day Party',
+                    image: 'images/festival-kick-off.jpeg',
+                    alt: 'Makena Festival Kick Off',
+                    date: 'July 2, 2026',
+                    time: '12 PM - 6 PM',
+                    location: 'Nazar Lounge',
+                    locationUrl: 'https://www.google.com/maps/search/?api=1&query=Av.%20Tom%C3%A1s%20Cabreira,%208500-995%20Portim%C3%A3o,%20Portugal',
+                    description: 'Kick off the festival with us at the exclusive rooftop day party in Portimão.',
+                    descriptionHtml:
+                        '<p><strong>Shades on, style out.</strong></p>' +
+                        '<p><strong>⚡ IF YOU ARE HERE, YOU KNOW MAKENA PARTIES AIN’T JOKES — Kick off the festival with us at our EXCLUSIVE FESTIVAL KICK OFF DAY PARTY in Portimão! ⚡</strong></p>' +
+                        '<p>Perched on a spectacular rooftop with breathtaking views of the ocean and the festival grounds, this is where Portimão’s energy reaches its peak. On July 2nd, as the Algarve sun blazes, this rooftop transforms into the ultimate playground to launch the festivities.</p>' +
+                        '<p>Endless horizons, sea breeze, and luxury vibes — Portimão done right.</p>' +
+                        '<p><strong>🎫 Entry from $25.</strong> Dive into an immersive daytime-to-sunset experience filled with music, style, and pure energy.</p>' +
+                        '<p><strong>🥂 Bar on site.</strong> Serving refreshing cocktails to keep you cool while the party heats up.</p>' +
+                        '<h3>The Vibe</h3>' +
+                        '<p>Feel the rhythm as our DJs set the soundtrack for your stay. Connect, dance, and toast to the summer with the sea at your feet. From chill afternoon vibes to golden hour madness overlooking the festival, this is where the journey begins.</p>' +
+                        '<p><strong>📅 July 2 — Portimão | From 12 PM.</strong> Where strangers meet, and memories are made.</p>' +
+                        '<p><strong>📳 IG:</strong> makena_entertainment<br><strong>📱 WhatsApp Support:</strong> +1 (202) 766-6056</p>' +
+                        '<p><strong>⚠️ Please note:</strong> By attending this event, you acknowledge that you are responsible for your actions and personal belongings. The organizers assume no liability in case of incidents. Respect for the villa, the neighborhood, and other guests is mandatory to ensure everyone’s safety and enjoyment. Any inappropriate behavior or damage will result in immediate and permanent removal.</p>',
+                    ticketId: 'festival_kick_off',
+                    eventbrite: 'https://www.eventbrite.com/e/makena-festival-kick-off-day-party-tickets-1985727533507'
+                },
+                'makena-boat-party-portimao': {
+                    title: 'Makena Boat Party',
+                    badge: 'Boat Party',
+                    image: 'images/boat-party.jpeg',
+                    alt: 'Makena Boat Party',
+                    date: 'July 2, 2026',
+                    time: '12 PM - 4 PM',
+                    location: 'Portimão, Portugal',
+                    description: 'Come make history with us on our exclusive boat party in Portimão.',
+                    descriptionHtml:
+                        '<p><strong>⚓ IF YOU ARE HERE, YOU KNOW MAKENA BOAT PARTIES AIN’T JOKES — Come make history with us on our EXCLUSIVE BOAT PARTY! ⚓</strong></p>' +
+                        '<p>Drifting along the Algarve coast, this is where Portimão’s sun-soaked energy turns into pure euphoria. On July 2nd, as the sun sets over the Atlantic and the golden cliffs glow, the marina and open sea become the backdrop for the ultimate celebration.</p>' +
+                        '<p>Summer vibes, music on deck, and endless horizons — Portimão at its finest.</p>' +
+                        '<p><strong>🎫 Boarding pass from $75.</strong> Step aboard for a 4-hour aquatic journey. Boarding pass comes with a nice cup of champagne.</p>' +
+                        '<p><strong>🥂 Sip under the stars.</strong> Our fully stocked onboard bar is ready with champagne and cold cocktails while the view stays on the house.</p>' +
+                        '<p>Feel the rhythm of the ocean as our DJs set the soundtrack to your night. Lose yourself in the views. Toast to summer. Dance under the glowing Algarve sky.</p>' +
+                        '<p><strong>📅 July 2 — Portimão | From 12 PM.</strong> Where the music meets the waves.</p>' +
+                        '<p><strong>📳 IG:</strong> makena_entertainment<br><strong>📱 WhatsApp Support:</strong> +1 (202) 766-6056</p>' +
+                        '<p><strong>⚠️ Be aware:</strong> By participating in this event, you acknowledge that you are solely responsible for your actions and belongings, waiving all liability for the organizers in the event of an incident. We rely on your absolute respect for the venue and others to ensure everyone’s safety and enjoyment. Any inappropriate behavior or damage will result in immediate and permanent removal.</p>',
+                    ticketId: 'makena_boat_party',
+                    eventbrite: 'https://www.eventbrite.com/e/makena-boat-party-portimao-part-ii-tickets-1991402994965'
+                },
+                'all-white-party-portimao': {
+                    title: 'All White Party',
+                    badge: 'Night Party',
+                    image: 'images/all-white-party.jpg',
+                    alt: 'Makena All White Party',
+                    date: 'July 2, 2026',
+                    time: '10 PM',
+                    location: 'Nazar Lounge',
+                    locationUrl: 'https://www.google.com/maps/search/?api=1&query=Av.%20Tom%C3%A1s%20Cabreira,%208500-995%20Portim%C3%A3o,%20Portugal',
+                    description: 'All White Party at Nazar Lounge, ocean view, elite crowd, and tickets from $30 rising.',
+                    descriptionHtml:
+                        '<p><strong>⚪ IF YOU KNOW, YOU KNOW — MAKENA ALL WHITE PARTY ⚪</strong></p>' +
+                        '<p>July 2nd. Pure white. Pure elegance. No second chances.</p>' +
+                        '<p>2 minutes from the festival — no Uber, no taxi, no long walk. Just step out… and step into something elite at Nazar Lounge, overlooking the ocean.</p>' +
+                        '<p>The best international DJs setting the tone. Signature, next-level cocktails flowing all night.</p>' +
+                        '<p>This is not for everyone. It is for the ones who move different. White outfits. Golden hour. Ocean view. Timeless energy.</p>' +
+                        '<p><strong>🎫 Started at $30.</strong> The longer you wait, the more you pay… if it is not sold out first.</p>' +
+                        '<p>A night where everything feels premium — the people, the music, the moment. Be seen. Or hear about it after.</p>' +
+                        '<p><strong>📅 July 2 — Nazar Lounge, Portimão Strip</strong><br><strong>⚪ ALL WHITE ONLY</strong></p>' +
+                        '<p><strong>📳 IG:</strong> makena_entertainment</p>' +
+                        '<p><strong>⚠️ Respect the place. Respect the vibe. Zero tolerance.</strong> Any disrespect = immediate removal, even with a valid ticket.</p>',
+                    ticketId: 'all_white_party',
+                    eventbrite: 'https://www.eventbrite.com/e/makena-all-white-party-tickets-1985728041025'
+                },
+                'rep-your-flag-portimao': {
+                    title: 'SEXIEST PRE GAME',
+                    badge: 'Day Party',
+                    image: 'images/world-cup.jpeg',
+                    alt: 'Makena SEXIEST PRE GAME',
+                    date: 'July 5, 2026',
+                    time: '12 PM - 6 PM',
+                    location: 'Portimão, Portugal',
+                    description: 'The ultimate warm-up starts now with the MAKENA Pre-Party in Portimão.',
+                    descriptionHtml:
+                        '<p><strong>The ultimate warm-up starts now! ☀️</strong> Get ready for the MAKENA Pre-Party, July 5, 12 PM - 6 PM. Elevate your festival experience!</p>' +
+                        '<p><strong>⚡ IF YOU ARE HERE, YOU KNOW MAKENA PARTIES AIN’T JOKES — KICK OFF THE MAIN EVENT AT OUR EXCLUSIVE MAKENA PRE-PARTY! ⚡</strong></p>' +
+                        '<p>Before the night takes over, the vibe begins with us. On July 5th, from 12 PM to 6 PM, join us for the ultimate warm-up session.</p>' +
+                        '<p>This is not just a pre-party; it is the essential build-up, setting the perfect tone for whatever comes next. Expect a curated afternoon of seamless transitions, sun-drenched beats, and an atmosphere charged with anticipation.</p>' +
+                        '<p><strong>🎫 Entry from $25.</strong> Dive into an immersive afternoon experience designed to ease you into the main event, filled with music, style, and pure energy.</p>' +
+                        '<p><strong>🥂 Bar on site.</strong> Serving refreshing cocktails to keep you cool and in the mood as the afternoon heats up.</p>' +
+                        '<h3>The Vibe</h3>' +
+                        '<p><strong>THE VIBE: ESSENTIAL. 🚀</strong></p>' +
+                        '<p>Feel the rhythm as our DJs craft the perfect soundtrack to kickstart your day. Connect, dance, and toast to the good times with like-minded individuals.</p>' +
+                        '<p>From the noon kick-off to the 6 PM crescendo, this is where your festival journey truly begins. Warm up. Wind down. Get ready.</p>' +
+                        '<p><strong>📅 July 5 — Portimão | From 12 PM.</strong></p>' +
+                        '<p><strong>📳 IG:</strong> makena_entertainment<br><strong>📱 WhatsApp Support:</strong> +1 (202) 766-6056</p>' +
+                        '<p><strong>⚠️ Please note:</strong> By attending this event, you acknowledge that you are responsible for your actions and personal belongings. The organizers assume no liability in case of incidents. Respect for the venue, the neighborhood, and other guests is mandatory to ensure everyone’s safety and enjoyment. Any inappropriate behavior or damage will result in immediate and permanent removal.</p>',
+                    ticketId: 'rep_your_flag',
+                    eventbrite: 'https://www.eventbrite.com/e/makena-rep-your-flag-day-party-tickets-1985729714029'
+                },
+                'afro-beats-vs-amapiano-portimao': {
+                    title: 'Afro Beats vs Amapiano',
+                    badge: 'Night Party',
+                    image: 'images/afrobeat-vs-amapiano.jpeg',
+                    alt: 'Makena Afro Beats vs Amapiano',
+                    date: 'July 3, 2026',
+                    time: '10 PM',
+                    location: 'Portimão, Portugal',
+                    description: 'Afrobeats vs Amapiano. The ultimate sound clash takes over Makena on July 3rd, 10 PM till late.',
+                    descriptionHtml:
+                        '<p><strong>Afro Beats vs Amapiano!</strong> Get ready for the ultimate sound clash. Makena takes over July 3rd, 10 PM till late. Which side are you on?</p>' +
+                        '<p><strong>AFROBEATS × AMAPIANO — A CONTINENT IN SOUND 🔥</strong></p>' +
+                        '<p>This night is about Africa in motion. Its history. Its evolution. Its energy on the dancefloor.</p>' +
+                        '<h3>Afrobeats</h3>' +
+                        '<p>We go back to where it all started. The golden era. Timeless grooves. Sounds that shaped generations. A full revisit of Afrobeats history, from P-Square, 2Face, D’banj, through the early movement, to today’s global sound led by Burna Boy, Asake, and Davido.</p>' +
+                        '<h3>Amapiano</h3>' +
+                        '<p>This is not just mainstream. We dive into Deep Amapiano, Soulful Amapiano, 3-Step, and Gqom — underground frequencies, emotional chords, and heavy log drums. Piano pianoooo 😌</p>' +
+                        '<p>Music you do not just dance to — you feel it. From township roots to global dancefloors, the soul of Southern Africa speaks.</p>' +
+                        '<p><strong>🎫 Entry from $25.</strong> Dive into an immersive, high-energy night where every beat is a challenge and every drop is a victory.</p>' +
+                        '<p><strong>🥂 Bar on site.</strong> Keeping the premium drinks flowing as the dance floor ignites with raw, unadulterated passion.</p>' +
+                        '<p><strong>THE VIBE: UNDISPUTED. 🔊</strong></p>' +
+                        '<p>Feel the pulse as the freshest Afro Beats go head-to-head with the hypnotic grooves of Amapiano. Connect, dance, and witness history as the genres collide under one roof.</p>' +
+                        '<p>From the 10 PM kick-off to the final epic beat, this is where legends are made. Choose your anthem. Own the night.</p>' +
+                        '<p><strong>📅 July 3 — Portimão | From 10 PM.</strong> Where strangers meet, and memories are made.</p>' +
+                        '<p><strong>📳 IG:</strong> makena_entertainment<br><strong>📱 WhatsApp Support:</strong> +1 (202) 766-6056</p>' +
+                        '<p><strong>⚠️ Please note:</strong> By attending this event, you acknowledge that you are responsible for your actions and personal belongings. The organizers assume no liability in case of incidents. Respect for the villa, the neighborhood, and other guests is mandatory to ensure everyone’s safety and enjoyment. Any inappropriate behavior or damage will result in immediate and permanent removal.</p>',
+                    ticketId: 'afro_beats_vs_amapiano',
+                    eventbrite: 'https://www.eventbrite.com/e/makena-afro-beats-vs-amapiano-tickets-1985728689966'
+                },
+                'rnb-old-school-day-party-portimao': {
+                    title: 'RnB & Old School Day Party',
+                    badge: 'Day Party',
+                    image: 'images/RnB-Old-School-Party.jpeg',
+                    alt: 'Makena RnB and Old School Day Party',
+                    date: 'July 4, 2026',
+                    time: '12 PM - 6 PM',
+                    location: 'Portimão, Portugal',
+                    description: 'Makena R&B 2000s Day Party. Old school vibes, limited crowd, from $25.',
+                    descriptionHtml:
+                        '<p><strong>Makena R&B 2000s Day Party — old school vibes, limited crowd, from $25. Miss it and hear about it later.</strong> July 4, Portimão.</p>' +
+                        '<p><strong>⚡ IF YOU KNOW, YOU KNOW — MAKENA R&B / OLD SCHOOL DAY PARTY ⚡</strong></p>' +
+                        '<p>2000s energy only. Smooth R&B, slow jams, classics you forgot you loved, and that feeling you cannot recreate twice.</p>' +
+                        '<p>July 4th — limited crowd, real vibes. If you are not inside, you are missing the moment everyone talks about after.</p>' +
+                        '<p><strong>🎫 From $25.</strong> Do not wait till it is gone.</p>' +
+                        '<p><strong>🥂 Bar on site.</strong></p>' +
+                        '<p><strong>THE VIBE: 2000s. R&amp;B. FAMILY.</strong></p>' +
+                        '<p>No pressure. Just good people, real connections, and music that hits different in the sun. Pull up with your people… or meet them here.</p>' +
+                        '<p><strong>📅 July 4 — Portimão</strong><br><strong>📳 IG:</strong> makena_entertainment</p>' +
+                        '<p><strong>⚠️ Respect the place. Respect the vibe. Zero tolerance.</strong></p>',
+                    ticketId: 'rnb_old_school_day_party',
+                    eventbrite: 'https://www.eventbrite.com/e/makena-rnb-old-school-day-party-rooftop-vibes-tickets-1985730190454'
+                },
+                'caribbean-energy-portimao': {
+                    title: 'Soca X Reggaeton X Kompa Caribbean Energy',
+                    badge: 'Night Party',
+                    image: 'images/soca-reggaeton.jpeg',
+                    alt: 'Makena Caribbean Energy',
+                    date: 'July 4, 2026',
+                    time: '10 PM',
+                    location: 'Portimão, Portugal',
+                    description: 'Soca x Reggaeton x Kompa. Limited crowd, real vibes, from $25.',
+                    descriptionHtml:
+                        '<p><strong>⚡ IF YOU KNOW, YOU KNOW - SOCA x REGGAETON x KOMPA ⚡</strong></p>' +
+                        '<p>July 4th — limited crowd, real vibes. If you are not inside, you are missing the moment everyone talks about after.</p>' +
+                        '<p><strong>🎫 From $25.</strong> Do not wait till it is gone.</p>' +
+                        '<p><strong>🥂 Bar on site.</strong></p>' +
+                        '<p>No pressure. Just good people, real connections, and music that hits different in the sun. Pull up with your people… or meet them here.</p>' +
+                        '<p><strong>📅 July 4 — Portimão</strong><br><strong>📳 IG:</strong> makena_entertainment</p>' +
+                        '<p><strong>⚠️ Respect the place. Respect the vibe. Zero tolerance.</strong></p>',
+                    ticketId: 'caribbean_energy',
+                    eventbrite: 'https://www.eventbrite.com/e/makena-soca-x-reggaeton-x-kompa-caribbean-energy-tickets-1985730433180'
+                },
+                'where-tall-people-meet-portimao': {
+                    title: 'Where Tall People Meet',
+                    badge: 'Day Party',
+                    image: 'images/tall-people-meet.jpeg',
+                    alt: 'Makena Where Tall People Meet',
+                    date: 'July 3, 2026',
+                    time: '12 PM - 6 PM',
+                    location: 'Portimão, Portugal',
+                    description: 'A brunch and day party for the tall crowd, with premium food, cocktails, shisha, and sunset energy.',
+                    descriptionHtml:
+                        '<p><strong>⚡ IF YOU KNOW, YOU KNOW - WHERE TALL PEOPLE MEET ⚡</strong></p>' +
+                        '<p>Finally, a party where you see eye to eye. Level up at Makena: Where Tall People Meet. Elite vibes, high energy, and zero limits.</p>' +
+                        '<p>Experience the Makena Brunch & Day Party with great vibes, breathtaking views, local and international cuisine, refreshing cocktails, and premium shisha.</p>' +
+                        '<p>Our world-class international DJs will set the mood from noon through the peak of the afternoon. Beautiful views. Amazing people. Incredible music.</p>' +
+                        '<p><strong>🎫 Entry from $25.</strong> Bar and food on site.</p>' +
+                        '<p><strong>📅 July 3 — Portimão | From 12 PM to 6 PM</strong><br><strong>📳 IG:</strong> makena_entertainment</p>' +
+                        '<p><strong>⚠️ Respect the place. Respect the vibe. Zero tolerance.</strong></p>',
+                    ticketId: 'where_tall_people_meet',
+                    eventbrite: 'https://www.eventbrite.com/e/makena-where-tall-people-meet-day-party-tickets-1985728333901'
+                },
+                'red-flag-party-portimao': {
+                    title: 'Red Flag Party',
+                    badge: 'Night Party',
+                    image: 'images/Red Flag.jpeg',
+                    alt: 'Makena Red Flag Party',
+                    date: 'July 5, 2026',
+                    time: '10 PM',
+                    location: 'Portimão, Portugal',
+                    description: 'Flag Day finale. Limited crowd, real vibes, from $25.',
+                    descriptionHtml:
+                        '<p><strong>⚡ IF YOU ARE HERE, YOU KNOW MAKENA PARTIES AIN’T JOKES - JOIN US FOR THE GRAND FINALE AT OUR EXCLUSIVE MAKENA CLOSING PARTY (FLAG DAY)! ⚡</strong></p>' +
+                        '<p>Last dance! FLAGS UP! Celebrate the grand finale at Makena Closing Party (Flag Day), July 5th, 10 PM till late. Unforgettable ending.</p>' +
+                        '<p>The moment has arrived to celebrate the unforgettable journey we have shared. On July 5th, from 10 PM till late, we gather for the ultimate farewell under the stars. This is a vibrant Flag Day celebration, inviting everyone to represent their heritage and unity on the dance floor.</p>' +
+                        '<p><strong>🎫 Entry from $25.</strong> Bar on site.</p>' +
+                        '<p><strong>DRESS CODE:</strong> REPRESENT YOUR FLAG!</p>' +
+                        '<p>Feel the rhythm as our DJs deliver an epic final soundtrack. Connect, dance, and celebrate the beautiful diversity that makes our community so special. Raise your flag. Own the night. Make it legendary.</p>' +
+                        '<p><strong>📅 July 5 — Portimão | From 10 PM</strong><br><strong>📳 IG:</strong> makena_entertainment<br><strong>📱 WhatsApp Support:</strong> +1 (202) 766-6056</p>' +
+                        '<p><strong>⚠️ Respect the place. Respect the vibe. Zero tolerance.</strong></p>',
+                    ticketId: 'red_flag_party',
+                    eventbrite: 'https://www.eventbrite.com/e/makena-red-flag-party-tickets-1985730738092'
+                },
+                'all-orange-day-party-portimao': {
+                    title: 'All Orange Day Party',
+                    badge: 'Day Party',
+                    image: 'images/all-orange-party.jpeg',
+                    alt: 'Makena All Orange Day Party',
+                    date: 'July 6, 2026',
+                    time: '12 PM - 6 PM',
+                    location: 'Portimão, Portugal',
+                    description: 'All Orange Brunch Party. Tier 1 sold out, with more tiers still available.',
+                    descriptionHtml:
+                        '<p><strong>Ooh là là! Get ready for the MAKENA All Orange Brunch Party, July 6th, from 12 PM - 6 PM. ✨</strong></p>' +
+                        '<p><strong>⚡ IF YOU ARE HERE, YOU KNOW MAKENA PARTIES AIN’T JOKES - EXPERIENCE THE ELEGANCE AND ENERGY AT OUR EXCLUSIVE MAKENA ALL ORANGE DAY PARTY! ⚡</strong></p>' +
+                        '<p>Prepare for a high-energy brunch day party in Portimão’s vibrant sun. This is not just a party; it is a bright, stylish celebration where sophistication blends with day-party energy.</p>' +
+                        '<p><strong>🎫 Tier 1: Sold out.</strong> Tier 2 starts at $25 and the prices rise from there.</p>' +
+                        '<p><strong>🥂 Bar on site.</strong> Serving premium drinks to keep the celebration flowing.</p>' +
+                        '<p><strong>THE VIBE: MAGNIFICENT ALL ORANGE OUTFITS. 🗼</strong></p>' +
+                        '<p>Feel the rhythm as our DJs weave a soundtrack of French-inspired flair and global energy. Connect, dance, and toast to the afternoon where style and sound create pure magic.</p>' +
+                        '<p><strong>📅 July 6 — Portimão | From 12 PM - 6 PM</strong><br><strong>📳 IG:</strong> makena_entertainment<br><strong>📱 WhatsApp Support:</strong> +1 (202) 766-6056</p>' +
+                        '<p><strong>⚠️ Respect the place. Respect the vibe. Zero tolerance.</strong></p>',
+                    ticketId: 'all_orange_day_party',
+                    eventbrite: 'https://www.eventbrite.com/e/makena-all-orange-brunch-day-party-tickets-1985732292742'
+                },
+                'makena-closing-party-portimao': {
+                    title: 'Makena Closing Party in Style',
+                    badge: 'Night Party',
+                    image: 'images/Closing-party.jpeg',
+                    alt: 'Makena Closing Party in Style',
+                    date: 'July 6, 2026',
+                    time: '10 PM',
+                    location: 'Portimão, Portugal',
+                    description: 'Last party of Makena. Dress to kill, vibe to thrill, from July 6 at 10 PM.',
+                    descriptionHtml:
+                        '<p><strong>It is going down! The last party of Makena takes over July 6th, 10 PM till late. Dress to kill, vibe to thrill. Don’t miss out!</strong></p>' +
+                        '<p>This is the final night of the Makena run in Portimão. The energy is high, the crowd is ready, and the closing chapter starts here.</p>' +
+                        '<p><strong>Dress code:</strong> Dress to kill.</p>' +
+                        '<p><strong>📅 July 6 — Portimão | From 10 PM</strong></p>' +
+                        '<p><strong>⚠️ Respect the place. Respect the vibe. Zero tolerance.</strong></p>',
+                    ticketId: 'closing_party_in_style',
+                    eventbrite: 'https://www.eventbrite.com/e/makena-closing-party-with-style-tickets-1985732605678'
+                }
+            };
+
+            function escapeHtml(value) {
+                return String(value || '').replace(/[&<>"']/g, function (char) {
+                    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char];
+                });
+            }
+
+            var slug = window.location.pathname.replace(/^\/+|\/+$/g, '').replace(/\.html$/, '');
+            var event = events[slug];
+            var root = document.getElementById('eventDetailRoot');
+
+            if (!event) {
+                document.title = 'Event Not Found | Makena Events';
+                document.getElementById('eventTitle').textContent = 'Event Not Found';
+                document.getElementById('eventSubtitle').textContent = 'Please return to the Afronation events page.';
+                if (root) {
+                    root.innerHTML = '<p class="event-description">This event page could not be found.</p><a href="afronation.html" class="btn btn-primary">View Events</a>';
+                }
+                return;
+            }
+
+            document.title = event.title + ' Portimão | Makena Events';
+            var metaDescription = document.querySelector('meta[name="description"]');
+            if (metaDescription) metaDescription.setAttribute('content', event.description);
+            var canonical = document.querySelector('link[rel="canonical"]');
+            if (canonical) canonical.setAttribute('href', 'https://makenaevents.com/' + slug);
+
+            document.getElementById('eventTitle').textContent = event.title;
+            document.getElementById('eventSubtitle').textContent = event.date + ' | ' + event.time + ' | ' + event.location;
+            document.getElementById('eventImage').src = event.image;
+            document.getElementById('eventImage').alt = event.alt;
+            document.getElementById('eventBadge').textContent = event.badge;
+            document.getElementById('eventHeading').textContent = event.title;
+            var description = document.getElementById('eventDescription');
+            if (event.descriptionHtml) {
+                description.outerHTML = '<div id="eventDescription" class="event-detail__copy">' + event.descriptionHtml + '</div>';
+            } else {
+                description.textContent = event.description;
+            }
+            document.getElementById('eventFacts').innerHTML =
+                '<span>' + escapeHtml(event.date) + '</span>' +
+                '<span>' + escapeHtml(event.time) + '</span>' +
+                '<span>' + (event.locationUrl ? '<a href="' + escapeHtml(event.locationUrl) + '" target="_blank" rel="noopener">' + escapeHtml(event.location) + '</a>' : escapeHtml(event.location)) + '</span>';
+            document.getElementById('eventTicketActions').innerHTML =
+                '<a href="' + escapeHtml(event.eventbrite) + '" class="btn btn-primary btn-small" target="_blank" rel="noopener">Eventbrite</a>' +
+                '<button class="btn btn-secondary btn-small stripe-ticket-button" type="button" data-ticket-id="' + escapeHtml(event.ticketId) + '">Makena Checkout</button>';
+
+            if (new URLSearchParams(window.location.search).get('buy') === '1') {
+                window.addEventListener('load', function () {
+                    var checkoutButton = document.querySelector('.stripe-ticket-button');
+                    if (checkoutButton) checkoutButton.click();
+                });
+            }
+        }());
+    </script>
+    <script src="script.js"></script>
+</body>
+</html>

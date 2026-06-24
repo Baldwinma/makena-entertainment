@@ -2,7 +2,7 @@ const Stripe = require('stripe');
 const QRCode = require('qrcode');
 const { getSupabase } = require('./lib/supabase');
 const { sendTicketEmail } = require('./send-ticket-email');
-const { getTicketDefinitionByName, summarizePurchasedItems } = require('./lib/ticket-catalog');
+const { getTicketDefinition, getTicketDefinitionByName, getTierDefinition, summarizePurchasedItems } = require('./lib/ticket-catalog');
 
 function json(statusCode, body) {
     return {
@@ -57,10 +57,19 @@ async function saveTicketsToSupabase(session, lineItems) {
     };
 
     const purchasedItems = lineItems.map(lineItem => {
-        const ticketDefinition = getTicketDefinitionByName(lineItem.description);
+        const product = lineItem.price && lineItem.price.product && typeof lineItem.price.product === 'object'
+            ? lineItem.price.product
+            : null;
+        const metadata = product && product.metadata ? product.metadata : {};
+        const ticketDefinition = getTicketDefinition(metadata.ticket_id) || getTicketDefinitionByName(lineItem.description);
+        const tierDefinition = metadata.tier_id ? getTierDefinition(metadata.ticket_id, metadata.tier_id) : null;
         const eventName = (ticketDefinition && ticketDefinition.name) || lineItem.description || 'Event';
+        const tierName = metadata.tier_name || (tierDefinition && tierDefinition.name) || 'General Admission';
         return [{
             name: eventName,
+            tierName,
+            tierId: metadata.tier_id || (tierDefinition && tierDefinition.id) || null,
+            tierAmount: Number(metadata.tier_amount || (tierDefinition && tierDefinition.amount) || lineItem.amount_subtotal / lineItem.quantity),
             quantity: lineItem.quantity,
             date: (ticketDefinition && ticketDefinition.date) || null,
             time: (ticketDefinition && ticketDefinition.time) || null,
@@ -69,6 +78,7 @@ async function saveTicketsToSupabase(session, lineItems) {
     }).flat();
 
     orderPayload.event_name = purchasedItems.map(item => item.name).join(', ');
+    orderPayload.ticket_tier_summary = purchasedItems.map(item => `${item.name} ${item.tierName} x${item.quantity}`).join(', ');
 
     const { data: order, error: orderError } = await supabase
         .from('event_orders')
@@ -83,7 +93,14 @@ async function saveTicketsToSupabase(session, lineItems) {
     let ticketIndex = 0;
     const ticketPayloads = lineItems.flatMap(lineItem =>
         (() => {
-            const ticketDefinition = getTicketDefinitionByName(lineItem.description);
+            const product = lineItem.price && lineItem.price.product && typeof lineItem.price.product === 'object'
+                ? lineItem.price.product
+                : null;
+            const metadata = product && product.metadata ? product.metadata : {};
+            const ticketDefinition = getTicketDefinition(metadata.ticket_id) || getTicketDefinitionByName(lineItem.description);
+            const tierDefinition = metadata.tier_id ? getTierDefinition(metadata.ticket_id, metadata.tier_id) : null;
+            const tierName = metadata.tier_name || (tierDefinition && tierDefinition.name) || 'General Admission';
+            const tierAmount = Number(metadata.tier_amount || (tierDefinition && tierDefinition.amount) || lineItem.amount_subtotal / lineItem.quantity);
             return Array.from({ length: lineItem.quantity }, () => ({
                 order_id: order.id,
                 ticket_code: buildTicketCode(session.id, ticketIndex++),
@@ -91,6 +108,10 @@ async function saveTicketsToSupabase(session, lineItems) {
                 event_date: ticketDefinition && ticketDefinition.date || null,
                 event_time: ticketDefinition && ticketDefinition.time || null,
                 event_location: ticketDefinition && ticketDefinition.location || null,
+                ticket_id: metadata.ticket_id || null,
+                ticket_tier_id: metadata.tier_id || null,
+                ticket_tier_name: tierName,
+                ticket_tier_amount: tierAmount,
                 holder_name: (session.customer_details && session.customer_details.name) || 'Guest',
                 holder_email: session.customer_details && session.customer_details.email,
                 status: 'valid',
@@ -107,9 +128,17 @@ async function saveTicketsToSupabase(session, lineItems) {
         throw ticketsError;
     }
 
+    await supabase
+        .from('event_ticket_reservations')
+        .update({
+            status: 'paid',
+            updated_at: new Date().toISOString()
+        })
+        .eq('stripe_session_id', session.id);
+
     const { data: tickets, error: readError } = await supabase
         .from('event_tickets')
-        .select('ticket_code, event_name, event_date, event_time, event_location, holder_name, holder_email, status, checked_in, checked_in_at')
+        .select('ticket_code, event_name, event_date, event_time, event_location, ticket_tier_name, ticket_tier_amount, holder_name, holder_email, status, checked_in, checked_in_at')
         .eq('order_id', order.id)
         .order('ticket_code', { ascending: true });
 
@@ -182,7 +211,7 @@ exports.handler = async function(event) {
 
     try {
         const session = await stripe.checkout.sessions.retrieve(sessionId, {
-            expand: ['line_items', 'payment_intent']
+            expand: ['line_items.data.price.product', 'payment_intent']
         });
 
         if (session.payment_status !== 'paid') {
@@ -207,6 +236,8 @@ exports.handler = async function(event) {
                 event_date: null,
                 event_time: null,
                 event_location: null,
+                ticket_tier_name: session.metadata.tierName || 'General Admission',
+                ticket_tier_amount: null,
                 status: 'valid',
                 checked_in: false
             }))
@@ -239,6 +270,8 @@ exports.handler = async function(event) {
                 eventDate: ticket.event_date,
                 eventTime: ticket.event_time,
                 eventLocation: ticket.event_location,
+                tierName: ticket.ticket_tier_name,
+                tierAmount: ticket.ticket_tier_amount,
                 status: ticket.checked_in ? 'Already Checked In' : 'Valid',
                 checkInUrl,
                 ticketPageUrl,

@@ -27,8 +27,8 @@ const welcomePartyTiers = [
         id: 'tier_2',
         name: 'Tier 2',
         amount: 4000,
-        capacity: 20,
-        lowInventoryThreshold: 5
+        capacity: 0,
+        lowInventoryThreshold: 0
     },
     {
         id: 'tier_3',

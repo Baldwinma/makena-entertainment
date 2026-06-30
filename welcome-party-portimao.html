@@ -34,7 +34,17 @@
         <div class="hero-overlay"></div>
         <div class="container">
             <h1 class="page-title">Welcome Party</h1>
-            <p class="page-subtitle">Tuesday, June 30 | 10 PM | Secret Villa, Portimão</p>
+            <p class="page-subtitle">
+                Tuesday, June 30 | 10 PM |
+                <a
+                    href="https://www.google.com/maps/search/?api=1&query=R.%20de%20Areias%20dos%20Moinhos%204%2C%208400%20Carvoeiro%2C%20Portugal"
+                    target="_blank"
+                    rel="noopener"
+                    class="location-link"
+                    data-copy-address="R. de Areias dos Moinhos 4, 8400 Carvoeiro, Portugal"
+                >R. de Areias dos Moinhos 4, 8400 Carvoeiro, Portugal</a>
+                <button type="button" class="location-copy" data-copy-address="R. de Areias dos Moinhos 4, 8400 Carvoeiro, Portugal">Copy</button>
+            </p>
             <a href="afronation.html" class="btn btn-secondary">← Back to Events</a>
         </div>
     </section>
@@ -62,10 +72,19 @@
                         <p><strong>Private mansion → limited access → AfroNation starts here.</strong> Tickets are going fast. Once it is sold out, it is over.</p>
                         <p><strong>⚡ MAKENA — OFFICIAL AFRONATION WEEK WELCOME PARTY | Private Mansion Experience</strong></p>
                         <p>This is not just another party. This is the right way to start the week. This official welcome experience before AfroNation.</p>
-                        <p>After sold-out editions in DR and Paris with 1,000+ guests, we are back bigger this summer in Portimão 🇵🇹. This is the official AfroNation welcome experience.</p>
+                        <p>After sold-out editions in DR and Paris with 1,000+ guests, we are back bigger this summer in Carvoeiro 🇵🇹. This is the official AfroNation welcome experience.</p>
                         <h3>🏝️ Private Mansion Experience</h3>
                         <ul>
-                            <li>Secret location</li>
+                            <li>
+                                <a
+                                    href="https://www.google.com/maps/search/?api=1&query=R.%20de%20Areias%20dos%20Moinhos%204%2C%208400%20Carvoeiro%2C%20Portugal"
+                                    target="_blank"
+                                    rel="noopener"
+                                    class="location-link"
+                                    data-copy-address="R. de Areias dos Moinhos 4, 8400 Carvoeiro, Portugal"
+                                >R. de Areias dos Moinhos 4, 8400 Carvoeiro, Portugal</a>
+                                <button type="button" class="location-copy" data-copy-address="R. de Areias dos Moinhos 4, 8400 Carvoeiro, Portugal">Copy</button>
+                            </li>
                             <li>Top DJs all night</li>
                             <li>Premium curated crowd</li>
                             <li>Sunset → night transition experience</li>
@@ -93,7 +112,16 @@
                     <div class="event-detail__facts">
                         <span>June 30, 2026</span>
                         <span>10 PM</span>
-                        <span>Secret Villa</span>
+                        <span class="event-location-address">
+                            <a
+                                href="https://www.google.com/maps/search/?api=1&query=R.%20de%20Areias%20dos%20Moinhos%204%2C%208400%20Carvoeiro%2C%20Portugal"
+                                target="_blank"
+                                rel="noopener"
+                                class="location-link"
+                                data-copy-address="R. de Areias dos Moinhos 4, 8400 Carvoeiro, Portugal"
+                            >R. de Areias dos Moinhos 4, 8400 Carvoeiro, Portugal</a>
+                            <button type="button" class="location-copy" data-copy-address="R. de Areias dos Moinhos 4, 8400 Carvoeiro, Portugal">Copy</button>
+                        </span>
                     </div>
                 </div>
             </div>
@@ -109,5 +137,24 @@
     </footer>
 
     <script src="script.js"></script>
+    <script>
+        document.querySelectorAll('[data-copy-address]').forEach(function (element) {
+            element.addEventListener('click', async function () {
+                var address = element.getAttribute('data-copy-address');
+                if (!address) return;
+                if (element.tagName.toLowerCase() === 'a') return;
+
+                try {
+                    await navigator.clipboard.writeText(address);
+                    element.textContent = 'Copied';
+                    window.setTimeout(function () {
+                        element.textContent = 'Copy';
+                    }, 1400);
+                } catch (error) {
+                    window.prompt('Copy address', address);
+                }
+            });
+        });
+    </script>
 </body>
 </html>

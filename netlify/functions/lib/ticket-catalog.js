@@ -412,7 +412,7 @@ const ticketCatalog = {
         currency: 'usd',
         date: 'June 30, 2026',
         time: '10 PM',
-        location: 'Secret Villa, Portimao, Portugal',
+        location: 'R. de Areias dos Moinhos 4, 8400 Carvoeiro, Portugal',
         tiers: welcomePartyTiers
     },
     wet_dreams_pool_party: {

@@ -116,15 +116,15 @@ const allWhitePartyTiers = [
         id: 'tier_1',
         name: 'Tier 1',
         amount: 3000,
-        capacity: 20,
-        lowInventoryThreshold: 5
+        capacity: 0,
+        lowInventoryThreshold: 0
     },
     {
         id: 'tier_2',
         name: 'Tier 2',
         amount: 4000,
-        capacity: 20,
-        lowInventoryThreshold: 5
+        capacity: 0,
+        lowInventoryThreshold: 0
     },
     {
         id: 'tier_3',
@@ -458,7 +458,7 @@ const ticketCatalog = {
     all_white_party: {
         name: 'All White Party',
         description: 'Makena Afronation Portimao ticket',
-        amount: 3000,
+        amount: 5000,
         currency: 'usd',
         date: 'July 2, 2026',
         time: '10 PM',

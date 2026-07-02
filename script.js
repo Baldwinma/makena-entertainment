@@ -257,7 +257,7 @@ document.addEventListener('keydown', (e) => {
         french_connection:        { name: 'French Connection',              price: 2500, currency: 'usd' },
         festival_kick_off:        { name: 'Festival Kick Off',              price: 2500, currency: 'usd' },
         makena_boat_party:        { name: 'Makena Boat Party',              price: 7000, currency: 'usd' },
-        all_white_party:          { name: 'All White Party',                price: 2500, currency: 'usd' },
+        all_white_party:          { name: 'All White Party',                price: 5000, currency: 'usd' },
         rep_your_flag:            { name: 'SEXIEST PRE GAME',                  price: 2500, currency: 'usd' },
         afro_beats_vs_amapiano:   { name: 'Afro Beats vs Amapiano',        price: 2500, currency: 'usd' },
         rnb_old_school_day_party: { name: 'RnB & Old School Day Party',    price: 2500, currency: 'usd' },

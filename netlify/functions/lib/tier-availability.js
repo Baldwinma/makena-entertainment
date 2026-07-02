@@ -4,8 +4,82 @@ function getNowIso() {
     return new Date().toISOString();
 }
 
+function getLisbonDateKey(date = new Date()) {
+    const parts = new Intl.DateTimeFormat('en-CA', {
+        timeZone: 'Europe/Lisbon',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+    }).formatToParts(date);
+
+    const lookup = Object.fromEntries(parts.map(part => [part.type, part.value]));
+    return `${lookup.year}-${lookup.month}-${lookup.day}`;
+}
+
+function getTicketDateKey(dateText) {
+    if (!dateText) {
+        return null;
+    }
+
+    const match = String(dateText).trim().match(/^([A-Za-z]+)\s+(\d{1,2}),\s+(\d{4})$/);
+    if (!match) {
+        return null;
+    }
+
+    const monthLookup = {
+        january: '01',
+        february: '02',
+        march: '03',
+        april: '04',
+        may: '05',
+        june: '06',
+        july: '07',
+        august: '08',
+        september: '09',
+        october: '10',
+        november: '11',
+        december: '12'
+    };
+
+    const month = monthLookup[match[1].toLowerCase()];
+    if (!month) {
+        return null;
+    }
+
+    return `${match[3]}-${month}-${match[2].padStart(2, '0')}`;
+}
+
 function buildAvailability(ticketId, ticket, soldTickets = [], reservations = []) {
     const tiers = getTicketTiers(ticket);
+    const ticketDateKey = getTicketDateKey(ticket.date);
+    const todayKey = getLisbonDateKey();
+    const isPastEvent = ticketDateKey ? ticketDateKey < todayKey : false;
+
+    if (isPastEvent) {
+        return {
+            ticketId,
+            name: ticket.name,
+            date: ticket.date,
+            time: ticket.time,
+            location: ticket.location,
+            tiers: tiers.map(tier => ({
+                id: tier.id,
+                name: tier.name,
+                amount: tier.amount,
+                currency: tier.currency || ticket.currency,
+                capacity: tier.capacity,
+                sold: tier.capacity || 0,
+                reserved: 0,
+                remaining: 0,
+                soldOut: true,
+                lowInventory: false,
+                active: false
+            })),
+            activeTier: null,
+            soldOut: true
+        };
+    }
+
     const soldByTier = new Map();
     const reservedByTier = new Map();
     const firstTierId = tiers[0] && tiers[0].id;

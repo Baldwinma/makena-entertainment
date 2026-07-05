@@ -1,5 +1,11 @@
 const { getTicketDefinition, getTicketTiers, listTicketDefinitions } = require('./ticket-catalog');
 
+const ACTIVE_TICKET_IDS = new Set([
+    'red_flag_party',
+    'all_orange_day_party',
+    'closing_party_in_style'
+]);
+
 function getNowIso() {
     return new Date().toISOString();
 }
@@ -51,11 +57,12 @@ function getTicketDateKey(dateText) {
 
 function buildAvailability(ticketId, ticket, soldTickets = [], reservations = []) {
     const tiers = getTicketTiers(ticket);
+    const isWhitelistedEvent = ACTIVE_TICKET_IDS.has(ticketId);
     const ticketDateKey = getTicketDateKey(ticket.date);
     const todayKey = getLisbonDateKey();
     const isPastEvent = ticketDateKey ? ticketDateKey < todayKey : false;
 
-    if (isPastEvent) {
+    if (!isWhitelistedEvent || isPastEvent) {
         return {
             ticketId,
             name: ticket.name,

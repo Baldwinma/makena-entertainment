@@ -267,6 +267,11 @@ document.addEventListener('keydown', (e) => {
         all_orange_day_party:     { name: 'All Orange Day Party',           price: 2500, currency: 'usd' },
         closing_party_in_style:   { name: 'Closing Party in Style',        price: 2500, currency: 'usd' }
     };
+    Object.keys(TICKETS).forEach(function (ticketId) {
+        if (TICKETS[ticketId].currency === 'usd') {
+            TICKETS[ticketId].price = 4000;
+        }
+    });
     var ticketAvailability = {};
 
     function fmt(cents, currency) {

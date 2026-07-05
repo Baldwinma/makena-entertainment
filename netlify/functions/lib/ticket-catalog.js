@@ -564,6 +564,7 @@ function getTicketTiers(ticket) {
         lowInventoryThreshold: 10
     }]).map(tier => ({
         ...tier,
+        amount: ticket.currency === 'usd' ? 4000 : tier.amount,
         currency: ticket.currency
     }));
 }

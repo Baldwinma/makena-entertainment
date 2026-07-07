@@ -1,10 +1,6 @@
 const { getTicketDefinition, getTicketTiers, listTicketDefinitions } = require('./ticket-catalog');
 
-const ACTIVE_TICKET_IDS = new Set([
-    'red_flag_party',
-    'all_orange_day_party',
-    'closing_party_in_style'
-]);
+const ACTIVE_TICKET_IDS = new Set();
 
 function getNowIso() {
     return new Date().toISOString();

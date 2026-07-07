@@ -1,6 +1,7 @@
 # Canonical redirects from .html URLs
 /index.html / 301
 /afronation.html /afronation 301
+/afro-plus-dc.html /afro-plus-dc 301
 /fete-de-la-musique.html /fete-de-la-musique 301
 /get-discount.html /get-discount 301
 /checkout-test.html /checkout-test 301
@@ -30,6 +31,7 @@
 
 # Clean URL rewrites to static HTML files
 /afronation /afronation.html 200
+/afro-plus-dc /afro-plus-dc.html 200
 /fete-de-la-musique /fete-de-la-musique.html 200
 /get-discount /get-discount.html 200
 /checkout-test /checkout-test.html 200

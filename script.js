@@ -265,13 +265,17 @@ document.addEventListener('keydown', (e) => {
         where_tall_people_meet:   { name: 'Where Tall People Meet',        price: 2500, currency: 'usd' },
         red_flag_party:           { name: 'Red Flag Party',                 price: 2500, currency: 'usd' },
         all_orange_day_party:     { name: 'All Orange Day Party',           price: 2500, currency: 'usd' },
-        closing_party_in_style:   { name: 'Closing Party in Style',        price: 2500, currency: 'usd' }
+        closing_party_in_style:         { name: 'Closing Party in Style',                    price: 2500, currency: 'usd' },
+        dc_welcome_party:               { name: 'AfroPlusFest DC - Welcome Party',            price: 2000, currency: 'usd' },
+        dc_rnb_day_party:               { name: 'AfroPlusFest DC - R&B Day Party',            price: 1500, currency: 'usd' },
+        dc_amapiano_vs_afrobeat:        { name: 'AfroPlusFest DC - Amapiano vs Afrobeat',     price: 2000, currency: 'usd' },
+        dc_brunch_day_party:            { name: 'AfroPlusFest DC - Brunch Day Party',         price: 1500, currency: 'usd' },
+        dc_dancehall_soca_party:        { name: 'AfroPlusFest DC - Dancehall Soca Kompa',     price: 2000, currency: 'usd' },
+        dc_group_chat_linkup:           { name: 'AfroPlusFest DC - Group Chat Link Up',       price: 1500, currency: 'usd' },
+        dc_last_last_after_party:       { name: 'AfroPlusFest DC - Last Last After Party',    price: 2000, currency: 'usd' },
+        dc_all_white_boat_party:        { name: 'AfroPlusFest DC - All White Boat Party',     price: 6500, currency: 'usd' },
+        dc_all_white_closing_party:     { name: 'AfroPlusFest DC - All White Closing Party',  price: 2000, currency: 'usd' }
     };
-    Object.keys(TICKETS).forEach(function (ticketId) {
-        if (TICKETS[ticketId].currency === 'usd') {
-            TICKETS[ticketId].price = 4000;
-        }
-    });
     var ticketAvailability = {};
 
     function fmt(cents, currency) {

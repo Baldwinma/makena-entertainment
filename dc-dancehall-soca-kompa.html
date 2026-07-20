@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <title>Dancehall Soca Reggaeton Kompa | AfroPlusFest DC | Makena Events</title>
+    <meta name="description" content="AfroPlusFest DC Dancehall Soca Reggaeton Kompa night party at Spectrum Lounge. September 5, 2026 from 11 PM to 3:30 AM.">
+    <link rel="canonical" href="https://makenaevents.com/dc-dancehall-soca-kompa">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar" id="navbar">
+        <div class="container">
+            <div class="nav-content">
+                <div class="logo">
+                    <a href="index.html">
+                        <img loading="lazy" src="images/logo-transparent.png" alt="Makena Logo">
+                    </a>
+                </div>
+                <button class="mobile-menu-toggle" id="mobileMenuToggle">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+                <ul class="nav-links" id="navLinks">
+                    <li><a href="afro-plus-dc.html">AfroPlusFest DC</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <section class="page-header">
+        <div class="hero-overlay"></div>
+        <div class="container">
+            <h1 class="page-title">Dancehall Soca Reggaeton Kompa</h1>
+            <p class="page-subtitle">
+                Saturday, September 5 | 11 PM - 3:30 AM |
+                <a
+                    href="https://www.google.com/maps/search/?api=1&query=10601+Baltimore+Ave+Beltsville+MD+20705"
+                    target="_blank"
+                    rel="noopener"
+                    class="location-link"
+                    data-copy-address="10601 Baltimore Ave, Beltsville, MD 20705"
+                >10601 Baltimore Ave, Beltsville, MD 20705</a>
+                <button type="button" class="location-copy" data-copy-address="10601 Baltimore Ave, Beltsville, MD 20705">Copy</button>
+            </p>
+            <a href="afro-plus-dc.html" class="btn btn-secondary">← Back to Events</a>
+        </div>
+    </section>
+
+    <section class="event-detail">
+        <div class="container">
+            <div class="event-detail__layout">
+                <div class="event-detail__aside">
+                    <div class="event-detail__media">
+                        <img loading="lazy" src="images/soca-reggaeton.jpeg" alt="AfroPlusFest DC Dancehall Soca Reggaeton Kompa">
+                    </div>
+                    <div class="event-detail__tickets event-detail__tickets--aside">
+                        <h3>Tickets</h3>
+                        <p>Available tiers update automatically based on current sales.</p>
+                        <div class="ticket-actions">
+                            <button class="btn btn-secondary btn-small stripe-ticket-button" type="button" data-ticket-id="dc_dancehall_soca_party">Buy Tickets from $20</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="event-detail__content">
+                    <span class="event-detail__eyebrow">Night Party</span>
+                    <h2>Dancehall Soca Reggaeton Kompa</h2>
+                    <div class="event-detail__copy">
+                        <p><strong>Dancehall. Soca. Reggaeton. Kompa. Four sounds, one roof, zero excuses.</strong> This is the most unique night of the week. Don't miss it.</p>
+                        <p><strong>⚡ MAKENA — DANCEHALL SOCA REGGAETON KOMPA | Full Caribbean Takeover</strong></p>
+                        <p>From Kingston to Port-au-Prince to San Juan to Trinidad — every corner of the Caribbean and Latin diaspora represented on one dancefloor. This is the night for the culture lovers who refuse to be put in a box.</p>
+                        <h3>🌴 Caribbean Takeover Experience</h3>
+                        <ul>
+                            <li>Full Caribbean takeover — four genres, one floor</li>
+                            <li>Non-stop energy from open to close</li>
+                            <li>Limited crowd — this one fills fast</li>
+                            <li>Specialist DJs for each genre, no watered-down sets</li>
+                        </ul>
+                        <p><strong>🎟️ Tickets from $20. This is the most unique night of the week.</strong></p>
+                        <p><strong>⚠️ By attending, you agree to respect the venue, staff, and guests.</strong> Any inappropriate behavior will result in immediate removal.</p>
+                    </div>
+                    <div class="event-detail__facts">
+                        <span>September 5, 2026</span>
+                        <span>11 PM - 3:30 AM</span>
+                        <span class="event-location-address">
+                            <a
+                                href="https://www.google.com/maps/search/?api=1&query=10601+Baltimore+Ave+Beltsville+MD+20705"
+                                target="_blank"
+                                rel="noopener"
+                                class="location-link"
+                                data-copy-address="10601 Baltimore Ave, Beltsville, MD 20705"
+                            >10601 Baltimore Ave, Beltsville, MD 20705</a>
+                            <button type="button" class="location-copy" data-copy-address="10601 Baltimore Ave, Beltsville, MD 20705">Copy</button>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-bottom">
+                <p>&copy; 2026 Makena Entertainment. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+    <script>
+        document.querySelectorAll('[data-copy-address]').forEach(function (element) {
+            element.addEventListener('click', async function () {
+                var address = element.getAttribute('data-copy-address');
+                if (!address) return;
+                if (element.tagName.toLowerCase() === 'a') return;
+
+                try {
+                    await navigator.clipboard.writeText(address);
+                    element.textContent = 'Copied';
+                    window.setTimeout(function () {
+                        element.textContent = 'Copy';
+                    }, 1400);
+                } catch (error) {
+                    window.prompt('Copy address', address);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

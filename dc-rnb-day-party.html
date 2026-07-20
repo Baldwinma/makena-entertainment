@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <title>R&B Day Party | AfroPlusFest DC | Makena Events</title>
+    <meta name="description" content="AfroPlusFest DC R&B Day Party at Spectrum Lounge. Day party on September 4, 2026 from 12 PM to 6 PM.">
+    <link rel="canonical" href="https://makenaevents.com/dc-rnb-day-party">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar" id="navbar">
+        <div class="container">
+            <div class="nav-content">
+                <div class="logo">
+                    <a href="index.html">
+                        <img loading="lazy" src="images/logo-transparent.png" alt="Makena Logo">
+                    </a>
+                </div>
+                <button class="mobile-menu-toggle" id="mobileMenuToggle">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+                <ul class="nav-links" id="navLinks">
+                    <li><a href="afro-plus-dc.html">AfroPlusFest DC</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <section class="page-header">
+        <div class="hero-overlay"></div>
+        <div class="container">
+            <h1 class="page-title">R&B Day Party</h1>
+            <p class="page-subtitle">
+                Friday, September 4 | 12 PM - 6 PM |
+                <a
+                    href="https://www.google.com/maps/search/?api=1&query=10601+Baltimore+Ave+Beltsville+MD+20705"
+                    target="_blank"
+                    rel="noopener"
+                    class="location-link"
+                    data-copy-address="10601 Baltimore Ave, Beltsville, MD 20705"
+                >10601 Baltimore Ave, Beltsville, MD 20705</a>
+                <button type="button" class="location-copy" data-copy-address="10601 Baltimore Ave, Beltsville, MD 20705">Copy</button>
+            </p>
+            <a href="afro-plus-dc.html" class="btn btn-secondary">← Back to Events</a>
+        </div>
+    </section>
+
+    <section class="event-detail">
+        <div class="container">
+            <div class="event-detail__layout">
+                <div class="event-detail__aside">
+                    <div class="event-detail__media">
+                        <img loading="lazy" src="images/RnB-Old-School-Party.jpeg" alt="AfroPlusFest DC R&B Day Party">
+                    </div>
+                    <div class="event-detail__tickets event-detail__tickets--aside">
+                        <h3>Tickets</h3>
+                        <p>Available tiers update automatically based on current sales.</p>
+                        <div class="ticket-actions">
+                            <button class="btn btn-secondary btn-small stripe-ticket-button" type="button" data-ticket-id="dc_rnb_day_party">Buy Tickets from $15</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="event-detail__content">
+                    <span class="event-detail__eyebrow">Day Party</span>
+                    <h2>R&B Day Party</h2>
+                    <div class="event-detail__copy">
+                        <p><strong>2000s R&amp;B hits → afternoon sun → Spectrum Lounge. This is the soundtrack to your Friday.</strong> Tickets are going fast. Tier 1 is the move.</p>
+                        <p><strong>⚡ MAKENA — R&amp;B DAY PARTY | Old School &amp; 2000s Nostalgia</strong></p>
+                        <p>This is not just background music. This is every song you forgot you knew every word to, played loud, in the afternoon sun, with the right crowd around you.</p>
+                        <h3>☀️ Day Party Experience</h3>
+                        <ul>
+                            <li>Old school R&amp;B &amp; 2000s classics all afternoon</li>
+                            <li>Day party energy — relaxed but locked in</li>
+                            <li>Limited crowd, no overcrowding</li>
+                            <li>Food &amp; drinks available</li>
+                        </ul>
+                        <p><strong>🎟️ Tickets from $15. Tier 1 is the move.</strong></p>
+                        <p><strong>⚠️ By attending, you agree to respect the venue, staff, and guests.</strong> Any inappropriate behavior will result in immediate removal.</p>
+                    </div>
+                    <div class="event-detail__facts">
+                        <span>September 4, 2026</span>
+                        <span>12 PM - 6 PM</span>
+                        <span class="event-location-address">
+                            <a
+                                href="https://www.google.com/maps/search/?api=1&query=10601+Baltimore+Ave+Beltsville+MD+20705"
+                                target="_blank"
+                                rel="noopener"
+                                class="location-link"
+                                data-copy-address="10601 Baltimore Ave, Beltsville, MD 20705"
+                            >10601 Baltimore Ave, Beltsville, MD 20705</a>
+                            <button type="button" class="location-copy" data-copy-address="10601 Baltimore Ave, Beltsville, MD 20705">Copy</button>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-bottom">
+                <p>&copy; 2026 Makena Entertainment. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+    <script>
+        document.querySelectorAll('[data-copy-address]').forEach(function (element) {
+            element.addEventListener('click', async function () {
+                var address = element.getAttribute('data-copy-address');
+                if (!address) return;
+                if (element.tagName.toLowerCase() === 'a') return;
+
+                try {
+                    await navigator.clipboard.writeText(address);
+                    element.textContent = 'Copied';
+                    window.setTimeout(function () {
+                        element.textContent = 'Copy';
+                    }, 1400);
+                } catch (error) {
+                    window.prompt('Copy address', address);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

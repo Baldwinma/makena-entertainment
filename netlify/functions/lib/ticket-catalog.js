@@ -354,6 +354,78 @@ const unlimitedPackageTiers = amount => [
     }
 ];
 
+const dcDayPartyTiers = [
+    {
+        id: 'tier_1',
+        name: 'Tier 1',
+        amount: 1500,
+        capacity: 20,
+        lowInventoryThreshold: 5
+    },
+    {
+        id: 'tier_2',
+        name: 'Tier 2',
+        amount: 2500,
+        capacity: 20,
+        lowInventoryThreshold: 5
+    },
+    {
+        id: 'tier_3',
+        name: 'Final Tier',
+        amount: 3500,
+        capacity: null,
+        lowInventoryThreshold: 10
+    }
+];
+
+const dcNightPartyTiers = [
+    {
+        id: 'tier_1',
+        name: 'Tier 1',
+        amount: 2000,
+        capacity: 20,
+        lowInventoryThreshold: 5
+    },
+    {
+        id: 'tier_2',
+        name: 'Tier 2',
+        amount: 3000,
+        capacity: 20,
+        lowInventoryThreshold: 5
+    },
+    {
+        id: 'tier_3',
+        name: 'Final Tier',
+        amount: 4000,
+        capacity: null,
+        lowInventoryThreshold: 10
+    }
+];
+
+const dcBoatPartyTiers = [
+    {
+        id: 'tier_1',
+        name: 'Tier 1',
+        amount: 6500,
+        capacity: 20,
+        lowInventoryThreshold: 5
+    },
+    {
+        id: 'tier_2',
+        name: 'Tier 2',
+        amount: 7500,
+        capacity: 20,
+        lowInventoryThreshold: 5
+    },
+    {
+        id: 'tier_3',
+        name: 'Final Tier',
+        amount: 8500,
+        capacity: null,
+        lowInventoryThreshold: 10
+    }
+];
+
 const ticketCatalog = {
     flex_trio_pass: {
         name: '3X ACCESS PASS | The Flex Trio',
@@ -544,6 +616,96 @@ const ticketCatalog = {
         time: '10 PM',
         location: 'Portimao, Portugal',
         tiers: standardPartyTiers
+    },
+    dc_welcome_party: {
+        name: 'AfroPlusFest DC - Welcome Party',
+        description: 'Kick off AfroPlusFest DC with the official welcome celebration at Spectrum Lounge.',
+        amount: 2000,
+        currency: 'usd',
+        date: 'September 3, 2026',
+        time: '11 PM - 3:30 AM',
+        location: '10601 Baltimore Ave, Beltsville, MD 20705',
+        tiers: dcNightPartyTiers
+    },
+    dc_rnb_day_party: {
+        name: 'AfroPlusFest DC - R&B Day Party',
+        description: 'AfroPlusFest DC R&B Day Party at Spectrum Lounge.',
+        amount: 1500,
+        currency: 'usd',
+        date: 'September 4, 2026',
+        time: '12 PM - 6 PM',
+        location: '10601 Baltimore Ave, Beltsville, MD 20705',
+        tiers: dcDayPartyTiers
+    },
+    dc_amapiano_vs_afrobeat: {
+        name: 'AfroPlusFest DC - Amapiano vs Afrobeat Party',
+        description: 'The ultimate sound clash — Amapiano vs Afrobeat — at Spectrum Lounge.',
+        amount: 2000,
+        currency: 'usd',
+        date: 'September 4, 2026',
+        time: '11 PM - 3:30 AM',
+        location: '10601 Baltimore Ave, Beltsville, MD 20705',
+        tiers: dcNightPartyTiers
+    },
+    dc_brunch_day_party: {
+        name: 'AfroPlusFest DC - Brunch Day Party',
+        description: 'AfroPlusFest DC Brunch Day Party at Spectrum Lounge.',
+        amount: 1500,
+        currency: 'usd',
+        date: 'September 5, 2026',
+        time: '12 PM - 6 PM',
+        location: '10601 Baltimore Ave, Beltsville, MD 20705',
+        tiers: dcDayPartyTiers
+    },
+    dc_dancehall_soca_party: {
+        name: 'AfroPlusFest DC - Dancehall Soca Reggaeton Kompa',
+        description: 'Dancehall, Soca, Reggaeton & Kompa night at Spectrum Lounge.',
+        amount: 2000,
+        currency: 'usd',
+        date: 'September 5, 2026',
+        time: '11 PM - 3:30 AM',
+        location: '10601 Baltimore Ave, Beltsville, MD 20705',
+        tiers: dcNightPartyTiers
+    },
+    dc_group_chat_linkup: {
+        name: 'AfroPlusFest DC - Group Chat Link Up',
+        description: 'Sunday day party and link up at Spectrum Lounge.',
+        amount: 1500,
+        currency: 'usd',
+        date: 'September 6, 2026',
+        time: '11 AM - 6 PM',
+        location: '10601 Baltimore Ave, Beltsville, MD 20705',
+        tiers: dcDayPartyTiers
+    },
+    dc_last_last_after_party: {
+        name: 'AfroPlusFest DC - Last Last After Party',
+        description: 'The final night out of AfroPlusFest DC at Spectrum Lounge.',
+        amount: 2000,
+        currency: 'usd',
+        date: 'September 6, 2026',
+        time: '11 PM - 3:30 AM',
+        location: '10601 Baltimore Ave, Beltsville, MD 20705',
+        tiers: dcNightPartyTiers
+    },
+    dc_all_white_boat_party: {
+        name: 'AfroPlusFest DC - All White Boat Party',
+        description: 'All White dress code boat party on the water. Location TBD.',
+        amount: 6500,
+        currency: 'usd',
+        date: 'September 7, 2026',
+        time: '12 PM - 6 PM',
+        location: 'TBD, Washington DC',
+        tiers: dcBoatPartyTiers
+    },
+    dc_all_white_closing_party: {
+        name: 'AfroPlusFest DC - All White Closing Party',
+        description: 'Close out AfroPlusFest DC in style. All White dress code at Spectrum Lounge.',
+        amount: 2000,
+        currency: 'usd',
+        date: 'September 7, 2026',
+        time: '11 PM - 3:30 AM',
+        location: '10601 Baltimore Ave, Beltsville, MD 20705',
+        tiers: dcNightPartyTiers
     }
 };
 
@@ -564,7 +726,7 @@ function getTicketTiers(ticket) {
         lowInventoryThreshold: 10
     }]).map(tier => ({
         ...tier,
-        amount: ticket.currency === 'usd' ? 4000 : tier.amount,
+        amount: tier.amount,
         currency: ticket.currency
     }));
 }

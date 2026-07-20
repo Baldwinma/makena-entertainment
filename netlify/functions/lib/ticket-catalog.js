@@ -873,6 +873,11 @@ function getPackageEventDefinitions(ticketId) {
     return ticket.includedEventIds.map(id => ({ id, ...getTicketDefinition(id) })).filter(Boolean);
 }
 
+function isPackageTicket(ticketId) {
+    const ticket = getTicketDefinition(ticketId);
+    return Boolean(ticket && Array.isArray(ticket.includedEventIds) && ticket.includedEventIds.length > 0);
+}
+
 module.exports = {
     getTicketDefinition,
     getTicketDefinitionByName,
@@ -880,5 +885,6 @@ module.exports = {
     getTierDefinition,
     listTicketDefinitions,
     summarizePurchasedItems,
-    getPackageEventDefinitions
+    getPackageEventDefinitions,
+    isPackageTicket
 };

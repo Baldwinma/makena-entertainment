@@ -1,5 +1,5 @@
 const Stripe = require('stripe');
-const { getTicketDefinition } = require('./lib/ticket-catalog');
+const { getTicketDefinition, isPackageTicket } = require('./lib/ticket-catalog');
 const { getSupabase } = require('./lib/supabase');
 const { getAvailabilityForTicket } = require('./lib/tier-availability');
 
@@ -160,12 +160,14 @@ exports.handler = async function(event) {
         };
     }
 
+    const hasPackage = validatedItems.some(({ ticketId }) => isPackageTicket(ticketId));
+
     try {
         const session = await stripe.checkout.sessions.create({
             mode: 'payment',
             ui_mode: 'embedded',
             line_items: lineItems,
-            allow_promotion_codes: true,
+            allow_promotion_codes: !hasPackage,
             billing_address_collection: 'auto',
             return_url: `${baseUrl}/checkout-success?session_id={CHECKOUT_SESSION_ID}`,
             metadata: sessionMetadata

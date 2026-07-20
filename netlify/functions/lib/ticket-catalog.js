@@ -390,15 +390,22 @@ const dcNightPartyTiers = [
         id: 'tier_2',
         name: 'Tier 2',
         amount: 3000,
-        capacity: 20,
-        lowInventoryThreshold: 5
+        capacity: 120,
+        lowInventoryThreshold: 20
     },
     {
         id: 'tier_3',
-        name: 'Final Tier',
+        name: 'Tier 3',
         amount: 4000,
-        capacity: null,
-        lowInventoryThreshold: 10
+        capacity: 80,
+        lowInventoryThreshold: 20
+    },
+    {
+        id: 'tier_4',
+        name: 'Final Tier',
+        amount: 5000,
+        capacity: 120,
+        lowInventoryThreshold: 20
     }
 ];
 

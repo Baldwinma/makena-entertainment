@@ -75,7 +75,7 @@ exports.handler = async function(event) {
         counts.set(key, current);
     });
 
-    const events = listTicketDefinitions().filter(ticket => ticket.id.startsWith('dc_')).map(ticket => {
+    const events = listTicketDefinitions().filter(ticket => ticket.id.startsWith('dc_') && !ticket.id.endsWith('_pass')).map(ticket => {
         const eventCounts = counts.get(normalizeEventName(ticket.name)) || {
             totalTickets: 0,
             validTickets: 0,

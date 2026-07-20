@@ -62,6 +62,29 @@ function buildEmailHtml({ ticket, ticketPageUrl, qrImageUrl }) {
     `;
 }
 
+function buildBundleEmailHtml({ tickets, ticketData, holderName }) {
+    const ticketBlocks = ticketData.map(({ ticket, ticketPageUrl, qrImageUrl }) => `
+        <div style="border: 1px solid #e5e7eb; border-radius: 12px; padding: 18px; max-width: 520px; margin-bottom: 24px;">
+            <h3 style="margin: 0 0 10px; font-size: 16px;">${escapeHtml(ticket.event_name)}</h3>
+            ${ticket.event_date ? `<p style="margin: 0 0 4px; font-size: 14px;"><strong>Date:</strong> ${escapeHtml(ticket.event_date)}</p>` : ''}
+            ${ticket.event_time ? `<p style="margin: 0 0 4px; font-size: 14px;"><strong>Time:</strong> ${escapeHtml(ticket.event_time)}</p>` : ''}
+            ${ticket.event_location ? `<p style="margin: 0 0 4px; font-size: 14px;"><strong>Location:</strong> ${escapeHtml(ticket.event_location)}</p>` : ''}
+            <p style="margin: 0 0 12px; font-size: 14px;"><strong>Ticket Code:</strong> ${escapeHtml(ticket.ticket_code)}</p>
+            <img src="${qrImageUrl}" alt="QR Code for ${escapeHtml(ticket.event_name)}" width="180" height="180" style="display: block; width: 180px; height: 180px; border: 1px solid #e5e7eb; border-radius: 8px; margin-bottom: 8px;">
+            <p style="font-size: 12px; color: #6b7280; margin: 0;">View ticket: <a href="${ticketPageUrl}">${ticketPageUrl}</a></p>
+        </div>
+    `).join('');
+
+    return `
+        <div style="font-family: Arial, sans-serif; color: #111827; line-height: 1.5;">
+            <h1 style="margin-bottom: 4px;">Your AfroPlusFest DC Pass</h1>
+            <p style="margin-top: 0; margin-bottom: 24px;">Hey ${escapeHtml(holderName || 'there')} — you're all set. Below are your individual tickets for each event. Show the QR code at the door for the event you're attending.</p>
+            ${ticketBlocks}
+            <p style="font-size: 13px; color: #6b7280;">Questions? Contact us at <a href="mailto:admin@makenaevents.com">admin@makenaevents.com</a></p>
+        </div>
+    `;
+}
+
 async function sendTicketEmail({ event, ticket, to }) {
     const baseUrl = getBaseUrl(event);
     const checkInUrl = `${baseUrl}/admin?ticket=${encodeURIComponent(ticket.ticket_code)}`;
@@ -95,6 +118,49 @@ async function sendTicketEmail({ event, ticket, to }) {
     const data = await response.json();
     if (!response.ok) {
         const message = data && data.message ? data.message : 'Unable to send ticket email.';
+        const error = new Error(message);
+        error.responseData = data;
+        throw error;
+    }
+
+    return data;
+}
+
+async function sendBundleTicketEmail({ event, tickets, to }) {
+    const baseUrl = getBaseUrl(event);
+
+    const ticketData = await Promise.all(tickets.map(async ticket => {
+        const checkInUrl = `${baseUrl}/admin?ticket=${encodeURIComponent(ticket.ticket_code)}`;
+        const ticketPageUrl = `${baseUrl}/ticket?ticket=${encodeURIComponent(ticket.ticket_code)}`;
+        const qrImageUrl = `${baseUrl}/.netlify/functions/ticket-qr?ticket=${encodeURIComponent(ticket.ticket_code)}`;
+        const qrPng = await QRCode.toBuffer(checkInUrl, { margin: 1, width: 280 });
+        return { ticket, ticketPageUrl, qrImageUrl, qrPng };
+    }));
+
+    const holderName = tickets[0] && tickets[0].holder_name;
+    const attachments = ticketData.map(({ ticket, qrPng }) => ({
+        filename: `${ticket.ticket_code}.png`,
+        content: qrPng.toString('base64')
+    }));
+
+    const response = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+            Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            from: process.env.TICKET_FROM_EMAIL,
+            to,
+            subject: `Your AfroPlusFest DC tickets — ${tickets.length} events`,
+            html: buildBundleEmailHtml({ ticketData, holderName }),
+            attachments
+        })
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+        const message = data && data.message ? data.message : 'Unable to send bundle ticket email.';
         const error = new Error(message);
         error.responseData = data;
         throw error;
@@ -175,3 +241,4 @@ exports.handler = async function(event) {
 };
 
 module.exports.sendTicketEmail = sendTicketEmail;
+module.exports.sendBundleTicketEmail = sendBundleTicketEmail;

@@ -402,6 +402,54 @@ const dcNightPartyTiers = [
     }
 ];
 
+const dcFullFestPassTiers = [
+    {
+        id: 'tier_1',
+        name: 'Tier 1',
+        amount: 17900,
+        capacity: 20,
+        lowInventoryThreshold: 5
+    },
+    {
+        id: 'tier_2',
+        name: 'Tier 2',
+        amount: 24900,
+        capacity: 20,
+        lowInventoryThreshold: 5
+    },
+    {
+        id: 'tier_3',
+        name: 'Final Tier',
+        amount: 31900,
+        capacity: null,
+        lowInventoryThreshold: 10
+    }
+];
+
+const dcPartyPassTiers = [
+    {
+        id: 'tier_1',
+        name: 'Tier 1',
+        amount: 11900,
+        capacity: 20,
+        lowInventoryThreshold: 5
+    },
+    {
+        id: 'tier_2',
+        name: 'Tier 2',
+        amount: 16900,
+        capacity: 20,
+        lowInventoryThreshold: 5
+    },
+    {
+        id: 'tier_3',
+        name: 'Final Tier',
+        amount: 21900,
+        capacity: null,
+        lowInventoryThreshold: 10
+    }
+];
+
 const dcBoatPartyTiers = [
     {
         id: 'tier_1',
@@ -617,6 +665,47 @@ const ticketCatalog = {
         location: 'Portimao, Portugal',
         tiers: standardPartyTiers
     },
+    dc_full_fest_pass: {
+        name: 'AfroPlusFest DC - Full Fest Pass',
+        description: 'Access to all 9 AfroPlusFest DC events including the All White Boat Party. September 3–7, 2026.',
+        amount: 17900,
+        currency: 'usd',
+        date: 'September 3, 2026',
+        time: 'September 3 – 7, 2026',
+        location: '10601 Baltimore Ave, Beltsville, MD 20705',
+        tiers: dcFullFestPassTiers,
+        includedEventIds: [
+            'dc_welcome_party',
+            'dc_rnb_day_party',
+            'dc_amapiano_vs_afrobeat',
+            'dc_brunch_day_party',
+            'dc_dancehall_soca_party',
+            'dc_group_chat_linkup',
+            'dc_last_last_after_party',
+            'dc_all_white_boat_party',
+            'dc_all_white_closing_party'
+        ]
+    },
+    dc_party_pass: {
+        name: 'AfroPlusFest DC - Party Pass',
+        description: 'Access to all 8 AfroPlusFest DC events. Boat Party not included. September 3–7, 2026.',
+        amount: 11900,
+        currency: 'usd',
+        date: 'September 3, 2026',
+        time: 'September 3 – 7, 2026',
+        location: '10601 Baltimore Ave, Beltsville, MD 20705',
+        tiers: dcPartyPassTiers,
+        includedEventIds: [
+            'dc_welcome_party',
+            'dc_rnb_day_party',
+            'dc_amapiano_vs_afrobeat',
+            'dc_brunch_day_party',
+            'dc_dancehall_soca_party',
+            'dc_group_chat_linkup',
+            'dc_last_last_after_party',
+            'dc_all_white_closing_party'
+        ]
+    },
     dc_welcome_party: {
         name: 'AfroPlusFest DC - Welcome Party',
         description: 'Kick off AfroPlusFest DC with the official welcome celebration at Spectrum Lounge.',
@@ -769,11 +858,20 @@ function summarizePurchasedItems(items) {
     }).join(', ');
 }
 
+function getPackageEventDefinitions(ticketId) {
+    const ticket = getTicketDefinition(ticketId);
+    if (!ticket || !Array.isArray(ticket.includedEventIds)) {
+        return null;
+    }
+    return ticket.includedEventIds.map(id => ({ id, ...getTicketDefinition(id) })).filter(Boolean);
+}
+
 module.exports = {
     getTicketDefinition,
     getTicketDefinitionByName,
     getTicketTiers,
     getTierDefinition,
     listTicketDefinitions,
-    summarizePurchasedItems
+    summarizePurchasedItems,
+    getPackageEventDefinitions
 };

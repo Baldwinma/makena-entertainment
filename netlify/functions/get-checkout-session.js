@@ -1,8 +1,8 @@
 const Stripe = require('stripe');
 const QRCode = require('qrcode');
 const { getSupabase } = require('./lib/supabase');
-const { sendTicketEmail } = require('./send-ticket-email');
-const { getTicketDefinition, getTicketDefinitionByName, getTierDefinition, summarizePurchasedItems } = require('./lib/ticket-catalog');
+const { sendTicketEmail, sendBundleTicketEmail } = require('./send-ticket-email');
+const { getTicketDefinition, getTicketDefinitionByName, getTierDefinition, summarizePurchasedItems, getPackageEventDefinitions } = require('./lib/ticket-catalog');
 
 function json(statusCode, body) {
     return {
@@ -91,6 +91,9 @@ async function saveTicketsToSupabase(session, lineItems) {
     }
 
     let ticketIndex = 0;
+    const holderName = (session.customer_details && session.customer_details.name) || 'Guest';
+    const holderEmail = session.customer_details && session.customer_details.email;
+
     const ticketPayloads = lineItems.flatMap(lineItem =>
         (() => {
             const product = lineItem.price && lineItem.price.product && typeof lineItem.price.product === 'object'
@@ -101,6 +104,32 @@ async function saveTicketsToSupabase(session, lineItems) {
             const tierDefinition = metadata.tier_id ? getTierDefinition(metadata.ticket_id, metadata.tier_id) : null;
             const tierName = metadata.tier_name || (tierDefinition && tierDefinition.name) || 'General Admission';
             const tierAmount = Number(metadata.tier_amount || (tierDefinition && tierDefinition.amount) || lineItem.amount_subtotal / lineItem.quantity);
+
+            const packageEvents = metadata.ticket_id ? getPackageEventDefinitions(metadata.ticket_id) : null;
+
+            if (packageEvents && packageEvents.length > 0) {
+                // Package purchase — generate one ticket per included event per quantity
+                return Array.from({ length: lineItem.quantity }).flatMap(() =>
+                    packageEvents.map(eventDef => ({
+                        order_id: order.id,
+                        ticket_code: buildTicketCode(session.id, ticketIndex++),
+                        event_name: eventDef.name,
+                        event_date: eventDef.date || null,
+                        event_time: eventDef.time || null,
+                        event_location: eventDef.location || null,
+                        ticket_id: eventDef.id,
+                        ticket_tier_id: metadata.tier_id || null,
+                        ticket_tier_name: tierName,
+                        ticket_tier_amount: tierAmount,
+                        holder_name: holderName,
+                        holder_email: holderEmail,
+                        status: 'valid',
+                        updated_at: new Date().toISOString()
+                    }))
+                );
+            }
+
+            // Single event purchase — one ticket per quantity
             return Array.from({ length: lineItem.quantity }, () => ({
                 order_id: order.id,
                 ticket_code: buildTicketCode(session.id, ticketIndex++),
@@ -112,8 +141,8 @@ async function saveTicketsToSupabase(session, lineItems) {
                 ticket_tier_id: metadata.tier_id || null,
                 ticket_tier_name: tierName,
                 ticket_tier_amount: tierAmount,
-                holder_name: (session.customer_details && session.customer_details.name) || 'Guest',
-                holder_email: session.customer_details && session.customer_details.email,
+                holder_name: holderName,
+                holder_email: holderEmail,
                 status: 'valid',
                 updated_at: new Date().toISOString()
             }));
@@ -177,12 +206,23 @@ async function sendTicketsAutomatically(event, order, tickets) {
         return { sent: true, reason: 'Tickets were already emailed.' };
     }
 
-    for (const ticket of tickets) {
-        await sendTicketEmail({
+    const uniqueEvents = new Set(tickets.map(t => t.event_name));
+    const isPackage = uniqueEvents.size > 1;
+
+    if (isPackage) {
+        await sendBundleTicketEmail({
             event,
-            ticket,
+            tickets,
             to: order.customer_email
         });
+    } else {
+        for (const ticket of tickets) {
+            await sendTicketEmail({
+                event,
+                ticket,
+                to: order.customer_email
+            });
+        }
     }
 
     await markOrderEmailStatus(order.id, {

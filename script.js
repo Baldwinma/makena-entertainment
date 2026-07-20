@@ -266,6 +266,8 @@ document.addEventListener('keydown', (e) => {
         red_flag_party:           { name: 'Red Flag Party',                 price: 2500, currency: 'usd' },
         all_orange_day_party:     { name: 'All Orange Day Party',           price: 2500, currency: 'usd' },
         closing_party_in_style:         { name: 'Closing Party in Style',                    price: 2500, currency: 'usd' },
+        dc_full_fest_pass:              { name: 'AfroPlusFest DC - Full Fest Pass',          price: 17900, currency: 'usd' },
+        dc_party_pass:                  { name: 'AfroPlusFest DC - Party Pass',               price: 11900, currency: 'usd' },
         dc_welcome_party:               { name: 'AfroPlusFest DC - Welcome Party',            price: 2000, currency: 'usd' },
         dc_rnb_day_party:               { name: 'AfroPlusFest DC - R&B Day Party',            price: 1500, currency: 'usd' },
         dc_amapiano_vs_afrobeat:        { name: 'AfroPlusFest DC - Amapiano vs Afrobeat',     price: 2000, currency: 'usd' },

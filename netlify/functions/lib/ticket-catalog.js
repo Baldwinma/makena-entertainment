@@ -675,14 +675,14 @@ const ticketCatalog = {
     dc_trio_pass: {
         name: 'AfroPlusFest DC - Trio Pass',
         description: 'Three events in one pass — Welcome Party, R&B Day Party, and Amapiano vs Afrobeat. September 3–4, 2026.',
-        amount: 4500,
+        amount: 5000,
         currency: 'usd',
         date: 'September 3, 2026',
         time: 'September 3 – 4, 2026',
         location: '10601 Baltimore Ave, Beltsville, MD 20705',
         tiers: [
-            { id: 'tier_1', name: 'Tier 1', amount: 4500, capacity: 20, lowInventoryThreshold: 5 },
-            { id: 'tier_2', name: 'Tier 2', amount: 5500, capacity: null, lowInventoryThreshold: 10 }
+            { id: 'tier_1', name: 'Tier 1', amount: 5000, capacity: 20, lowInventoryThreshold: 5 },
+            { id: 'tier_2', name: 'Tier 2', amount: 6000, capacity: null, lowInventoryThreshold: 10 }
         ],
         includedEventIds: [
             'dc_welcome_party',
@@ -693,13 +693,13 @@ const ticketCatalog = {
     dc_five_event_pass: {
         name: 'AfroPlusFest DC - 5-Event Pass',
         description: 'Five events in one pass — the full Sep 3–5 run. Welcome Party through Dancehall Soca night.',
-        amount: 7000,
+        amount: 7500,
         currency: 'usd',
         date: 'September 3, 2026',
         time: 'September 3 – 5, 2026',
         location: '10601 Baltimore Ave, Beltsville, MD 20705',
         tiers: [
-            { id: 'tier_1', name: 'Tier 1', amount: 7000, capacity: 20, lowInventoryThreshold: 5 },
+            { id: 'tier_1', name: 'Tier 1', amount: 7500, capacity: 20, lowInventoryThreshold: 5 },
             { id: 'tier_2', name: 'Tier 2', amount: 8500, capacity: null, lowInventoryThreshold: 10 }
         ],
         includedEventIds: [

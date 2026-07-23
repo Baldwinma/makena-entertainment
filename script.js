@@ -266,6 +266,8 @@ document.addEventListener('keydown', (e) => {
         red_flag_party:           { name: 'Red Flag Party',                 price: 2500, currency: 'usd' },
         all_orange_day_party:     { name: 'All Orange Day Party',           price: 2500, currency: 'usd' },
         closing_party_in_style:         { name: 'Closing Party in Style',                    price: 2500, currency: 'usd' },
+        dc_trio_pass:                   { name: 'AfroPlusFest DC - Trio Pass',                price: 4500,  currency: 'usd' },
+        dc_five_event_pass:             { name: 'AfroPlusFest DC - 5-Event Pass',             price: 7000,  currency: 'usd' },
         dc_full_fest_pass:              { name: 'AfroPlusFest DC - Full Fest Pass',          price: 17900, currency: 'usd' },
         dc_party_pass:                  { name: 'AfroPlusFest DC - Party Pass',               price: 11900, currency: 'usd' },
         dc_welcome_party:               { name: 'AfroPlusFest DC - Welcome Party',            price: 2000, currency: 'usd' },
@@ -644,6 +646,38 @@ document.addEventListener('keydown', (e) => {
     // ── Init badge ────────────────────────────────────────────────────────────
     syncCartUI();
     loadTicketAvailability();
+
+    // ── Bundle nudge (individual DC event pages only) ─────────────────────────
+    var DC_INDIVIDUAL_IDS = new Set([
+        'dc_welcome_party', 'dc_rnb_day_party', 'dc_amapiano_vs_afrobeat',
+        'dc_brunch_day_party', 'dc_dancehall_soca_party', 'dc_group_chat_linkup',
+        'dc_last_last_after_party', 'dc_all_white_boat_party', 'dc_all_white_closing_party'
+    ]);
+
+    var pageTicketId = (document.querySelector('.stripe-ticket-button') || {}).dataset && document.querySelector('.stripe-ticket-button').dataset.ticketId;
+
+    if (pageTicketId && DC_INDIVIDUAL_IDS.has(pageTicketId) && !sessionStorage.getItem('bundleNudgeDismissed')) {
+        var nudge = document.createElement('div');
+        nudge.id = 'bundle-nudge';
+        nudge.innerHTML =
+            '<div class="bundle-nudge__inner">' +
+            '<span class="bundle-nudge__icon">🎉</span>' +
+            '<div class="bundle-nudge__text">' +
+            '<strong>Save up to $20 — bundle your events!</strong>' +
+            '<span>Trio Pass saves $10 · 5-Event Pass saves $20 · Full Week Pass saves even more</span>' +
+            '</div>' +
+            '<a href="dc-packages.html" class="bundle-nudge__cta">See Packages</a>' +
+            '<button class="bundle-nudge__close" aria-label="Dismiss">✕</button>' +
+            '</div>';
+        document.body.appendChild(nudge);
+
+        setTimeout(function () { nudge.classList.add('bundle-nudge--visible'); }, 1200);
+
+        nudge.querySelector('.bundle-nudge__close').addEventListener('click', function () {
+            nudge.classList.remove('bundle-nudge--visible');
+            sessionStorage.setItem('bundleNudgeDismissed', '1');
+        });
+    }
 
 }());
 

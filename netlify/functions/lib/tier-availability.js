@@ -1,6 +1,8 @@
 const { getTicketDefinition, getTicketTiers, listTicketDefinitions } = require('./ticket-catalog');
 
 const ACTIVE_TICKET_IDS = new Set([
+    'dc_trio_pass',
+    'dc_five_event_pass',
     'dc_full_fest_pass',
     'dc_party_pass',
     'dc_welcome_party',

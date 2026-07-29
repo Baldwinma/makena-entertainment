@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <title>Group Trips | Makena Events</title>
+    <meta name="description" content="Join a Makena group travel experience. All-inclusive packages with boat parties, island excursions, and unforgettable nights. Express your interest now.">
+    <link rel="canonical" href="https://makenaevents.com/trips">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        /* ── Trip page specific ───────────────────────────────────────────────── */
+        .trip-hero {
+            position: relative;
+            min-height: 520px;
+            display: flex;
+            align-items: center;
+            background: linear-gradient(rgba(0,0,0,0.58), rgba(0,0,0,0.72)),
+                        url('images/boat-party.jpeg') center center / cover no-repeat;
+            text-align: center;
+            padding: 7rem 1rem 4rem;
+        }
+
+        .trip-hero .container {
+            position: relative;
+            z-index: 2;
+        }
+
+        .trip-hero__eyebrow {
+            display: inline-block;
+            background: rgba(134, 239, 172, 0.15);
+            border: 1px solid rgba(134, 239, 172, 0.35);
+            border-radius: 20px;
+            padding: 0.3rem 1rem;
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: #86EFA9;
+            margin-bottom: 1rem;
+        }
+
+        .trip-hero h1 {
+            font-size: clamp(2.2rem, 6vw, 3.8rem);
+            font-weight: 900;
+            color: #fff;
+            line-height: 1.1;
+            margin-bottom: 1rem;
+        }
+
+        .trip-hero h1 span {
+            color: #86EFA9;
+        }
+
+        .trip-hero p {
+            font-size: 1.05rem;
+            color: rgba(255,255,255,0.75);
+            max-width: 520px;
+            margin: 0 auto 2rem;
+            line-height: 1.65;
+        }
+
+        /* ── What's Included ─────────────────────────────────────────────────── */
+        .trip-section {
+            padding: 4rem 0;
+        }
+
+        .trip-section--alt {
+            background: var(--dark-bg-alt);
+        }
+
+        .trip-section__header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .trip-section__header h2 {
+            font-size: clamp(1.6rem, 4vw, 2.2rem);
+            font-weight: 800;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .trip-section__header p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            max-width: 480px;
+            margin: 0 auto;
+        }
+
+        .activities-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .activity-card {
+            background: var(--dark-bg-card);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px;
+            padding: 1.4rem 1.2rem;
+            text-align: center;
+            transition: border-color 0.2s, transform 0.2s;
+        }
+
+        .activity-card:hover {
+            border-color: rgba(134,239,172,0.3);
+            transform: translateY(-3px);
+        }
+
+        .activity-card__icon {
+            font-size: 2rem;
+            margin-bottom: 0.75rem;
+            display: block;
+        }
+
+        .activity-card h4 {
+            font-size: 0.92rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.4rem;
+        }
+
+        .activity-card p {
+            font-size: 0.78rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        /* ── Itinerary ───────────────────────────────────────────────────────── */
+        .itinerary-list {
+            max-width: 640px;
+            margin: 0 auto;
+            list-style: none;
+        }
+
+        .itinerary-list li {
+            display: flex;
+            gap: 1.2rem;
+            padding: 1.2rem 0;
+            border-bottom: 1px solid rgba(255,255,255,0.07);
+            align-items: flex-start;
+        }
+
+        .itinerary-list li:last-child {
+            border-bottom: none;
+        }
+
+        .itin-day {
+            flex-shrink: 0;
+            width: 52px;
+            height: 52px;
+            background: rgba(134,239,172,0.1);
+            border: 1px solid rgba(134,239,172,0.25);
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            line-height: 1.1;
+        }
+
+        .itin-day span:first-child {
+            font-size: 0.55rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: #86EFA9;
+        }
+
+        .itin-day span:last-child {
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: #fff;
+        }
+
+        .itin-info h4 {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+        }
+
+        .itin-info p {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            line-height: 1.55;
+        }
+
+        /* ── Includes checklist ──────────────────────────────────────────────── */
+        .includes-cols {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.65rem;
+            max-width: 560px;
+            margin: 0 auto;
+        }
+
+        .includes-cols .check-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .includes-cols .check-item::before {
+            content: '✓';
+            color: #86EFA9;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        /* ── Pricing hint ────────────────────────────────────────────────────── */
+        .pricing-hint {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-top: 2rem;
+        }
+
+        .pricing-hint__card {
+            background: var(--dark-bg-card);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px;
+            padding: 1.2rem 1.6rem;
+            text-align: center;
+            min-width: 140px;
+        }
+
+        .pricing-hint__card--featured {
+            border-color: rgba(134,239,172,0.35);
+            background: rgba(134,239,172,0.05);
+        }
+
+        .pricing-hint__card .tier {
+            font-size: 0.62rem;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 0.3rem;
+        }
+
+        .pricing-hint__card--featured .tier {
+            color: #86EFA9;
+        }
+
+        .pricing-hint__card .price {
+            font-size: 1.5rem;
+            font-weight: 900;
+            color: #fff;
+        }
+
+        .pricing-hint__card .sub {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            margin-top: 0.2rem;
+        }
+
+        .pricing-note {
+            text-align: center;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 1rem;
+        }
+
+        /* ── CTA band ────────────────────────────────────────────────────────── */
+        .trip-cta-band {
+            background: linear-gradient(135deg, #0b2a1a 0%, #0a1612 100%);
+            border-top: 1px solid rgba(134,239,172,0.15);
+            border-bottom: 1px solid rgba(134,239,172,0.15);
+            padding: 3.5rem 1rem;
+            text-align: center;
+        }
+
+        .trip-cta-band h2 {
+            font-size: clamp(1.5rem, 4vw, 2rem);
+            font-weight: 800;
+            color: #fff;
+            margin-bottom: 0.6rem;
+        }
+
+        .trip-cta-band p {
+            color: rgba(255,255,255,0.6);
+            font-size: 0.92rem;
+            margin-bottom: 1.8rem;
+            max-width: 440px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* ── Interest Modal ──────────────────────────────────────────────────── */
+        .interest-modal__backdrop {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.75);
+            z-index: 9100;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .interest-modal__backdrop.is-open {
+            display: flex;
+        }
+
+        .interest-modal__card {
+            background: #141414;
+            border: 1px solid rgba(134,239,172,0.2);
+            border-radius: 16px;
+            padding: 2rem;
+            width: 100%;
+            max-width: 440px;
+            position: relative;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .interest-modal__close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            color: rgba(255,255,255,0.4);
+            font-size: 1.3rem;
+            cursor: pointer;
+            line-height: 1;
+            padding: 0.25rem;
+            transition: color 0.2s;
+        }
+
+        .interest-modal__close:hover { color: #fff; }
+
+        .interest-modal__card h3 {
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: #fff;
+            margin-bottom: 0.35rem;
+        }
+
+        .interest-modal__card > p {
+            font-size: 0.82rem;
+            color: rgba(255,255,255,0.5);
+            margin-bottom: 1.5rem;
+            line-height: 1.5;
+        }
+
+        .interest-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .interest-form label {
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: rgba(255,255,255,0.6);
+            display: block;
+            margin-bottom: 0.35rem;
+            letter-spacing: 0.03em;
+        }
+
+        .interest-form input,
+        .interest-form select {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 8px;
+            color: #fff;
+            font-size: 0.9rem;
+            font-family: inherit;
+            transition: border-color 0.2s;
+            -webkit-appearance: none;
+        }
+
+        .interest-form input::placeholder {
+            color: rgba(255,255,255,0.25);
+        }
+
+        .interest-form input:focus,
+        .interest-form select:focus {
+            outline: none;
+            border-color: #86EFA9;
+        }
+
+        .interest-form select option {
+            background: #1a1a1a;
+            color: #fff;
+        }
+
+        .interest-form__row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+        }
+
+        .interest-form__submit {
+            width: 100%;
+            background: #86EFA9;
+            color: #0a0a0a;
+            font-weight: 800;
+            font-size: 0.92rem;
+            padding: 0.9rem;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-family: inherit;
+            transition: opacity 0.2s;
+            margin-top: 0.5rem;
+        }
+
+        .interest-form__submit:hover { opacity: 0.88; }
+        .interest-form__submit:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .interest-modal__success {
+            display: none;
+            text-align: center;
+            padding: 1rem 0;
+        }
+
+        .interest-modal__success .tick {
+            font-size: 2.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .interest-modal__success h3 {
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: #86EFA9;
+            margin-bottom: 0.5rem;
+        }
+
+        .interest-modal__success p {
+            font-size: 0.85rem;
+            color: rgba(255,255,255,0.55);
+            line-height: 1.6;
+        }
+
+        .interest-form__error {
+            font-size: 0.78rem;
+            color: #f87171;
+            margin-top: -0.25rem;
+            display: none;
+        }
+
+        .not-included-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: rgba(255,255,255,0.55);
+        }
+
+        .not-included-item::before {
+            content: '✕';
+            color: #f87171;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        @media (max-width: 480px) {
+            .interest-form__row { grid-template-columns: 1fr; }
+            .includes-cols { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar" id="navbar">
+        <div class="container">
+            <div class="nav-content">
+                <div class="logo">
+                    <a href="index.html">
+                        <img src="images/logo-transparent.png" alt="Makena Logo">
+                    </a>
+                </div>
+                <button class="mobile-menu-toggle" id="mobileMenuToggle">
+                    <span></span><span></span><span></span>
+                </button>
+                <ul class="nav-links" id="navLinks">
+                    <li><a href="afro-plus-dc.html">AfroPlusFest DC</a></li>
+                    <li><a href="trips.html" class="active">Group Trips</a></li>
+                    <li><a href="index.html#links">Connect</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <section class="trip-hero">
+        <div class="container">
+            <div class="trip-hero__eyebrow">Makena Group Travel</div>
+            <h1>Travel Together.<br><span>Party Better.</span></h1>
+            <p>All-inclusive group experiences built around the things you love — boat parties, island adventures, group dinners, and unforgettable nights out. No stress, just vibes.</p>
+            <button class="btn btn-primary" id="openInterestModal">I'm Interested</button>
+        </div>
+    </section>
+
+    <!-- Activities -->
+    <section class="trip-section">
+        <div class="container">
+            <div class="trip-section__header">
+                <h2>What's In Every Trip</h2>
+                <p>Every Makena group trip is built around the same core experiences — curated so you never have to figure anything out.</p>
+            </div>
+            <div class="activities-grid">
+                <div class="activity-card">
+                    <span class="activity-card__icon">⛵</span>
+                    <h4>Private Catamaran</h4>
+                    <p>Open bar, DJ on deck, snorkeling, and a sandbar stop. This is the day everyone talks about.</p>
+                </div>
+                <div class="activity-card">
+                    <span class="activity-card__icon">🏝️</span>
+                    <h4>Island Day Trip</h4>
+                    <p>Speedboat to a stunning island. Beach lunch, open bar, crystal clear water, and all the group photos.</p>
+                </div>
+                <div class="activity-card">
+                    <span class="activity-card__icon">🏍️</span>
+                    <h4>Adventure Day</h4>
+                    <p>Dune buggies, ATV rides, zip-lines, or waterfall hikes — your choice of adrenaline.</p>
+                </div>
+                <div class="activity-card">
+                    <span class="activity-card__icon">🎉</span>
+                    <h4>Makena Night Party</h4>
+                    <p>One night, the whole group. DJ, themed dress code, and that Makena energy you already know.</p>
+                </div>
+                <div class="activity-card">
+                    <span class="activity-card__icon">🍽️</span>
+                    <h4>Group Dinners</h4>
+                    <p>Private dinner setups, curated menus, drinks included. No splitting bills, no headaches.</p>
+                </div>
+                <div class="activity-card">
+                    <span class="activity-card__icon">🏨</span>
+                    <h4>All-Inclusive Resort</h4>
+                    <p>4 nights fully covered — food, drinks, pools, beach access. Every meal sorted from day one.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Itinerary -->
+    <section class="trip-section trip-section--alt">
+        <div class="container">
+            <div class="trip-section__header">
+                <h2>How the Week Looks</h2>
+                <p>5 days, zero planning required on your end.</p>
+            </div>
+            <ul class="itinerary-list">
+                <li>
+                    <div class="itin-day"><span>Day</span><span>1</span></div>
+                    <div class="itin-info">
+                        <h4>Arrival & Welcome Mixer</h4>
+                        <p>Private airport transfers, hotel check-in, welcome gift bag, and the first drinks together as a group.</p>
+                    </div>
+                </li>
+                <li>
+                    <div class="itin-day"><span>Day</span><span>2</span></div>
+                    <div class="itin-info">
+                        <h4>Private Catamaran Boat Party</h4>
+                        <p>Full-day private catamaran — open bar, DJ, snorkeling stop, lunch on board, and a sandbar sunset.</p>
+                    </div>
+                </li>
+                <li>
+                    <div class="itin-day"><span>Day</span><span>3</span></div>
+                    <div class="itin-info">
+                        <h4>Island Day Trip</h4>
+                        <p>Speedboat to a picture-perfect island. Natural pools, beach lunch with open bar, free beach time.</p>
+                    </div>
+                </li>
+                <li>
+                    <div class="itin-day"><span>Day</span><span>4</span></div>
+                    <div class="itin-info">
+                        <h4>Adventure Day + Makena Night Party</h4>
+                        <p>Morning adrenaline — buggies, ATV or zip-line. Evening: private group dinner. Night: All White Makena party.</p>
+                    </div>
+                </li>
+                <li>
+                    <div class="itin-day"><span>Day</span><span>5</span></div>
+                    <div class="itin-info">
+                        <h4>Farewell & Departure</h4>
+                        <p>Last morning on the beach, group photo, then private transfers back to the airport.</p>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </section>
+
+    <!-- What's Included -->
+    <section class="trip-section">
+        <div class="container">
+            <div class="trip-section__header">
+                <h2>Everything's Covered</h2>
+                <p>One all-inclusive price. No hidden extras. Just show up.</p>
+            </div>
+            <div class="includes-cols">
+                <div class="check-item">4-Night All-Inclusive Resort</div>
+                <div class="check-item">Round-Trip Airport Transfers</div>
+                <div class="check-item">Private Catamaran (open bar)</div>
+                <div class="check-item">Island Day Trip</div>
+                <div class="check-item">Adventure Day Activity</div>
+                <div class="check-item">Club Night Entry + Drinks</div>
+                <div class="check-item">Makena Group Dinner</div>
+                <div class="check-item">All White Night Party</div>
+                <div class="check-item">All Meals & Drinks at Resort</div>
+                <div class="check-item">Welcome Gift Bag</div>
+            </div>
+
+            <div style="margin-top: 2.5rem; max-width: 560px; margin-left: auto; margin-right: auto;">
+                <h3 style="font-size: 1.1rem; font-weight: 700; color: #fff; margin-bottom: 1rem;">Not Included</h3>
+                <div class="includes-cols">
+                    <div class="not-included-item">Flights</div>
+                    <div class="not-included-item">Personal shopping</div>
+                    <div class="not-included-item">Spa treatments</div>
+                    <div class="not-included-item">Tips (recommended)</div>
+                </div>
+            </div>
+
+            <p class="pricing-note" style="margin-top: 1.5rem;">Pricing will be released once we confirm destination and group size. Express your interest below and we'll be in touch.</p>
+        </div>
+    </section>
+
+    <!-- CTA Band -->
+    <section class="trip-cta-band">
+        <div class="container">
+            <h2>Sound Like Your Kind of Trip?</h2>
+            <p>Drop your details and we'll reach out once we have enough interest. No commitment required — just let us know you're in.</p>
+            <button class="btn btn-primary" id="openInterestModal2">I'm Interested</button>
+        </div>
+    </section>
+
+    <!-- Interest Modal -->
+    <div class="interest-modal__backdrop" id="interestModal" role="dialog" aria-modal="true" aria-labelledby="interestModalTitle">
+        <div class="interest-modal__card">
+            <button class="interest-modal__close" id="closeInterestModal" aria-label="Close">✕</button>
+
+            <div id="interestFormWrap">
+                <h3 id="interestModalTitle">Count Me In</h3>
+                <p>No commitment needed. We'll reach out with details once we have a sense of numbers.</p>
+
+                <form class="interest-form" id="interestForm" novalidate>
+                    <div class="interest-form__row">
+                        <div>
+                            <label for="tripFirstName">First Name *</label>
+                            <input type="text" id="tripFirstName" name="firstName" placeholder="First name" required>
+                        </div>
+                        <div>
+                            <label for="tripLastName">Last Name</label>
+                            <input type="text" id="tripLastName" name="lastName" placeholder="Last name">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="tripEmail">Email Address *</label>
+                        <input type="email" id="tripEmail" name="email" placeholder="you@email.com" required>
+                    </div>
+
+                    <div>
+                        <label for="tripPhone">Phone Number *</label>
+                        <input type="tel" id="tripPhone" name="phone" placeholder="+1 555 000 0000" required>
+                    </div>
+
+                    <div>
+                        <label for="tripCountry">Country of Origin *</label>
+                        <select id="tripCountry" name="country" required>
+                            <option value="" disabled selected>Select your country</option>
+                            <option>United States</option>
+                            <option>United Kingdom</option>
+                            <option>Canada</option>
+                            <option>France</option>
+                            <option>Germany</option>
+                            <option>Nigeria</option>
+                            <option>Ghana</option>
+                            <option>Cameroon</option>
+                            <option>Ivory Coast</option>
+                            <option>Senegal</option>
+                            <option>South Africa</option>
+                            <option>Kenya</option>
+                            <option>Jamaica</option>
+                            <option>Trinidad and Tobago</option>
+                            <option>Barbados</option>
+                            <option>Dominican Republic</option>
+                            <option>Brazil</option>
+                            <option>Colombia</option>
+                            <option>Spain</option>
+                            <option>Portugal</option>
+                            <option>Netherlands</option>
+                            <option>Belgium</option>
+                            <option>Switzerland</option>
+                            <option>Italy</option>
+                            <option>Other</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="tripGuests">How many people would you bring (including yourself)?</label>
+                        <select id="tripGuests" name="guests">
+                            <option value="1">Just me</option>
+                            <option value="2">2 people</option>
+                            <option value="3">3 people</option>
+                            <option value="4">4 people</option>
+                            <option value="5+">5 or more</option>
+                        </select>
+                    </div>
+
+                    <p class="interest-form__error" id="interestFormError">Something went wrong. Please try again.</p>
+
+                    <button type="submit" class="interest-form__submit" id="interestSubmitBtn">Send My Interest</button>
+                </form>
+            </div>
+
+            <div class="interest-modal__success" id="interestSuccess">
+                <div class="tick">✅</div>
+                <h3>You're on the list!</h3>
+                <p>We've got your details. We'll be in touch as soon as we have enough interest to confirm dates and destination. Keep an eye on your inbox.</p>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-bottom">
+                <p>&copy; 2026 Makena Entertainment. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+    <script>
+        (function () {
+            var modal = document.getElementById('interestModal');
+            var form = document.getElementById('interestForm');
+            var formWrap = document.getElementById('interestFormWrap');
+            var success = document.getElementById('interestSuccess');
+            var errorEl = document.getElementById('interestFormError');
+            var submitBtn = document.getElementById('interestSubmitBtn');
+
+            function openModal() {
+                modal.classList.add('is-open');
+                document.body.style.overflow = 'hidden';
+            }
+
+            function closeModal() {
+                modal.classList.remove('is-open');
+                document.body.style.overflow = '';
+            }
+
+            document.getElementById('openInterestModal').addEventListener('click', openModal);
+            document.getElementById('openInterestModal2').addEventListener('click', openModal);
+            document.getElementById('closeInterestModal').addEventListener('click', closeModal);
+
+            modal.addEventListener('click', function (e) {
+                if (e.target === modal) closeModal();
+            });
+
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape') closeModal();
+            });
+
+            form.addEventListener('submit', async function (e) {
+                e.preventDefault();
+                errorEl.style.display = 'none';
+
+                var firstName = document.getElementById('tripFirstName').value.trim();
+                var email = document.getElementById('tripEmail').value.trim();
+                var phone = document.getElementById('tripPhone').value.trim();
+                var country = document.getElementById('tripCountry').value;
+
+                if (!firstName || !email || !phone || !country) {
+                    errorEl.textContent = 'Please fill in all required fields.';
+                    errorEl.style.display = 'block';
+                    return;
+                }
+
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Sending…';
+
+                try {
+                    var res = await fetch('/.netlify/functions/trip-interest', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            firstName,
+                            lastName: document.getElementById('tripLastName').value.trim(),
+                            email,
+                            phone,
+                            country,
+                            guests: document.getElementById('tripGuests').value
+                        })
+                    });
+
+                    var data = await res.json();
+
+                    if (!res.ok) {
+                        throw new Error(data.error || 'Unable to submit.');
+                    }
+
+                    formWrap.style.display = 'none';
+                    success.style.display = 'block';
+                } catch (err) {
+                    errorEl.textContent = err.message || 'Something went wrong. Please try again.';
+                    errorEl.style.display = 'block';
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Send My Interest';
+                }
+            });
+        }());
+    </script>
+</body>
+</html>

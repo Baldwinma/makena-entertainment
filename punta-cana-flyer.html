@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Makena Punta Cana Trip — Nov 2026</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: #0d0d0d;
+            font-family: 'Poppins', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            padding: 2rem 1rem;
+        }
+
+        .flyer {
+            width: 100%;
+            max-width: 420px;
+            background: linear-gradient(160deg, #0f1a14 0%, #0a0a0a 60%, #0d1a1a 100%);
+            border: 1px solid rgba(134, 239, 172, 0.2);
+            border-radius: 20px;
+            overflow: hidden;
+        }
+
+        /* Header */
+        .flyer__header {
+            background: linear-gradient(135deg, #0b2a1a 0%, #0a1f10 100%);
+            padding: 2rem 1.5rem 1.5rem;
+            text-align: center;
+            border-bottom: 1px solid rgba(134, 239, 172, 0.15);
+            position: relative;
+        }
+
+        .flyer__header::before {
+            content: '🌴';
+            font-size: 2.5rem;
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .flyer__brand {
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.25em;
+            color: #86EFA9;
+            text-transform: uppercase;
+            margin-bottom: 0.4rem;
+        }
+
+        .flyer__title {
+            font-size: 1.9rem;
+            font-weight: 900;
+            color: #fff;
+            line-height: 1.1;
+            margin-bottom: 0.5rem;
+        }
+
+        .flyer__title span {
+            color: #86EFA9;
+        }
+
+        .flyer__dates {
+            display: inline-block;
+            background: rgba(134, 239, 172, 0.12);
+            border: 1px solid rgba(134, 239, 172, 0.3);
+            border-radius: 20px;
+            padding: 0.3rem 1rem;
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: #86EFA9;
+            margin-top: 0.5rem;
+            letter-spacing: 0.05em;
+        }
+
+        /* Body */
+        .flyer__body {
+            padding: 1.4rem 1.5rem;
+        }
+
+        /* Itinerary */
+        .section-label {
+            font-size: 0.62rem;
+            font-weight: 700;
+            letter-spacing: 0.2em;
+            color: #86EFA9;
+            text-transform: uppercase;
+            margin-bottom: 0.85rem;
+        }
+
+        .day-list {
+            list-style: none;
+            margin-bottom: 1.4rem;
+        }
+
+        .day-list li {
+            display: flex;
+            gap: 0.75rem;
+            align-items: flex-start;
+            padding: 0.6rem 0;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .day-list li:last-child {
+            border-bottom: none;
+        }
+
+        .day-num {
+            flex-shrink: 0;
+            width: 28px;
+            height: 28px;
+            background: rgba(134, 239, 172, 0.1);
+            border: 1px solid rgba(134, 239, 172, 0.25);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.65rem;
+            font-weight: 700;
+            color: #86EFA9;
+            margin-top: 1px;
+        }
+
+        .day-info strong {
+            display: block;
+            color: #fff;
+            font-size: 0.82rem;
+            font-weight: 600;
+            line-height: 1.3;
+        }
+
+        .day-info span {
+            color: rgba(255,255,255,0.5);
+            font-size: 0.73rem;
+        }
+
+        /* Includes */
+        .includes-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+            margin-bottom: 1.4rem;
+        }
+
+        .includes-item {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.75rem;
+            color: rgba(255,255,255,0.75);
+        }
+
+        .includes-item::before {
+            content: '✓';
+            color: #86EFA9;
+            font-weight: 700;
+            font-size: 0.7rem;
+            flex-shrink: 0;
+        }
+
+        /* Divider */
+        .divider {
+            border: none;
+            border-top: 1px solid rgba(255,255,255,0.08);
+            margin: 1.2rem 0;
+        }
+
+        /* Pricing */
+        .pricing-row {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .price-card {
+            flex: 1;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 10px;
+            padding: 0.7rem 0.6rem;
+            text-align: center;
+        }
+
+        .price-card--featured {
+            border-color: rgba(134, 239, 172, 0.35);
+            background: rgba(134, 239, 172, 0.06);
+        }
+
+        .price-card__tier {
+            font-size: 0.6rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.45);
+            margin-bottom: 0.2rem;
+        }
+
+        .price-card--featured .price-card__tier {
+            color: #86EFA9;
+        }
+
+        .price-card__amount {
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: #fff;
+            line-height: 1;
+        }
+
+        .price-card__sub {
+            font-size: 0.6rem;
+            color: rgba(255,255,255,0.4);
+            margin-top: 0.2rem;
+        }
+
+        .flights-note {
+            text-align: center;
+            font-size: 0.68rem;
+            color: rgba(255,255,255,0.35);
+            margin-bottom: 1.25rem;
+        }
+
+        /* CTA */
+        .cta {
+            display: block;
+            width: 100%;
+            background: #86EFA9;
+            color: #0a0a0a;
+            text-align: center;
+            font-weight: 800;
+            font-size: 0.88rem;
+            padding: 0.85rem;
+            border-radius: 10px;
+            text-decoration: none;
+            letter-spacing: 0.03em;
+        }
+
+        /* Footer */
+        .flyer__footer {
+            padding: 1rem 1.5rem;
+            background: rgba(0,0,0,0.3);
+            border-top: 1px solid rgba(255,255,255,0.06);
+            text-align: center;
+        }
+
+        .flyer__footer p {
+            font-size: 0.68rem;
+            color: rgba(255,255,255,0.3);
+        }
+
+        .flyer__footer strong {
+            color: rgba(255,255,255,0.5);
+        }
+    </style>
+</head>
+<body>
+    <div class="flyer">
+
+        <div class="flyer__header">
+            <p class="flyer__brand">Makena Presents</p>
+            <h1 class="flyer__title">Punta Cana<br><span>Group Trip</span></h1>
+            <div class="flyer__dates">November 11 – 15, 2026 · 5 Days, 4 Nights</div>
+        </div>
+
+        <div class="flyer__body">
+
+            <p class="section-label">The Itinerary</p>
+
+            <ul class="day-list">
+                <li>
+                    <div class="day-num">D1</div>
+                    <div class="day-info">
+                        <strong>Arrival + Welcome Mixer</strong>
+                        <span>Nov 11 · Private transfers, check-in, welcome drinks</span>
+                    </div>
+                </li>
+                <li>
+                    <div class="day-num">D2</div>
+                    <div class="day-info">
+                        <strong>Private Catamaran Boat Party</strong>
+                        <span>Nov 12 · Open bar, DJ, snorkeling, sandbar stop</span>
+                    </div>
+                </li>
+                <li>
+                    <div class="day-num">D3</div>
+                    <div class="day-info">
+                        <strong>Saona Island Day Trip</strong>
+                        <span>Nov 13 · Speedboat out, natural pool, beach lunch & open bar</span>
+                    </div>
+                </li>
+                <li>
+                    <div class="day-num">D4</div>
+                    <div class="day-info">
+                        <strong>Adventure Day + Makena Night Party</strong>
+                        <span>Nov 14 · Dune buggies / zip-line / ATV · Group dinner · All White Night</span>
+                    </div>
+                </li>
+                <li>
+                    <div class="day-num">D5</div>
+                    <div class="day-info">
+                        <strong>Farewell & Departure</strong>
+                        <span>Nov 15 · Beach morning, group photo, transfers out</span>
+                    </div>
+                </li>
+            </ul>
+
+            <p class="section-label">Everything Included</p>
+
+            <div class="includes-grid">
+                <div class="includes-item">4-Night All-Inclusive Resort</div>
+                <div class="includes-item">Airport Transfers</div>
+                <div class="includes-item">Catamaran Boat Party</div>
+                <div class="includes-item">Saona Island Trip</div>
+                <div class="includes-item">Adventure Day Activity</div>
+                <div class="includes-item">Club Night Entry + Drinks</div>
+                <div class="includes-item">Makena Group Dinner</div>
+                <div class="includes-item">All White Night Party</div>
+                <div class="includes-item">Welcome Gift Bag</div>
+                <div class="includes-item">All Meals & Drinks</div>
+            </div>
+
+            <hr class="divider">
+
+            <p class="section-label">Pricing Per Person</p>
+
+            <div class="pricing-row">
+                <div class="price-card">
+                    <div class="price-card__tier">Standard</div>
+                    <div class="price-card__amount">$1,299</div>
+                    <div class="price-card__sub">Double occupancy</div>
+                </div>
+                <div class="price-card price-card--featured">
+                    <div class="price-card__tier">Premium</div>
+                    <div class="price-card__amount">$1,599</div>
+                    <div class="price-card__sub">Superior room</div>
+                </div>
+                <div class="price-card">
+                    <div class="price-card__tier">VIP</div>
+                    <div class="price-card__amount">$1,999</div>
+                    <div class="price-card__sub">Junior Suite</div>
+                </div>
+            </div>
+
+            <p class="flights-note">* Flights not included · Deposit to secure your spot</p>
+
+            <a href="mailto:admin@makenaevents.com" class="cta">Reserve Your Spot →</a>
+
+        </div>
+
+        <div class="flyer__footer">
+            <p><strong>makenaevents.com</strong> · admin@makenaevents.com</p>
+        </div>
+
+    </div>
+</body>
+</html>

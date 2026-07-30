@@ -462,7 +462,7 @@ const dcBoatPartyTiers = [
         id: 'tier_1',
         name: 'Tier 1',
         amount: 6500,
-        capacity: 20,
+        capacity: 9,
         lowInventoryThreshold: 5
     },
     {

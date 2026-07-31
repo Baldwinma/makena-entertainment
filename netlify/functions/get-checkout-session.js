@@ -233,6 +233,54 @@ async function sendTicketsAutomatically(event, order, tickets) {
     return { sent: true };
 }
 
+async function recordAmbassadorSale(session, storage) {
+    const supabase = getSupabase();
+    if (!supabase) return;
+
+    const discountList = (
+        session.total_details &&
+        session.total_details.breakdown &&
+        session.total_details.breakdown.discounts
+    ) || [];
+    if (!discountList.length) return;
+
+    const firstDiscount = discountList[0];
+    const promoObj = firstDiscount && firstDiscount.discount && firstDiscount.discount.promotion_code;
+    const codeString = promoObj && typeof promoObj === 'object' ? promoObj.code : null;
+    if (!codeString) return;
+
+    const { data: ambassador } = await supabase
+        .from('ambassador_applications')
+        .select('id')
+        .eq('status', 'approved')
+        .ilike('discount_code', codeString)
+        .maybeSingle();
+
+    if (!ambassador) return;
+
+    const ticketsCount = (storage.tickets || []).length || 1;
+    const amountPaid = session.amount_total || 0;
+    const discountAmount = discountList.reduce((s, d) => s + (d.amount || 0), 0);
+    const amountBeforeDiscount = amountPaid + discountAmount;
+    const eventNames = [...new Set((storage.tickets || []).map(t => t.event_name).filter(Boolean))].join(', ');
+
+    await supabase
+        .from('ambassador_sales')
+        .upsert({
+            ambassador_id: ambassador.id,
+            discount_code: codeString.toUpperCase(),
+            stripe_session_id: session.id,
+            customer_email: session.customer_details && session.customer_details.email,
+            customer_name: session.customer_details && session.customer_details.name,
+            event_names: eventNames,
+            tickets_count: ticketsCount,
+            amount_paid_cents: amountPaid,
+            amount_before_discount_cents: amountBeforeDiscount,
+            discount_amount_cents: discountAmount,
+            purchased_at: new Date(session.created * 1000).toISOString()
+        }, { onConflict: 'stripe_session_id,discount_code' });
+}
+
 exports.handler = async function(event) {
     if (event.httpMethod !== 'GET') {
         return json(405, { error: 'Method not allowed' });
@@ -251,7 +299,11 @@ exports.handler = async function(event) {
 
     try {
         const session = await stripe.checkout.sessions.retrieve(sessionId, {
-            expand: ['line_items.data.price.product', 'payment_intent']
+            expand: [
+                'line_items.data.price.product',
+                'payment_intent',
+                'total_details.breakdown.discounts.discount.promotion_code'
+            ]
         });
 
         if (session.payment_status !== 'paid') {
@@ -261,6 +313,10 @@ exports.handler = async function(event) {
         const lineItems = session.line_items.data;
         const totalQuantity = lineItems.reduce((s, li) => s + li.quantity, 0);
         const storage = await saveTicketsToSupabase(session, lineItems);
+
+        try { await recordAmbassadorSale(session, storage); } catch (e) {
+            console.error('Ambassador sale record error:', e);
+        }
         const baseUrl = getBaseUrl(event);
         const order = storage.order || {
             customer_email: session.customer_details && session.customer_details.email,

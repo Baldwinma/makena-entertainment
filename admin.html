@@ -68,6 +68,7 @@
                     <button class="admin-tab admin-tab--active" data-tab="checkin">Check-In</button>
                     <button class="admin-tab" data-tab="tickets">Manage Tickets</button>
                     <button class="admin-tab" data-tab="content">Event Details</button>
+                    <button class="admin-tab" data-tab="ambassadors">Ambassadors</button>
                 </div>
 
                 <div id="adminCheckinContent">
@@ -141,6 +142,22 @@
                     </div>
                     <div id="eventContentStatus"></div>
                     <div id="eventContentList"></div>
+                </div>
+
+                <div id="adminAmbassadorsPanel" hidden>
+                    <div class="section-header" style="margin-bottom: 1.5rem;">
+                        <h2 class="section-title" style="font-size: 1.8rem;">Ambassadors</h2>
+                        <div class="title-underline"></div>
+                        <p class="section-description">Review and manage ambassador applications. Approve to activate their discount code.</p>
+                    </div>
+                    <div class="audience-filters" id="ambassadorFilters">
+                        <button class="audience-filter-btn audience-filter-btn--active" data-filter="all">All</button>
+                        <button class="audience-filter-btn" data-filter="pending">Pending</button>
+                        <button class="audience-filter-btn" data-filter="approved">Approved</button>
+                        <button class="audience-filter-btn" data-filter="rejected">Rejected</button>
+                    </div>
+                    <div id="ambassadorStatus"></div>
+                    <div id="ambassadorList"></div>
                 </div>
             </div>
         </div>
@@ -810,11 +827,15 @@
             document.getElementById('adminCheckinContent').hidden = tabName !== 'checkin';
             document.getElementById('adminTicketsContent').hidden = tabName !== 'tickets';
             document.getElementById('adminEventContentPanel').hidden = tabName !== 'content';
+            document.getElementById('adminAmbassadorsPanel').hidden = tabName !== 'ambassadors';
             if (tabName === 'tickets' && !ticketConfigLoaded) {
                 loadTicketConfig();
             }
             if (tabName === 'content' && !eventContentLoaded) {
                 loadEventContent();
+            }
+            if (tabName === 'ambassadors' && !ambassadorsLoaded) {
+                loadAmbassadors();
             }
         }
 
@@ -823,10 +844,13 @@
         });
 
         let eventContentLoaded = false;
+        let ambassadorsLoaded = false;
+        let ambassadorFilter = 'all';
 
         logoutLink.addEventListener('click', function() {
             ticketConfigLoaded = false;
             eventContentLoaded = false;
+            ambassadorsLoaded = false;
         });
 
         // ── Ticket config ────────────────────────────────────────────────────
@@ -1137,6 +1161,247 @@
             showResult(resultEl, 'success', 'Saved', 'Event details updated. Ticket emails and viewer pages will reflect these changes immediately.');
             eventContentLoaded = false;
             loadEventContent();
+        }
+
+        // ── Ambassadors ──────────────────────────────────────────────────────
+        document.getElementById('ambassadorFilters').addEventListener('click', function(e) {
+            var btn = e.target.closest('.audience-filter-btn');
+            if (!btn) return;
+            document.querySelectorAll('#ambassadorFilters .audience-filter-btn').forEach(function(b) {
+                b.classList.remove('audience-filter-btn--active');
+            });
+            btn.classList.add('audience-filter-btn--active');
+            ambassadorFilter = btn.dataset.filter || 'all';
+            ambassadorsLoaded = false;
+            loadAmbassadors();
+        });
+
+        async function loadAmbassadors() {
+            var listEl = document.getElementById('ambassadorList');
+            var statusEl = document.getElementById('ambassadorStatus');
+            listEl.innerHTML = '<p style="color:var(--text-muted);margin:0">Loading...</p>';
+            statusEl.innerHTML = '';
+
+            var url = '/.netlify/functions/admin-ambassadors';
+            if (ambassadorFilter !== 'all') url += '?status=' + ambassadorFilter;
+
+            var response = await authedFetch(url);
+            if (response.status === 401) {
+                localStorage.removeItem(tokenKey);
+                setLoggedInState(false);
+                return;
+            }
+
+            var data = await response.json();
+            if (!response.ok) {
+                listEl.innerHTML = '';
+                showResult(statusEl, 'error', 'Failed to Load', escapeHtml(data.error || 'Could not load ambassadors.'));
+                return;
+            }
+
+            ambassadorsLoaded = true;
+            renderAmbassadors(data.ambassadors || []);
+        }
+
+        function fmtMoney(cents) {
+            return '$' + ((cents || 0) / 100).toFixed(2);
+        }
+
+        function fmtDate(val) {
+            if (!val) return '';
+            try { return new Date(val).toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' }); } catch(e) { return val; }
+        }
+
+        function renderAmbassadors(list) {
+            var listEl = document.getElementById('ambassadorList');
+
+            if (!list.length) {
+                listEl.innerHTML = '<p style="color:var(--text-muted);margin:1rem 0">No ambassadors found.</p>';
+                return;
+            }
+
+            listEl.innerHTML = list.map(function(a) {
+                var tierBadge = a.tier === 'elite'
+                    ? '<span style="background:rgba(245,158,11,0.18);color:#f59e0b;border:1px solid rgba(245,158,11,0.4);border-radius:100px;font-size:0.7rem;font-weight:700;padding:0.18rem 0.6rem;letter-spacing:0.06em;text-transform:uppercase">Elite ⭐</span>'
+                    : '<span style="background:rgba(147,51,234,0.15);color:#a855f7;border:1px solid rgba(147,51,234,0.3);border-radius:100px;font-size:0.7rem;font-weight:700;padding:0.18rem 0.6rem;letter-spacing:0.06em;text-transform:uppercase">Scout</span>';
+                var statusBadge = a.status === 'approved'
+                    ? '<span style="color:#6ee7b7;font-size:0.8rem;font-weight:600">Approved</span>'
+                    : a.status === 'rejected'
+                        ? '<span style="color:#fca5a5;font-size:0.8rem;font-weight:600">Rejected</span>'
+                        : '<span style="color:#fbbf24;font-size:0.8rem;font-weight:600">Pending</span>';
+
+                var sales = a.sales || [];
+                var ticketsSold = a.tickets_sold || 0;
+                var commission = fmtMoney(a.commission_earned_cents);
+                var totalRevenue = fmtMoney(a.total_revenue_cents);
+                var totalDiscount = fmtMoney(a.total_discount_cents);
+                var rate = a.tier === 'elite' ? '8%' : '5%';
+                var appliedDate = fmtDate(a.created_at);
+
+                // Sales history rows
+                var salesRows = sales.length
+                    ? sales.map(function(s) {
+                        return '<tr style="font-size:0.8rem;border-top:1px solid rgba(255,255,255,0.06)">' +
+                            '<td style="padding:0.4rem 0.5rem;color:var(--text-muted)">' + escapeHtml(fmtDate(s.purchased_at)) + '</td>' +
+                            '<td style="padding:0.4rem 0.5rem;color:var(--text-secondary)">' + escapeHtml(s.event_names || '') + '</td>' +
+                            '<td style="padding:0.4rem 0.5rem;text-align:center">' + (s.tickets_count || 1) + '</td>' +
+                            '<td style="padding:0.4rem 0.5rem;text-align:right">' + escapeHtml(fmtMoney(s.amount_paid_cents)) + '</td>' +
+                            '<td style="padding:0.4rem 0.5rem;text-align:right;color:#fbbf24">-' + escapeHtml(fmtMoney(s.discount_amount_cents)) + '</td>' +
+                            '<td style="padding:0.4rem 0.5rem;font-size:0.75rem;color:var(--text-muted);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + escapeHtml(s.customer_name || s.customer_email || '') + '</td>' +
+                        '</tr>';
+                    }).join('')
+                    : '<tr><td colspan="6" style="padding:0.5rem;color:var(--text-muted);font-size:0.82rem">No tracked sales yet. Sales are recorded automatically when a buyer uses this ambassador\'s discount code at checkout.</td></tr>';
+
+                var salesTracker = a.status === 'approved' ? (
+                    '<details style="margin-top:0.75rem;margin-bottom:0.5rem">' +
+                        '<summary style="font-size:0.82rem;cursor:pointer;color:var(--text-muted);font-weight:600">Sales history (' + sales.length + ' orders)</summary>' +
+                        '<div style="overflow-x:auto;margin-top:0.5rem">' +
+                        '<table style="width:100%;border-collapse:collapse;min-width:420px">' +
+                            '<thead><tr style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-muted)">' +
+                                '<th style="padding:0.3rem 0.5rem;text-align:left">Date</th>' +
+                                '<th style="padding:0.3rem 0.5rem;text-align:left">Event(s)</th>' +
+                                '<th style="padding:0.3rem 0.5rem;text-align:center">Qty</th>' +
+                                '<th style="padding:0.3rem 0.5rem;text-align:right">Paid</th>' +
+                                '<th style="padding:0.3rem 0.5rem;text-align:right">Discount</th>' +
+                                '<th style="padding:0.3rem 0.5rem;text-align:left">Buyer</th>' +
+                            '</tr></thead>' +
+                            '<tbody>' + salesRows + '</tbody>' +
+                        '</table>' +
+                        '</div>' +
+                        '<div style="margin-top:0.75rem;padding-top:0.5rem;border-top:1px solid rgba(255,255,255,0.08);display:flex;gap:1.5rem;flex-wrap:wrap">' +
+                            '<span style="font-size:0.82rem"><strong style="color:var(--text-secondary)">' + totalRevenue + '</strong> <span style="color:var(--text-muted)">revenue</span></span>' +
+                            '<span style="font-size:0.82rem"><strong style="color:#fbbf24">-' + totalDiscount + '</strong> <span style="color:var(--text-muted)">discount given</span></span>' +
+                            '<span style="font-size:0.82rem"><strong style="color:#6ee7b7">' + commission + '</strong> <span style="color:var(--text-muted)">commission (' + rate + ' of paid)</span></span>' +
+                        '</div>' +
+                        // Manual sale entry
+                        '<div style="margin-top:0.75rem;padding-top:0.5rem;border-top:1px solid rgba(255,255,255,0.08)">' +
+                            '<p style="font-size:0.78rem;color:var(--text-muted);margin-bottom:0.4rem">Add offline / manual sale:</p>' +
+                            '<div class="amb-admin-manual-sale" data-id="' + escapeHtml(a.id) + '" style="display:flex;gap:0.5rem;flex-wrap:wrap;align-items:flex-end">' +
+                                '<div><label style="font-size:0.75rem;color:var(--text-muted);display:block;margin-bottom:0.2rem">Event name</label><input class="tc-input" type="text" data-field="eventName" placeholder="e.g. Welcome Party" style="width:160px;font-size:0.82rem"></div>' +
+                                '<div><label style="font-size:0.75rem;color:var(--text-muted);display:block;margin-bottom:0.2rem">Tickets</label><input class="tc-input" type="number" min="1" step="1" value="1" data-field="ticketsCount" style="width:70px;font-size:0.82rem"></div>' +
+                                '<div><label style="font-size:0.75rem;color:var(--text-muted);display:block;margin-bottom:0.2rem">Amount paid ($)</label><input class="tc-input" type="number" min="0" step="0.01" data-field="amountPaid" placeholder="0.00" style="width:100px;font-size:0.82rem"></div>' +
+                                '<button class="btn btn-secondary amb-admin-manual-sale-btn" data-id="' + escapeHtml(a.id) + '" style="font-size:0.82rem;padding:0.45rem 0.8rem">+ Add</button>' +
+                            '</div>' +
+                        '</div>' +
+                    '</details>'
+                ) : '';
+
+                var pendingActions = a.status === 'pending' ? (
+                    '<div class="amb-admin-row__approve" data-id="' + escapeHtml(a.id) + '">' +
+                        '<input class="tc-input" type="text" placeholder="Stripe discount code (e.g. MKNA-JOHNSMIT-AB12)" style="margin-bottom:0.5rem;font-size:0.85rem" data-field="discountCode">' +
+                        '<input class="tc-input" type="text" placeholder="Internal note (optional)" style="margin-bottom:0.65rem;font-size:0.85rem" data-field="notes">' +
+                        '<div style="display:flex;gap:0.6rem">' +
+                            '<button class="btn btn-primary amb-admin-approve-btn" data-id="' + escapeHtml(a.id) + '" style="flex:1;font-size:0.85rem;padding:0.55rem">Approve</button>' +
+                            '<button class="btn btn-secondary amb-admin-reject-btn" data-id="' + escapeHtml(a.id) + '" style="flex:1;font-size:0.85rem;padding:0.55rem">Reject</button>' +
+                        '</div>' +
+                    '</div>'
+                ) : '';
+
+                // Stats block — only shown for approved ambassadors
+                var statsBlock = a.status === 'approved' ? (
+                    '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.75rem;margin:0.75rem 0 0.5rem">' +
+                        '<div style="background:var(--dark-bg-alt);border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:0.75rem 1rem">' +
+                            '<div style="font-size:1.4rem;font-weight:900;color:var(--text-primary);line-height:1">' + ticketsSold + '</div>' +
+                            '<div style="font-size:0.72rem;color:var(--text-muted);margin-top:0.25rem;text-transform:uppercase;letter-spacing:0.05em">Tickets Sold</div>' +
+                        '</div>' +
+                        '<div style="background:var(--dark-bg-alt);border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:0.75rem 1rem">' +
+                            '<div style="font-size:1.4rem;font-weight:900;color:var(--text-primary);line-height:1">' + totalRevenue + '</div>' +
+                            '<div style="font-size:0.72rem;color:var(--text-muted);margin-top:0.25rem;text-transform:uppercase;letter-spacing:0.05em">Ticket Sales</div>' +
+                        '</div>' +
+                        '<div style="background:var(--dark-bg-alt);border:1px solid rgba(16,185,129,0.15);border-radius:10px;padding:0.75rem 1rem">' +
+                            '<div style="font-size:1.4rem;font-weight:900;color:#6ee7b7;line-height:1">' + commission + '</div>' +
+                            '<div style="font-size:0.72rem;color:var(--text-muted);margin-top:0.25rem;text-transform:uppercase;letter-spacing:0.05em">Commission Earned</div>' +
+                        '</div>' +
+                    '</div>'
+                ) : '';
+
+                return '<div class="tc-ticket amb-admin-card" data-id="' + escapeHtml(a.id) + '">' +
+                    '<div class="tc-ticket__header">' +
+                        '<strong>' + escapeHtml((a.first_name || '') + ' ' + (a.last_name || '')) + '</strong>' +
+                        '<span style="display:flex;gap:0.5rem;align-items:center">' + tierBadge + statusBadge + '</span>' +
+                    '</div>' +
+                    '<div style="font-size:0.85rem;color:var(--text-muted);padding:0 0 0.25rem;display:flex;flex-wrap:wrap;gap:0.5rem 1.5rem">' +
+                        '<span>' + escapeHtml(a.email || '') + '</span>' +
+                        (a.instagram_handle ? '<span>@' + escapeHtml(a.instagram_handle) + '</span>' : '') +
+                        '<span>' + escapeHtml(a.city || '') + '</span>' +
+                        '<span>Applied ' + escapeHtml(appliedDate) + '</span>' +
+                    '</div>' +
+                    (a.discount_code ? '<div style="font-size:0.82rem;margin-bottom:0.25rem"><strong>Code:</strong> <span style="font-family:monospace;color:#f59e0b">' + escapeHtml(a.discount_code) + '</span></div>' : '') +
+                    statsBlock +
+                    (a.status === 'pending' && a.why ?
+                        '<div style="margin:0.6rem 0;padding:0.75rem;background:var(--dark-bg-alt);border-radius:8px;font-size:0.83rem;color:var(--text-muted);line-height:1.55"><strong style="color:var(--text-secondary);display:block;margin-bottom:0.3rem">Why they applied:</strong>' + escapeHtml(a.why) + '</div>'
+                    : '') +
+                    (a.notes ? '<div style="font-size:0.8rem;color:var(--text-muted);margin:0.4rem 0"><strong>Note:</strong> ' + escapeHtml(a.notes) + '</div>' : '') +
+                    pendingActions +
+                    salesTracker +
+                    '<div class="tc-tier-result amb-admin-result"></div>' +
+                '</div>';
+            }).join('');
+
+            listEl.querySelectorAll('.amb-admin-approve-btn').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    var container = btn.closest('.amb-admin-row__approve');
+                    var discountCode = container.querySelector('[data-field="discountCode"]').value.trim();
+                    var notes = container.querySelector('[data-field="notes"]').value.trim();
+                    ambassadorAction(btn.dataset.id, 'approve', { discountCode: discountCode, notes: notes });
+                });
+            });
+
+            listEl.querySelectorAll('.amb-admin-reject-btn').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    var container = btn.closest('.amb-admin-row__approve');
+                    var notes = container.querySelector('[data-field="notes"]').value.trim();
+                    ambassadorAction(btn.dataset.id, 'reject', { notes: notes });
+                });
+            });
+
+            listEl.querySelectorAll('.amb-admin-manual-sale-btn').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    var container = btn.closest('.amb-admin-manual-sale');
+                    var eventName = container.querySelector('[data-field="eventName"]').value.trim();
+                    var ticketsCount = parseInt(container.querySelector('[data-field="ticketsCount"]').value, 10) || 1;
+                    var amountPaid = parseFloat(container.querySelector('[data-field="amountPaid"]').value) || 0;
+                    if (!eventName) { alert('Enter an event name.'); return; }
+                    ambassadorAction(btn.dataset.id, 'add_manual_sale', {
+                        eventName: eventName,
+                        ticketsCount: ticketsCount,
+                        amountPaidCents: Math.round(amountPaid * 100)
+                    });
+                });
+            });
+        }
+
+        async function ambassadorAction(id, action, extra) {
+            var card = document.querySelector('.amb-admin-card[data-id="' + id + '"]');
+            var resultEl = card ? card.querySelector('.amb-admin-result') : null;
+
+            var response = await authedFetch('/.netlify/functions/admin-ambassadors', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(Object.assign({ id: id, action: action }, extra || {}))
+            });
+
+            if (response.status === 401) {
+                localStorage.removeItem(tokenKey);
+                setLoggedInState(false);
+                return;
+            }
+
+            var data = await response.json();
+
+            if (!response.ok) {
+                if (resultEl) showResult(resultEl, 'error', 'Failed', escapeHtml(data.error || 'Action failed.'));
+                return;
+            }
+
+            var msg = action === 'approve'      ? 'Ambassador approved.' :
+                      action === 'reject'       ? 'Application rejected.' :
+                      action === 'add_manual_sale' ? 'Sale recorded.' :
+                      'Done.';
+
+            if (resultEl) showResult(resultEl, 'success', 'Done', msg);
+            ambassadorsLoaded = false;
+            setTimeout(function() { loadAmbassadors(); }, 900);
         }
     </script>
 </body>

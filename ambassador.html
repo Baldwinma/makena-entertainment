@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <title>Makena Ambassador Program | Earn Money Selling Event Tickets</title>
+    <meta name="description" content="Become a Makena Ambassador. Promote events, earn commissions, and get exclusive perks including free entry and merch. Apply now — terms discussed personally after approval.">
+    <link rel="canonical" href="https://makenaevents.com/ambassador">
+    <meta property="og:title" content="Makena Ambassador Program | Join the Team">
+    <meta property="og:description" content="Promote Makena events, earn commissions, and unlock exclusive perks. Two tiers: Scout and Elite. Apply and we'll be in touch.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://makenaevents.com/ambassador">
+    <meta property="og:image" content="https://makenaevents.com/images/logo-transparent.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Makena Ambassador Program">
+    <meta name="twitter:description" content="Promote Makena events, earn commissions, and get exclusive perks. Two tiers — apply and we'll reach out with details.">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        /* ── Ambassador page styles ── */
+        .amb-tiers {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-top: 2.5rem;
+        }
+
+        .amb-tier-card {
+            border-radius: 18px;
+            padding: 2rem 1.75rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .amb-tier-card--scout {
+            background: var(--dark-bg-card);
+            border: 1px solid rgba(147, 51, 234, 0.3);
+        }
+
+        .amb-tier-card--elite {
+            background: linear-gradient(145deg, #1a1000 0%, #2a1800 60%, #1a0a00 100%);
+            border: 1.5px solid var(--secondary-color);
+            box-shadow: 0 0 40px rgba(245, 158, 11, 0.12);
+        }
+
+        .amb-tier-badge {
+            display: inline-block;
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            padding: 0.25rem 0.75rem;
+            border-radius: 100px;
+            margin-bottom: 1rem;
+        }
+
+        .amb-tier-card--scout .amb-tier-badge {
+            background: rgba(147, 51, 234, 0.18);
+            color: var(--primary-light);
+            border: 1px solid rgba(147, 51, 234, 0.35);
+        }
+
+        .amb-tier-card--elite .amb-tier-badge {
+            background: rgba(245, 158, 11, 0.18);
+            color: var(--secondary-color);
+            border: 1px solid rgba(245, 158, 11, 0.4);
+        }
+
+        .amb-tier-name {
+            font-size: 1.6rem;
+            font-weight: 900;
+            margin-bottom: 0.25rem;
+        }
+
+        .amb-tier-card--scout .amb-tier-name {
+            color: var(--primary-light);
+        }
+
+        .amb-tier-card--elite .amb-tier-name {
+            color: var(--secondary-color);
+        }
+
+        .amb-tier-subtitle {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+        }
+
+        .amb-tier-rate {
+            font-size: 2.2rem;
+            font-weight: 900;
+            line-height: 1;
+            margin-bottom: 0.2rem;
+        }
+
+        .amb-tier-card--scout .amb-tier-rate {
+            color: #fff;
+        }
+
+        .amb-tier-card--elite .amb-tier-rate {
+            color: var(--secondary-color);
+        }
+
+        .amb-tier-rate-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 1.75rem;
+        }
+
+        .amb-tier-card--elite .amb-tier-rate-label {
+            color: rgba(245, 158, 11, 0.7);
+        }
+
+        .amb-perks {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+        }
+
+        .amb-perks li {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.6rem;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            line-height: 1.4;
+        }
+
+        .amb-perks li::before {
+            content: '✓';
+            flex-shrink: 0;
+            font-weight: 700;
+            margin-top: 0.05rem;
+        }
+
+        .amb-tier-card--scout .amb-perks li::before {
+            color: var(--primary-light);
+        }
+
+        .amb-tier-card--elite .amb-perks li::before {
+            color: var(--secondary-color);
+        }
+
+        .amb-perks li strong {
+            color: var(--text-primary);
+        }
+
+        .amb-vs-divider {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            letter-spacing: 0.05em;
+        }
+
+        /* Milestones */
+        .amb-milestones {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.25rem;
+            margin-top: 2rem;
+        }
+
+        .amb-milestone {
+            background: var(--dark-bg-card);
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            border-radius: 14px;
+            padding: 1.5rem 1.25rem;
+            text-align: center;
+        }
+
+        .amb-milestone__num {
+            font-size: 2rem;
+            font-weight: 900;
+            line-height: 1;
+            margin-bottom: 0.3rem;
+        }
+
+        .amb-milestone:nth-child(1) .amb-milestone__num { color: var(--primary-light); }
+        .amb-milestone:nth-child(2) .amb-milestone__num { color: var(--secondary-color); }
+        .amb-milestone:nth-child(3) .amb-milestone__num { color: #ec4899; }
+
+        .amb-milestone__label {
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-muted);
+            margin-bottom: 0.6rem;
+        }
+
+        .amb-milestone__reward {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            line-height: 1.4;
+        }
+
+        /* Steps */
+        .amb-steps {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            margin-top: 2rem;
+            counter-reset: steps;
+        }
+
+        .amb-step {
+            background: var(--dark-bg-card);
+            border-radius: 14px;
+            padding: 1.75rem 1.5rem;
+            position: relative;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .amb-step__num {
+            width: 2.2rem;
+            height: 2.2rem;
+            border-radius: 50%;
+            background: var(--gradient-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .amb-step__title {
+            font-size: 1.05rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .amb-step__body {
+            font-size: 0.88rem;
+            color: var(--text-muted);
+            line-height: 1.55;
+        }
+
+        /* FAQ accordion (reuse faq styles from index) */
+        .amb-faq-list {
+            margin-top: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+        }
+
+        .amb-faq-item {
+            background: var(--dark-bg-card);
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .amb-faq-item summary {
+            cursor: pointer;
+            padding: 1rem 1.25rem;
+            font-weight: 600;
+            font-size: 0.95rem;
+            list-style: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .amb-faq-item summary::-webkit-details-marker { display: none; }
+
+        .amb-faq-item summary::after {
+            content: '+';
+            font-size: 1.2rem;
+            font-weight: 300;
+            color: var(--primary-light);
+            flex-shrink: 0;
+            transition: transform 0.2s;
+        }
+
+        .amb-faq-item[open] summary::after {
+            transform: rotate(45deg);
+        }
+
+        .amb-faq-answer {
+            padding: 0 1.25rem 1rem;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        /* Form */
+        .amb-form-card {
+            background: var(--dark-bg-card);
+            border: 1px solid rgba(147, 51, 234, 0.25);
+            border-radius: 18px;
+            padding: 2.25rem 2rem;
+            max-width: 660px;
+            margin: 2rem auto 0;
+        }
+
+        .amb-form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .amb-field {
+            margin-bottom: 1.1rem;
+        }
+
+        .amb-field label {
+            display: block;
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 0.4rem;
+            letter-spacing: 0.03em;
+        }
+
+        .amb-field label .amb-optional {
+            font-weight: 400;
+            color: var(--text-muted);
+        }
+
+        .amb-input,
+        .amb-select,
+        .amb-textarea {
+            width: 100%;
+            background: var(--dark-bg-alt);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 9px;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 0.95rem;
+            padding: 0.65rem 0.9rem;
+            transition: border-color 0.2s;
+            outline: none;
+        }
+
+        .amb-input:focus,
+        .amb-select:focus,
+        .amb-textarea:focus {
+            border-color: var(--primary-light);
+        }
+
+        .amb-select {
+            appearance: none;
+            cursor: pointer;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%239ca3af' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.9rem center;
+            padding-right: 2.2rem;
+        }
+
+        .amb-textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .amb-form-note {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 1.25rem;
+            text-align: center;
+        }
+
+        .amb-submit-btn {
+            width: 100%;
+            padding: 0.9rem;
+            margin-top: 1.25rem;
+            font-size: 1rem;
+            font-weight: 700;
+            border-radius: 10px;
+            border: none;
+            background: var(--gradient-primary);
+            color: #fff;
+            cursor: pointer;
+            transition: opacity 0.2s, transform 0.15s;
+        }
+
+        .amb-submit-btn:hover:not(:disabled) {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        .amb-submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .amb-form-result {
+            margin-top: 1.25rem;
+            border-radius: 10px;
+            padding: 1.1rem 1.25rem;
+            font-size: 0.9rem;
+            line-height: 1.55;
+            display: none;
+        }
+
+        .amb-form-result--success {
+            background: rgba(16, 185, 129, 0.12);
+            border: 1px solid rgba(16, 185, 129, 0.35);
+            color: #6ee7b7;
+            display: block;
+        }
+
+        .amb-form-result--error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #fca5a5;
+            display: block;
+        }
+
+        .amb-form-result__title {
+            font-weight: 700;
+            margin-bottom: 0.3rem;
+        }
+
+        .amb-code-chip {
+            display: inline-block;
+            font-family: monospace;
+            font-size: 1.05rem;
+            letter-spacing: 0.06em;
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: 6px;
+            padding: 0.2rem 0.6rem;
+            margin-top: 0.4rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 720px) {
+            .amb-tiers {
+                grid-template-columns: 1fr;
+            }
+            .amb-vs-divider {
+                display: none;
+            }
+            .amb-milestones {
+                grid-template-columns: 1fr;
+            }
+            .amb-steps {
+                grid-template-columns: 1fr;
+            }
+            .amb-form-row {
+                grid-template-columns: 1fr;
+            }
+            .amb-form-card {
+                padding: 1.5rem 1.25rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar" id="navbar">
+        <div class="container">
+            <div class="nav-content">
+                <div class="logo">
+                    <a href="index.html">
+                        <img src="images/logo-transparent.png" alt="Makena Logo">
+                    </a>
+                </div>
+                <ul class="nav-links" id="navLinks">
+                    <li><a href="afro-plus-dc.html">AfroPlusFest DC</a></li>
+                    <li><a href="index.html">Events</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <section class="page-header">
+        <div class="hero-overlay"></div>
+        <div class="container">
+            <h1 class="page-title">Makena Ambassador Program</h1>
+            <p class="page-subtitle">Be part of the team that brings Makena events to your city.</p>
+            <p class="page-subtitle">Promote events, earn commissions, and get exclusive perks. Apply below — we'll reach out to discuss the details personally.</p>
+            <div style="margin-top:1.75rem;display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;">
+                <a href="#apply" class="btn btn-primary">Apply Now</a>
+                <a href="#how-it-works" class="btn btn-secondary">How It Works</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- TIERS -->
+    <section class="events" id="tiers">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Two Tiers. Grow With Us.</h2>
+                <div class="title-underline"></div>
+                <p class="section-description">Every ambassador starts as a Scout. As your impact grows, so do your perks. Commission rates and exact terms are discussed personally once you're approved.</p>
+            </div>
+
+            <div class="amb-tiers">
+                <!-- Scout -->
+                <div class="amb-tier-card amb-tier-card--scout">
+                    <span class="amb-tier-badge">Scout Tier</span>
+                    <div class="amb-tier-name">Scout</div>
+                    <div class="amb-tier-subtitle">Where every ambassador starts</div>
+                    <ul class="amb-perks" style="margin-top:1rem">
+                        <li>Your own personal <strong>discount code</strong> to share with friends and followers</li>
+                        <li>Earn a <strong>commission</strong> on every ticket sold through your code</li>
+                        <li><strong>Free entry</strong> to Makena events</li>
+                        <li>Early access to event announcements before the public</li>
+                        <li>Milestone rewards as your sales grow</li>
+                    </ul>
+                </div>
+
+                <!-- Elite -->
+                <div class="amb-tier-card amb-tier-card--elite">
+                    <span class="amb-tier-badge">Elite Tier ⭐</span>
+                    <div class="amb-tier-name">Elite</div>
+                    <div class="amb-tier-subtitle">Unlocked when you prove your impact</div>
+                    <ul class="amb-perks" style="margin-top:1rem">
+                        <li>Everything in Scout — <strong>upgraded</strong></li>
+                        <li><strong>Higher commission rate</strong>, applied retroactively across your full sales history</li>
+                        <li><strong>Free entry + free +1</strong> to every Makena event</li>
+                        <li>Exclusive <strong>Makena merch kit</strong> sent to you</li>
+                        <li>Featured on <strong>Makena's social platforms</strong></li>
+                        <li>Top-tier <strong>milestone bonuses</strong></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- HOW IT WORKS -->
+    <section class="events" id="how-it-works" style="padding-top:0">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">How It Works</h2>
+                <div class="title-underline"></div>
+            </div>
+            <div class="amb-steps">
+                <div class="amb-step">
+                    <div class="amb-step__num">1</div>
+                    <div class="amb-step__title">Apply</div>
+                    <div class="amb-step__body">Fill out the short form below. We review every application personally and get back to you within 2–3 business days to discuss the details and see if it's a good fit.</div>
+                </div>
+                <div class="amb-step">
+                    <div class="amb-step__num">2</div>
+                    <div class="amb-step__title">Get Your Code</div>
+                    <div class="amb-step__body">Once approved, we set you up with a personal discount code. Your network uses it to save on tickets — and every purchase through your code earns you a commission.</div>
+                </div>
+                <div class="amb-step">
+                    <div class="amb-step__num">3</div>
+                    <div class="amb-step__title">Earn &amp; Level Up</div>
+                    <div class="amb-step__body">We track every sale tied to your code and pay you out regularly. The more you sell, the more you unlock — including access to higher tiers with better perks and bigger rewards.</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="events" style="padding-top:0">
+        <div class="container" style="max-width:720px">
+            <div class="section-header">
+                <h2 class="section-title">Questions</h2>
+                <div class="title-underline"></div>
+            </div>
+            <div class="amb-faq-list">
+                <details class="amb-faq-item">
+                    <summary>What happens after I apply?</summary>
+                    <div class="amb-faq-answer">We review your application and reach out personally within 2–3 business days. If it's a good fit, we'll have a quick conversation to discuss how the program works, what you can earn, and get you set up with your discount code.</div>
+                </details>
+                <details class="amb-faq-item">
+                    <summary>Do I need to be in DC to apply?</summary>
+                    <div class="amb-faq-answer">No. You can be based anywhere — if your network is buying tickets to Makena events, your code works. That said, local DC ambassadors get extra perks like free entry and free +1s they can actually use in person.</div>
+                </details>
+                <details class="amb-faq-item">
+                    <summary>Do I need a large social media following?</summary>
+                    <div class="amb-faq-answer">Not at all. We care about your community and how you engage with it, not your follower count. Some of the best ambassadors sell tickets purely through their personal network — no big platform needed.</div>
+                </details>
+                <details class="amb-faq-item">
+                    <summary>How are sales tracked?</summary>
+                    <div class="amb-faq-answer">Every ticket purchase made using your personal code is tracked automatically. You'll get a clear breakdown of your sales and earnings — no guesswork involved.</div>
+                </details>
+            </div>
+        </div>
+    </section>
+
+    <!-- APPLICATION FORM -->
+    <section class="events" id="apply" style="padding-top:0;padding-bottom:4rem">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Apply to Be an Ambassador</h2>
+                <div class="title-underline"></div>
+                <p class="section-description">Takes 2 minutes. We'll review your application and reach out within 2–3 business days.</p>
+            </div>
+
+            <div class="amb-form-card" id="ambassadorFormCard">
+                <form id="ambassadorForm" novalidate>
+                    <div class="amb-form-row">
+                        <div class="amb-field">
+                            <label for="amb-first-name">First Name</label>
+                            <input id="amb-first-name" name="firstName" class="amb-input" type="text" autocomplete="given-name" required placeholder="First name">
+                        </div>
+                        <div class="amb-field">
+                            <label for="amb-last-name">Last Name</label>
+                            <input id="amb-last-name" name="lastName" class="amb-input" type="text" autocomplete="family-name" required placeholder="Last name">
+                        </div>
+                    </div>
+
+                    <div class="amb-field">
+                        <label for="amb-email">Email Address</label>
+                        <input id="amb-email" name="email" class="amb-input" type="email" autocomplete="email" required placeholder="your@email.com">
+                    </div>
+
+                    <div class="amb-form-row">
+                        <div class="amb-field">
+                            <label for="amb-instagram">Instagram Handle <span class="amb-optional">(optional)</span></label>
+                            <input id="amb-instagram" name="instagram" class="amb-input" type="text" placeholder="@yourhandle" autocomplete="off" autocapitalize="none" spellcheck="false">
+                        </div>
+                        <div class="amb-field">
+                            <label for="amb-city">City / Location</label>
+                            <input id="amb-city" name="city" class="amb-input" type="text" autocomplete="address-level2" required placeholder="e.g. Washington DC">
+                        </div>
+                    </div>
+
+                    <div class="amb-field">
+                        <label for="amb-how-heard">How did you hear about Makena? <span class="amb-optional">(optional)</span></label>
+                        <select id="amb-how-heard" name="howHeard" class="amb-select">
+                            <option value="">Select one...</option>
+                            <option value="instagram">Instagram</option>
+                            <option value="tiktok">TikTok</option>
+                            <option value="friend">A friend</option>
+                            <option value="attended">Attended a Makena event</option>
+                            <option value="flyer">Flyer / poster</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+
+                    <div class="amb-field">
+                        <label for="amb-why">Why do you want to be a Makena Ambassador?</label>
+                        <textarea id="amb-why" name="why" class="amb-textarea" rows="4" required placeholder="Tell us about your community, how you'd promote events, or why Makena is a good fit for you. (Minimum 20 characters)"></textarea>
+                    </div>
+
+                    <button type="submit" class="amb-submit-btn" id="ambSubmitBtn">Apply Now</button>
+
+                    <p class="amb-form-note">By applying you agree to represent Makena honestly and in line with our community standards. We don't sell or share your information with third parties.</p>
+                </form>
+
+                <div class="amb-form-result" id="ambFormResult"></div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <img src="images/logo-transparent.png" alt="Makena Entertainment" class="footer-logo">
+                    <p class="footer-tagline">Bringing the culture to the world.</p>
+                </div>
+                <div class="footer-links">
+                    <a href="afro-plus-dc.html">AfroPlusFest DC</a>
+                    <a href="index.html">All Events</a>
+                    <a href="ambassador.html">Ambassador Program</a>
+                    <a href="mailto:admin@makenaevents.com">Contact Us</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Makena Entertainment LLC. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+    <script>
+        document.getElementById('ambassadorForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            var btn = document.getElementById('ambSubmitBtn');
+            var resultEl = document.getElementById('ambFormResult');
+
+            var firstName = document.getElementById('amb-first-name').value.trim();
+            var lastName  = document.getElementById('amb-last-name').value.trim();
+            var email     = document.getElementById('amb-email').value.trim();
+            var instagram = document.getElementById('amb-instagram').value.trim();
+            var city      = document.getElementById('amb-city').value.trim();
+            var howHeard  = document.getElementById('amb-how-heard').value;
+            var why       = document.getElementById('amb-why').value.trim();
+
+            resultEl.className = 'amb-form-result';
+            resultEl.innerHTML = '';
+
+            if (!firstName) { showAmbError('Please enter your first name.'); return; }
+            if (!lastName)  { showAmbError('Please enter your last name.'); return; }
+            if (!email || !email.includes('@')) { showAmbError('Please enter a valid email address.'); return; }
+            if (!city)      { showAmbError('Please enter your city.'); return; }
+            if (!why || why.length < 20) { showAmbError('Please tell us a bit more about yourself (at least 20 characters).'); return; }
+
+            btn.disabled = true;
+            btn.textContent = 'Submitting...';
+
+            try {
+                var response = await fetch('/.netlify/functions/ambassador-apply', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ firstName, lastName, email, instagram, city, howHeard, why })
+                });
+
+                var data = await response.json();
+
+                if (!response.ok) {
+                    showAmbError(data.error || 'Something went wrong. Please try again.');
+                    return;
+                }
+
+                document.getElementById('ambassadorForm').hidden = true;
+                resultEl.className = 'amb-form-result amb-form-result--success';
+                resultEl.innerHTML =
+                    '<div class="amb-form-result__title">Application received!</div>' +
+                    '<p>Thanks ' + escapeAmbHtml(firstName) + '! We\'ve got your application and will be in touch within 2–3 business days to chat through the details.</p>' +
+                    '<p style="margin-top:0.75rem;font-size:0.82rem;opacity:0.75">Questions in the meantime? Email us at <a href="mailto:admin@makenaevents.com" style="color:inherit">admin@makenaevents.com</a>.</p>';
+            } catch (err) {
+                showAmbError('Network error — please check your connection and try again.');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Apply Now';
+            }
+        });
+
+        function showAmbError(msg) {
+            var resultEl = document.getElementById('ambFormResult');
+            resultEl.className = 'amb-form-result amb-form-result--error';
+            resultEl.innerHTML = '<div class="amb-form-result__title">Oops</div><p>' + escapeAmbHtml(msg) + '</p>';
+            resultEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        function escapeAmbHtml(value) {
+            return String(value || '').replace(/[&<>"']/g, function(c) {
+                return ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' })[c];
+            });
+        }
+    </script>
+</body>
+</html>

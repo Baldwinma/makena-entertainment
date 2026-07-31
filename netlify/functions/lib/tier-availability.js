@@ -65,7 +65,7 @@ function getTicketDateKey(dateText) {
     return `${match[3]}-${month}-${match[2].padStart(2, '0')}`;
 }
 
-function buildAvailability(ticketId, ticket, soldTickets = [], reservations = []) {
+function buildAvailability(ticketId, ticket, soldTickets = [], reservations = [], overrideMap = new Map()) {
     const tiers = getTicketTiers(ticket);
     const isWhitelistedEvent = ACTIVE_TICKET_IDS.has(ticketId);
     const ticketDateKey = getTicketDateKey(ticket.date);
@@ -113,10 +113,14 @@ function buildAvailability(ticketId, ticket, soldTickets = [], reservations = []
 
     let activeTierId = null;
     const tierAvailability = tiers.map(tier => {
+        const override = overrideMap.get(tier.id);
+        const effectiveCapacity = override ? override.capacity : tier.capacity;
+        const effectiveAmount = override && override.price_cents !== null ? override.price_cents : tier.amount;
+
         const sold = soldByTier.get(tier.id) || 0;
         const reserved = reservedByTier.get(tier.id) || 0;
         const used = sold + reserved;
-        const remaining = Number.isInteger(tier.capacity) ? Math.max(tier.capacity - used, 0) : null;
+        const remaining = Number.isInteger(effectiveCapacity) ? Math.max(effectiveCapacity - used, 0) : null;
         const soldOut = remaining === 0;
         const lowInventory = remaining !== null && remaining > 0 && remaining <= tier.lowInventoryThreshold;
 
@@ -127,9 +131,9 @@ function buildAvailability(ticketId, ticket, soldTickets = [], reservations = []
         return {
             id: tier.id,
             name: tier.name,
-            amount: tier.amount,
+            amount: effectiveAmount,
             currency: tier.currency || ticket.currency,
-            capacity: tier.capacity,
+            capacity: effectiveCapacity,
             sold,
             reserved,
             remaining,
@@ -154,13 +158,28 @@ function buildAvailability(ticketId, ticket, soldTickets = [], reservations = []
     };
 }
 
-async function getAvailabilityForTicket(supabase, ticketId) {
+async function getAvailabilityForTicket(supabase, ticketId, preloadedOverrides = null) {
     const ticket = getTicketDefinition(ticketId);
     if (!ticket) {
         return null;
     }
 
-    const [{ data: soldTickets, error: ticketsError }, { data: reservations, error: reservationsError }] = await Promise.all([
+    let overridesPromise;
+    if (preloadedOverrides !== null) {
+        overridesPromise = Promise.resolve(preloadedOverrides);
+    } else {
+        overridesPromise = supabase
+            .from('ticket_config_overrides')
+            .select('tier_id, price_cents, capacity')
+            .eq('ticket_id', ticketId)
+            .then(({ data }) => {
+                const map = new Map();
+                (data || []).forEach(o => map.set(o.tier_id, o));
+                return map;
+            });
+    }
+
+    const [{ data: soldTickets, error: ticketsError }, { data: reservations, error: reservationsError }, overrideMap] = await Promise.all([
         supabase
             .from('event_tickets')
             .select('ticket_tier_id')
@@ -171,7 +190,8 @@ async function getAvailabilityForTicket(supabase, ticketId) {
             .select('tier_id, quantity')
             .eq('ticket_id', ticketId)
             .eq('status', 'pending')
-            .gt('expires_at', getNowIso())
+            .gt('expires_at', getNowIso()),
+        overridesPromise
     ]);
 
     if (ticketsError) {
@@ -182,12 +202,27 @@ async function getAvailabilityForTicket(supabase, ticketId) {
         throw reservationsError;
     }
 
-    return buildAvailability(ticketId, ticket, soldTickets || [], reservations || []);
+    return buildAvailability(ticketId, ticket, soldTickets || [], reservations || [], overrideMap);
 }
 
 async function listAvailability(supabase) {
     const ticketIds = listTicketDefinitions().map(ticket => ticket.id);
-    return Promise.all(ticketIds.map(ticketId => getAvailabilityForTicket(supabase, ticketId)));
+
+    const { data: allOverrides } = await supabase
+        .from('ticket_config_overrides')
+        .select('ticket_id, tier_id, price_cents, capacity');
+
+    const overridesByTicket = new Map();
+    (allOverrides || []).forEach(o => {
+        if (!overridesByTicket.has(o.ticket_id)) {
+            overridesByTicket.set(o.ticket_id, new Map());
+        }
+        overridesByTicket.get(o.ticket_id).set(o.tier_id, o);
+    });
+
+    return Promise.all(ticketIds.map(ticketId =>
+        getAvailabilityForTicket(supabase, ticketId, overridesByTicket.get(ticketId) || new Map())
+    ));
 }
 
 module.exports = {

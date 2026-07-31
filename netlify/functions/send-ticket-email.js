@@ -228,6 +228,17 @@ exports.handler = async function(event) {
         return json(403, { error: 'Tickets can only be sent to the purchaser email address.' });
     }
 
+    const { data: contentOverride } = await supabase
+        .from('event_content_overrides')
+        .select('location, description')
+        .eq('event_name', ticket.event_name)
+        .maybeSingle();
+
+    if (contentOverride) {
+        if (contentOverride.location) ticket = { ...ticket, event_location: contentOverride.location };
+        if (contentOverride.description) ticket = { ...ticket, event_description: contentOverride.description };
+    }
+
     try {
         const data = await sendTicketEmail({ event, ticket, to });
         return json(200, {

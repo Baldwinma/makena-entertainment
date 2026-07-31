@@ -3121,3 +3121,212 @@ body.checkout-modal-open {
     padding-top: 1rem;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
+
+/* ── Admin tabs ──────────────────────────────────────────────────────────── */
+.admin-tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.admin-tab {
+    padding: 0.55rem 1.1rem;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--text-secondary);
+    font: inherit;
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: border-color 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+}
+
+.admin-tab:hover {
+    border-color: rgba(147, 51, 234, 0.55);
+    background: rgba(147, 51, 234, 0.1);
+    color: var(--text-primary);
+}
+
+.admin-tab--active {
+    border-color: rgba(147, 51, 234, 0.8);
+    background: rgba(147, 51, 234, 0.2);
+    color: var(--text-primary);
+}
+
+/* ── Ticket config panel ─────────────────────────────────────────────────── */
+.tc-ticket {
+    margin-bottom: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.tc-ticket__header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.75rem 1rem;
+    background: rgba(255, 255, 255, 0.04);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.tc-ticket__header strong {
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    line-height: 1.3;
+}
+
+.tc-ticket__header span {
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    white-space: nowrap;
+}
+
+.tc-tier-row {
+    padding: 0.875rem 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.tc-tier-row:last-child {
+    border-bottom: none;
+}
+
+.tc-tier-row__info {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 0.625rem;
+    flex-wrap: wrap;
+}
+
+.tc-tier-name {
+    color: var(--text-primary);
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.tc-tier-default {
+    color: var(--text-muted);
+    font-size: 0.78rem;
+}
+
+.tc-tier-override-tag {
+    padding: 0.15rem 0.5rem;
+    border-radius: 999px;
+    background: rgba(245, 158, 11, 0.15);
+    color: #F59E0B;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.tc-tier-updated {
+    color: var(--text-muted);
+    font-size: 0.75rem;
+}
+
+.tc-tier-row__inputs {
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-end;
+    flex-wrap: wrap;
+}
+
+.tc-input-group {
+    display: grid;
+    gap: 0.3rem;
+    flex: 1;
+    min-width: 110px;
+}
+
+.tc-input-group label {
+    color: var(--text-muted);
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.tc-input {
+    padding: 0.6rem 0.75rem;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 8px;
+    background: var(--dark-bg);
+    color: var(--text-primary);
+    font: inherit;
+    font-size: 0.9rem;
+    width: 100%;
+    -moz-appearance: textfield;
+}
+
+.tc-input::-webkit-inner-spin-button,
+.tc-input::-webkit-outer-spin-button {
+    opacity: 0.4;
+}
+
+.tc-input:focus {
+    outline: none;
+    border-color: rgba(147, 51, 234, 0.6);
+}
+
+.tc-save-btn {
+    padding: 0.6rem 1.1rem !important;
+    font-size: 0.85rem !important;
+    align-self: flex-end;
+    white-space: nowrap;
+}
+
+.tc-tier-result {
+    margin-top: 0.5rem;
+}
+
+.tc-tier-result:empty {
+    display: none;
+}
+
+.tc-tier-result .check-in-result {
+    margin-top: 0;
+    padding: 0.55rem 0.875rem;
+    font-size: 0.85rem;
+}
+
+.tc-tier-result .check-in-result h3 {
+    font-size: 0.88rem;
+    margin-bottom: 0.15rem;
+}
+
+.tc-tier-result .check-in-status-icon {
+    display: none;
+}
+
+.tc-textarea {
+    resize: vertical;
+    min-height: 72px;
+    line-height: 1.5;
+    text-transform: none;
+}
+
+.tc-event-content-row {
+    display: grid;
+    gap: 0.75rem;
+    padding: 0.875rem 1rem;
+}
+
+.tc-event-content-row__actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.tc-stop-btn {
+    padding: 0.6rem 1rem !important;
+    font-size: 0.85rem !important;
+    white-space: nowrap;
+}

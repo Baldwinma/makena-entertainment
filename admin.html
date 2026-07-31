@@ -64,6 +64,13 @@
             </div>
 
             <div class="check-in-panel" id="scannerPanel" hidden>
+                <div class="admin-tabs">
+                    <button class="admin-tab admin-tab--active" data-tab="checkin">Check-In</button>
+                    <button class="admin-tab" data-tab="tickets">Manage Tickets</button>
+                    <button class="admin-tab" data-tab="content">Event Details</button>
+                </div>
+
+                <div id="adminCheckinContent">
                 <div class="section-header" style="margin-bottom: 1.5rem;">
                     <h2 class="section-title" style="font-size: 1.8rem;">Scan Tickets</h2>
                     <div class="title-underline"></div>
@@ -113,6 +120,27 @@
                         <span id="currentAdminLabel"></span>
                     </div>
                     <div class="recent-scans__list" id="recentScansList"></div>
+                </div>
+                </div><!-- end adminCheckinContent -->
+
+                <div id="adminTicketsContent" hidden>
+                    <div class="section-header" style="margin-bottom: 1.5rem;">
+                        <h2 class="section-title" style="font-size: 1.8rem;">Manage Tickets</h2>
+                        <div class="title-underline"></div>
+                        <p class="section-description">Edit prices and availability. Changes go live immediately and affect checkout.</p>
+                    </div>
+                    <div id="ticketConfigStatus"></div>
+                    <div id="ticketConfigList"></div>
+                </div>
+
+                <div id="adminEventContentPanel" hidden>
+                    <div class="section-header" style="margin-bottom: 1.5rem;">
+                        <h2 class="section-title" style="font-size: 1.8rem;">Event Details</h2>
+                        <div class="title-underline"></div>
+                        <p class="section-description">Override descriptions and venue addresses. Updates apply to ticket emails and ticket viewer pages immediately.</p>
+                    </div>
+                    <div id="eventContentStatus"></div>
+                    <div id="eventContentList"></div>
                 </div>
             </div>
         </div>
@@ -771,6 +799,345 @@
         }
 
         setPasswordVisibility(false);
+
+        // ── Admin tabs ──────────────────────────────────────────────────────
+        let ticketConfigLoaded = false;
+
+        function switchAdminTab(tabName) {
+            document.querySelectorAll('.admin-tab').forEach(function(tab) {
+                tab.classList.toggle('admin-tab--active', tab.dataset.tab === tabName);
+            });
+            document.getElementById('adminCheckinContent').hidden = tabName !== 'checkin';
+            document.getElementById('adminTicketsContent').hidden = tabName !== 'tickets';
+            document.getElementById('adminEventContentPanel').hidden = tabName !== 'content';
+            if (tabName === 'tickets' && !ticketConfigLoaded) {
+                loadTicketConfig();
+            }
+            if (tabName === 'content' && !eventContentLoaded) {
+                loadEventContent();
+            }
+        }
+
+        document.querySelectorAll('.admin-tab').forEach(function(tab) {
+            tab.addEventListener('click', function() { switchAdminTab(tab.dataset.tab); });
+        });
+
+        let eventContentLoaded = false;
+
+        logoutLink.addEventListener('click', function() {
+            ticketConfigLoaded = false;
+            eventContentLoaded = false;
+        });
+
+        // ── Ticket config ────────────────────────────────────────────────────
+        async function loadTicketConfig() {
+            var listEl = document.getElementById('ticketConfigList');
+            var statusEl = document.getElementById('ticketConfigStatus');
+            listEl.innerHTML = '<p style="color:var(--text-muted);margin:0">Loading...</p>';
+            statusEl.innerHTML = '';
+
+            var response = await authedFetch('/.netlify/functions/admin-ticket-config');
+
+            if (response.status === 401) {
+                localStorage.removeItem(tokenKey);
+                setLoggedInState(false);
+                return;
+            }
+
+            var data = await response.json();
+
+            if (!response.ok) {
+                listEl.innerHTML = '';
+                showResult(statusEl, 'error', 'Failed to Load', escapeHtml(data.error || 'Could not load ticket config.'));
+                return;
+            }
+
+            ticketConfigLoaded = true;
+            renderTicketConfig(data.tickets || []);
+        }
+
+        function isUpcomingTicket(ticket) {
+            if (!ticket.date) return true;
+            var monthMap = {january:'01',february:'02',march:'03',april:'04',may:'05',june:'06',july:'07',august:'08',september:'09',october:'10',november:'11',december:'12'};
+            var m = String(ticket.date).match(/(\w+)\s+(\d+),\s+(\d{4})$/);
+            if (!m) return true;
+            var mo = monthMap[m[1].toLowerCase()];
+            if (!mo) return true;
+            var dateKey = m[3] + '-' + mo + '-' + m[2].padStart(2, '0');
+            return dateKey >= new Date().toISOString().slice(0, 10);
+        }
+
+        function renderTicketConfig(tickets) {
+            var listEl = document.getElementById('ticketConfigList');
+
+            var upcoming = tickets.filter(isUpcomingTicket);
+
+            if (!upcoming.length) {
+                listEl.innerHTML = '<p style="color:var(--text-muted);margin:0">No upcoming events found.</p>';
+                return;
+            }
+
+            listEl.innerHTML = upcoming.map(function(ticket) {
+                return '<div class="tc-ticket" data-ticket-id="' + escapeHtml(ticket.id) + '">' +
+                    '<div class="tc-ticket__header">' +
+                        '<strong>' + escapeHtml(ticket.name) + '</strong>' +
+                        '<span>' + escapeHtml(ticket.date || '') + '</span>' +
+                    '</div>' +
+                    '<div class="tc-tiers">' +
+                        ticket.tiers.map(function(tier) { return renderTierRow(ticket, tier); }).join('') +
+                    '</div>' +
+                '</div>';
+            }).join('');
+
+            listEl.querySelectorAll('.tc-save-btn').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    saveTierConfig(btn.dataset.ticketId, btn.dataset.tierId);
+                });
+            });
+
+            listEl.querySelectorAll('.tc-stop-btn').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    stopTierSales(btn.dataset.ticketId, btn.dataset.tierId, parseInt(btn.dataset.priceCents, 10));
+                });
+            });
+        }
+
+        function renderTierRow(ticket, tier) {
+            var currency = (ticket.currency || 'USD').toUpperCase();
+            var priceInDollars = (tier.effectivePrice / 100).toFixed(2);
+            var capacityVal = tier.effectiveCapacity !== null && tier.effectiveCapacity !== undefined ? String(tier.effectiveCapacity) : '';
+            var defaultPriceFmt = currency + ' $' + (tier.defaultPrice / 100).toFixed(2);
+            var defaultCapFmt = tier.defaultCapacity !== null && tier.defaultCapacity !== undefined ? String(tier.defaultCapacity) : '∞';
+
+            return '<div class="tc-tier-row" data-ticket-id="' + escapeHtml(ticket.id) + '" data-tier-id="' + escapeHtml(tier.id) + '">' +
+                '<div class="tc-tier-row__info">' +
+                    '<span class="tc-tier-name">' + escapeHtml(tier.name) + '</span>' +
+                    '<span class="tc-tier-default">Default: ' + escapeHtml(defaultPriceFmt) + ' | Cap: ' + escapeHtml(defaultCapFmt) + '</span>' +
+                    (tier.hasOverride ? '<span class="tc-tier-override-tag">Overridden</span>' : '') +
+                    (tier.updatedBy ? '<span class="tc-tier-updated">Last saved by ' + escapeHtml(tier.updatedBy) + '</span>' : '') +
+                '</div>' +
+                '<div class="tc-tier-row__inputs">' +
+                    '<div class="tc-input-group">' +
+                        '<label>Price (' + escapeHtml(currency) + ' $)</label>' +
+                        '<input type="number" class="tc-input tc-price-input" value="' + escapeHtml(priceInDollars) + '" min="0" step="0.01">' +
+                    '</div>' +
+                    '<div class="tc-input-group">' +
+                        '<label>Capacity (blank = unlimited)</label>' +
+                        '<input type="number" class="tc-input tc-capacity-input" value="' + escapeHtml(capacityVal) + '" min="0" step="1" placeholder="∞">' +
+                    '</div>' +
+                    '<button class="btn btn-primary tc-save-btn" data-ticket-id="' + escapeHtml(ticket.id) + '" data-tier-id="' + escapeHtml(tier.id) + '">Save</button>' +
+                    '<button class="btn btn-secondary tc-stop-btn" data-ticket-id="' + escapeHtml(ticket.id) + '" data-tier-id="' + escapeHtml(tier.id) + '" data-price-cents="' + tier.effectivePrice + '">Stop Sales</button>' +
+                '</div>' +
+                '<div class="tc-tier-result"></div>' +
+            '</div>';
+        }
+
+        async function stopTierSales(ticketId, tierId, priceCents) {
+            var row = document.querySelector('.tc-tier-row[data-ticket-id="' + ticketId + '"][data-tier-id="' + tierId + '"]');
+            if (!row) { return; }
+
+            var resultEl = row.querySelector('.tc-tier-result');
+            var stopBtn = row.querySelector('.tc-stop-btn');
+
+            stopBtn.disabled = true;
+            stopBtn.textContent = 'Stopping...';
+
+            var response = await authedFetch('/.netlify/functions/admin-ticket-config', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ticketId: ticketId, tierId: tierId, priceCents: priceCents, capacity: 0 })
+            });
+            var data = await response.json();
+
+            stopBtn.disabled = false;
+            stopBtn.textContent = 'Stop Sales';
+
+            if (response.status === 401) {
+                localStorage.removeItem(tokenKey);
+                setLoggedInState(false);
+                return;
+            }
+
+            if (!response.ok) {
+                showResult(resultEl, 'error', 'Failed', escapeHtml(data.error || 'Could not stop sales.'));
+                return;
+            }
+
+            showResult(resultEl, 'warning', 'Sales Stopped', 'Capacity set to 0 — this tier is now sold out.');
+            ticketConfigLoaded = false;
+            loadTicketConfig();
+        }
+
+        async function saveTierConfig(ticketId, tierId) {
+            var row = document.querySelector('.tc-tier-row[data-ticket-id="' + ticketId + '"][data-tier-id="' + tierId + '"]');
+            if (!row) { return; }
+
+            var priceInput = row.querySelector('.tc-price-input');
+            var capacityInput = row.querySelector('.tc-capacity-input');
+            var resultEl = row.querySelector('.tc-tier-result');
+            var saveBtn = row.querySelector('.tc-save-btn');
+
+            var priceVal = priceInput.value.trim();
+            var capacityVal = capacityInput.value.trim();
+
+            if (!priceVal) {
+                showResult(resultEl, 'error', 'Missing Price', 'Enter a price in dollars.');
+                return;
+            }
+
+            var priceFloat = parseFloat(priceVal);
+            if (isNaN(priceFloat) || priceFloat < 0) {
+                showResult(resultEl, 'error', 'Invalid Price', 'Enter a valid dollar amount (e.g. 65.00).');
+                return;
+            }
+            var priceCents = Math.round(priceFloat * 100);
+
+            var capacity = null;
+            if (capacityVal !== '') {
+                capacity = parseInt(capacityVal, 10);
+                if (isNaN(capacity) || capacity < 0) {
+                    showResult(resultEl, 'error', 'Invalid Capacity', 'Enter a whole number, or leave blank for unlimited.');
+                    return;
+                }
+            }
+
+            saveBtn.disabled = true;
+            saveBtn.textContent = 'Saving...';
+
+            var response = await authedFetch('/.netlify/functions/admin-ticket-config', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ticketId: ticketId, tierId: tierId, priceCents: priceCents, capacity: capacity })
+            });
+            var data = await response.json();
+
+            saveBtn.disabled = false;
+            saveBtn.textContent = 'Save';
+
+            if (response.status === 401) {
+                localStorage.removeItem(tokenKey);
+                setLoggedInState(false);
+                return;
+            }
+
+            if (!response.ok) {
+                showResult(resultEl, 'error', 'Save Failed', escapeHtml(data.error || 'Could not save changes.'));
+                return;
+            }
+
+            var capLabel = capacity === null ? '∞ unlimited' : String(capacity);
+            showResult(resultEl, 'success', 'Saved', '$' + (priceCents / 100).toFixed(2) + ' | Capacity: ' + capLabel);
+            ticketConfigLoaded = false;
+            loadTicketConfig();
+        }
+        // ── Event content ────────────────────────────────────────────────────
+        async function loadEventContent() {
+            var listEl = document.getElementById('eventContentList');
+            var statusEl = document.getElementById('eventContentStatus');
+            listEl.innerHTML = '<p style="color:var(--text-muted);margin:0">Loading...</p>';
+            statusEl.innerHTML = '';
+
+            var response = await authedFetch('/.netlify/functions/admin-event-content');
+
+            if (response.status === 401) {
+                localStorage.removeItem(tokenKey);
+                setLoggedInState(false);
+                return;
+            }
+
+            var data = await response.json();
+
+            if (!response.ok) {
+                listEl.innerHTML = '';
+                showResult(statusEl, 'error', 'Failed to Load', escapeHtml(data.error || 'Could not load event details.'));
+                return;
+            }
+
+            eventContentLoaded = true;
+            renderEventContent(data.events || []);
+        }
+
+        function renderEventContent(events) {
+            var listEl = document.getElementById('eventContentList');
+            var upcoming = events.filter(isUpcomingTicket);
+
+            if (!upcoming.length) {
+                listEl.innerHTML = '<p style="color:var(--text-muted);margin:0">No upcoming events found.</p>';
+                return;
+            }
+
+            listEl.innerHTML = upcoming.map(function(ev) {
+                return '<div class="tc-ticket" data-event-id="' + escapeHtml(ev.id) + '">' +
+                    '<div class="tc-ticket__header">' +
+                        '<strong>' + escapeHtml(ev.name) + '</strong>' +
+                        '<span>' + escapeHtml(ev.date || '') + '</span>' +
+                    '</div>' +
+                    '<div class="tc-event-content-row">' +
+                        '<div class="tc-input-group" style="grid-column:1/-1">' +
+                            '<label>Venue / Address' + (ev.hasOverride && ev.effectiveLocation !== ev.defaultLocation ? ' <span class="tc-tier-override-tag">Overridden</span>' : '') + '</label>' +
+                            '<input type="text" class="tc-input tc-location-input" value="' + escapeHtml(ev.effectiveLocation) + '" placeholder="' + escapeHtml(ev.defaultLocation || 'Enter venue address') + '">' +
+                        '</div>' +
+                        '<div class="tc-input-group" style="grid-column:1/-1">' +
+                            '<label>Description' + (ev.hasOverride && ev.effectiveDescription !== ev.defaultDescription ? ' <span class="tc-tier-override-tag">Overridden</span>' : '') + '</label>' +
+                            '<textarea class="tc-input tc-textarea tc-description-input" rows="3" placeholder="' + escapeHtml(ev.defaultDescription || '') + '">' + escapeHtml(ev.effectiveDescription) + '</textarea>' +
+                        '</div>' +
+                        '<div class="tc-event-content-row__actions">' +
+                            (ev.updatedBy ? '<span class="tc-tier-updated">Last saved by ' + escapeHtml(ev.updatedBy) + '</span>' : '<span></span>') +
+                            '<button class="btn btn-primary tc-content-save-btn" data-event-id="' + escapeHtml(ev.id) + '">Save Changes</button>' +
+                        '</div>' +
+                        '<div class="tc-tier-result tc-content-result"></div>' +
+                    '</div>' +
+                '</div>';
+            }).join('');
+
+            listEl.querySelectorAll('.tc-content-save-btn').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    saveEventContent(btn.dataset.eventId);
+                });
+            });
+        }
+
+        async function saveEventContent(ticketId) {
+            var card = document.querySelector('.tc-ticket[data-event-id="' + ticketId + '"]');
+            if (!card) return;
+
+            var locationInput = card.querySelector('.tc-location-input');
+            var descInput = card.querySelector('.tc-description-input');
+            var resultEl = card.querySelector('.tc-content-result');
+            var saveBtn = card.querySelector('.tc-content-save-btn');
+
+            saveBtn.disabled = true;
+            saveBtn.textContent = 'Saving...';
+
+            var response = await authedFetch('/.netlify/functions/admin-event-content', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    ticketId: ticketId,
+                    location: locationInput.value.trim(),
+                    description: descInput.value.trim()
+                })
+            });
+            var data = await response.json();
+
+            saveBtn.disabled = false;
+            saveBtn.textContent = 'Save Changes';
+
+            if (response.status === 401) {
+                localStorage.removeItem(tokenKey);
+                setLoggedInState(false);
+                return;
+            }
+
+            if (!response.ok) {
+                showResult(resultEl, 'error', 'Save Failed', escapeHtml(data.error || 'Could not save changes.'));
+                return;
+            }
+
+            showResult(resultEl, 'success', 'Saved', 'Event details updated. Ticket emails and viewer pages will reflect these changes immediately.');
+            eventContentLoaded = false;
+            loadEventContent();
+        }
     </script>
 </body>
 </html>

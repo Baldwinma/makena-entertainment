@@ -54,6 +54,12 @@ exports.handler = async function(event) {
         return json(404, { error: 'Ticket not found.' });
     }
 
+    const { data: contentOverride } = await supabase
+        .from('event_content_overrides')
+        .select('location, description')
+        .eq('event_name', ticket.event_name)
+        .maybeSingle();
+
     const baseUrl = getBaseUrl(event);
 
     return json(200, {
@@ -62,7 +68,7 @@ exports.handler = async function(event) {
             eventName: ticket.event_name,
             eventDate: ticket.event_date,
             eventTime: ticket.event_time,
-            eventLocation: ticket.event_location,
+            eventLocation: (contentOverride && contentOverride.location) || ticket.event_location,
             tierName: ticket.ticket_tier_name,
             holderName: ticket.holder_name || 'Guest',
             holderEmail: ticket.holder_email,

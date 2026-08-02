@@ -309,7 +309,8 @@ exports.handler = async function(event) {
         const session = await stripe.checkout.sessions.retrieve(sessionId, {
             expand: [
                 'line_items.data.price.product',
-                'payment_intent'
+                'payment_intent',
+                'total_details.breakdown'
             ]
         });
 

@@ -205,7 +205,7 @@ exports.handler = async function(event) {
         return json(400, { error: 'Missing ticket code.' });
     }
 
-    const { data: ticket, error: ticketError } = await supabase
+    let { data: ticket, error: ticketError } = await supabase
         .from('event_tickets')
         .select('ticket_code, event_name, event_date, event_time, event_location, ticket_tier_name, holder_name, holder_email, status, checked_in')
         .eq('ticket_code', ticketCode)

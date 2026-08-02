@@ -233,7 +233,7 @@ async function sendTicketsAutomatically(event, order, tickets) {
     return { sent: true };
 }
 
-async function recordAmbassadorSale(session, storage) {
+async function recordAmbassadorSale(stripe, session, storage) {
     const supabase = getSupabase();
     if (!supabase) return;
 
@@ -245,8 +245,16 @@ async function recordAmbassadorSale(session, storage) {
     if (!discountList.length) return;
 
     const firstDiscount = discountList[0];
-    const promoObj = firstDiscount && firstDiscount.discount && firstDiscount.discount.promotion_code;
-    const codeString = promoObj && typeof promoObj === 'object' ? promoObj.code : null;
+    const promoRef = firstDiscount && firstDiscount.discount && firstDiscount.discount.promotion_code;
+    if (!promoRef) return;
+
+    let codeString;
+    if (typeof promoRef === 'object' && promoRef.code) {
+        codeString = promoRef.code;
+    } else if (typeof promoRef === 'string') {
+        const promoCode = await stripe.promotionCodes.retrieve(promoRef);
+        codeString = promoCode.code;
+    }
     if (!codeString) return;
 
     const { data: ambassador } = await supabase
@@ -301,8 +309,7 @@ exports.handler = async function(event) {
         const session = await stripe.checkout.sessions.retrieve(sessionId, {
             expand: [
                 'line_items.data.price.product',
-                'payment_intent',
-                'total_details.breakdown.discounts.discount.promotion_code'
+                'payment_intent'
             ]
         });
 
@@ -314,7 +321,7 @@ exports.handler = async function(event) {
         const totalQuantity = lineItems.reduce((s, li) => s + li.quantity, 0);
         const storage = await saveTicketsToSupabase(session, lineItems);
 
-        try { await recordAmbassadorSale(session, storage); } catch (e) {
+        try { await recordAmbassadorSale(stripe, session, storage); } catch (e) {
             console.error('Ambassador sale record error:', e);
         }
         const baseUrl = getBaseUrl(event);

@@ -1,5 +1,32 @@
-/* Root Variables - Purple & Gold Theme */
-:root {
+/* ── Theme Variables ─────────────────────────────────────────────────────── */
+
+/* Light theme (default) */
+:root,
+html[data-theme="light"] {
+    --primary-color: #00b4c8;
+    --primary-dark: #0097a7;
+    --primary-light: #33c4d4;
+    --secondary-color: #f97316;
+    --secondary-dark: #ea6c00;
+    --secondary-light: #fb923c;
+    --accent-color: #d6007c;
+    --dark-bg: #faf7f2;
+    --dark-bg-alt: #f0ebe3;
+    --dark-bg-card: #ffffff;
+    --text-primary: #1a1210;
+    --text-secondary: #5c5248;
+    --text-muted: #6b5f57;
+    --text-accent: #006b77;
+    --gradient-primary: linear-gradient(135deg, #00b4c8 0%, #d6007c 100%);
+    --gradient-secondary: linear-gradient(135deg, #f97316 0%, #d6007c 100%);
+    --gradient-hero: linear-gradient(135deg, rgba(0, 180, 200, 0.85) 0%, rgba(214, 0, 124, 0.75) 100%);
+    --navbar-bg: rgba(250, 247, 242, 0.95);
+    --navbar-bg-scrolled: rgba(250, 247, 242, 0.98);
+    --mobile-nav-bg: rgba(250, 247, 242, 0.98);
+}
+
+/* Dark theme (original purple / gold palette) */
+html[data-theme="dark"] {
     --primary-color: #9333ea;
     --primary-dark: #7e22ce;
     --primary-light: #a855f7;
@@ -13,9 +40,39 @@
     --text-primary: #ffffff;
     --text-secondary: #d1d5db;
     --text-muted: #9ca3af;
+    --text-accent: #a855f7;
     --gradient-primary: linear-gradient(135deg, #9333ea 0%, #ec4899 100%);
     --gradient-secondary: linear-gradient(135deg, #f59e0b 0%, #dc2626 100%);
     --gradient-hero: linear-gradient(135deg, rgba(147, 51, 234, 0.9) 0%, rgba(236, 72, 153, 0.8) 100%);
+    --navbar-bg: rgba(10, 10, 10, 0.95);
+    --navbar-bg-scrolled: rgba(10, 10, 10, 0.98);
+    --mobile-nav-bg: rgba(10, 10, 10, 0.98);
+}
+
+/* Auto dark theme when system preference is dark and user hasn't chosen */
+@media (prefers-color-scheme: dark) {
+    html:not([data-theme]) {
+        --primary-color: #9333ea;
+        --primary-dark: #7e22ce;
+        --primary-light: #a855f7;
+        --secondary-color: #f59e0b;
+        --secondary-dark: #d97706;
+        --secondary-light: #fbbf24;
+        --accent-color: #ec4899;
+        --dark-bg: #0a0a0a;
+        --dark-bg-alt: #1a1a1a;
+        --dark-bg-card: #222222;
+        --text-primary: #ffffff;
+        --text-secondary: #d1d5db;
+        --text-muted: #9ca3af;
+        --text-accent: #a855f7;
+        --gradient-primary: linear-gradient(135deg, #9333ea 0%, #ec4899 100%);
+        --gradient-secondary: linear-gradient(135deg, #f59e0b 0%, #dc2626 100%);
+        --gradient-hero: linear-gradient(135deg, rgba(147, 51, 234, 0.9) 0%, rgba(236, 72, 153, 0.8) 100%);
+        --navbar-bg: rgba(10, 10, 10, 0.95);
+        --navbar-bg-scrolled: rgba(10, 10, 10, 0.98);
+        --mobile-nav-bg: rgba(10, 10, 10, 0.98);
+    }
 }
 
 /* Reset & Base Styles */
@@ -48,16 +105,16 @@ body {
     position: fixed;
     top: 0;
     width: 100%;
-    background-color: rgba(10, 10, 10, 0.95);
+    background-color: var(--navbar-bg);
     backdrop-filter: blur(10px);
     z-index: 1000;
     transition: all 0.3s ease;
-    border-bottom: 1px solid rgba(147, 51, 234, 0.2);
+    border-bottom: 1px solid rgba(0, 180, 200, 0.2);
 }
 
 .navbar.scrolled {
-    background-color: rgba(10, 10, 10, 0.98);
-    box-shadow: 0 4px 20px rgba(147, 51, 234, 0.3);
+    background-color: var(--navbar-bg-scrolled);
+    box-shadow: 0 4px 20px rgba(0, 180, 200, 0.3);
 }
 
 .nav-content {
@@ -133,7 +190,7 @@ body {
 }
 
 .nav-links a:hover {
-    color: var(--primary-light);
+    color: var(--text-primary);
 }
 
 .nav-links a:hover::after {
@@ -159,9 +216,9 @@ body {
     right: 0;
     bottom: 0;
     background-image:
-        radial-gradient(circle at 20% 50%, rgba(147, 51, 234, 0.15) 0%, transparent 50%),
-        radial-gradient(circle at 80% 80%, rgba(236, 72, 153, 0.15) 0%, transparent 50%),
-        radial-gradient(circle at 40% 20%, rgba(245, 158, 11, 0.1) 0%, transparent 50%);
+        radial-gradient(circle at 20% 50%, rgba(0, 180, 200, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(214, 0, 124, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 40% 20%, rgba(249, 115, 22, 0.1) 0%, transparent 50%);
     animation: pulse 15s ease-in-out infinite;
 }
 
@@ -196,7 +253,7 @@ body {
 
 .hero-title .word {
     display: inline-block;
-    background: linear-gradient(135deg, #1a9fa6 0%, #ffaaaa 100%);
+    background: linear-gradient(135deg, #00b4c8 0%, #f9a8d4 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -218,7 +275,7 @@ body {
     font-size: clamp(1.2rem, 3vw, 1.8rem);
     font-weight: 300;
     margin-bottom: 2rem;
-    color: var(--text-secondary);
+    color: rgba(255, 255, 255, 0.88);
     animation: fadeInUp 1s ease-out 0.3s both;
 }
 
@@ -244,26 +301,27 @@ body {
 }
 
 .btn-primary {
-    background: var(--gradient-primary);
+    background: linear-gradient(135deg, var(--primary-dark) 0%, var(--accent-color) 100%);
     color: white;
-    box-shadow: 0 4px 15px rgba(147, 51, 234, 0.4);
+    box-shadow: 0 4px 15px rgba(0, 151, 167, 0.4);
 }
 
 .btn-primary:hover {
     transform: translateY(-3px);
-    box-shadow: 0 6px 25px rgba(147, 51, 234, 0.6);
+    box-shadow: 0 6px 25px rgba(0, 180, 200, 0.6);
 }
 
 .btn-secondary {
     background: transparent;
-    color: white;
-    border: 2px solid var(--primary-color);
+    color: var(--text-primary);
+    border: 2px solid var(--primary-dark);
 }
 
 .btn-secondary:hover {
-    background: var(--primary-color);
+    background: var(--primary-dark);
+    color: white;
     transform: translateY(-3px);
-    box-shadow: 0 6px 25px rgba(147, 51, 234, 0.4);
+    box-shadow: 0 6px 25px rgba(0, 151, 167, 0.4);
 }
 
 .btn-small {
@@ -292,13 +350,13 @@ body {
     color: white;
     text-decoration: none;
     transition: all 0.3s ease;
-    border: 1px solid rgba(147, 51, 234, 0.3);
+    border: 1px solid rgba(0, 180, 200, 0.3);
 }
 
 .social-icon:hover {
     background: var(--gradient-primary);
     transform: translateY(-5px) scale(1.1);
-    box-shadow: 0 10px 25px rgba(147, 51, 234, 0.5);
+    box-shadow: 0 10px 25px rgba(0, 180, 200, 0.5);
 }
 
 /* Scroll Indicator */
@@ -347,7 +405,7 @@ body {
 .page-header {
     position: relative;
     padding: 8rem 0 5rem 0;
-    background: linear-gradient(135deg, #0a0a0a 0%, #1a0a2e 50%, #16001e 100%);
+    background: linear-gradient(135deg, #00b4c8 0%, #d6007c 100%);
     overflow: hidden;
     margin-top: 90px;
 }
@@ -360,8 +418,8 @@ body {
     right: 0;
     bottom: 0;
     background-image:
-        radial-gradient(circle at 20% 50%, rgba(147, 51, 234, 0.15) 0%, transparent 50%),
-        radial-gradient(circle at 80% 80%, rgba(236, 72, 153, 0.15) 0%, transparent 50%);
+        radial-gradient(circle at 20% 50%, rgba(0, 180, 200, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(214, 0, 124, 0.15) 0%, transparent 50%);
     animation: pulse 15s ease-in-out infinite;
 }
 
@@ -389,6 +447,16 @@ body {
     max-width: 700px;
     margin-left: auto;
     margin-right: auto;
+}
+
+.page-header .page-title {
+    background: none;
+    -webkit-text-fill-color: white;
+    color: white;
+}
+
+.page-header .page-subtitle {
+    color: rgba(255, 255, 255, 0.85);
 }
 
 .page-header .btn {
@@ -456,7 +524,7 @@ section {
 }
 
 .about-text strong {
-    color: var(--primary-light);
+    color: var(--text-accent);
     font-weight: 700;
 }
 
@@ -477,12 +545,12 @@ section {
     border-radius: 20px;
     overflow: hidden;
     transition: all 0.3s ease;
-    border: 1px solid rgba(147, 51, 234, 0.2);
+    border: 1px solid rgba(0, 180, 200, 0.2);
 }
 
 .event-card:hover {
     transform: translateY(-10px);
-    box-shadow: 0 15px 40px rgba(147, 51, 234, 0.3);
+    box-shadow: 0 15px 40px rgba(0, 180, 200, 0.3);
     border-color: var(--primary-color);
 }
 
@@ -615,7 +683,7 @@ section {
 }
 
 .faq-item[open] {
-    border-color: rgba(147, 51, 234, 0.35);
+    border-color: rgba(0, 180, 200, 0.35);
 }
 
 .faq-question {
@@ -646,8 +714,8 @@ section {
     align-items: center;
     justify-content: center;
     border-radius: 50%;
-    background: rgba(147, 51, 234, 0.15);
-    color: #9333ea;
+    background: rgba(0, 107, 119, 0.15);
+    color: var(--text-accent);
     font-size: 1.2rem;
     font-weight: 400;
     line-height: 1;
@@ -656,7 +724,7 @@ section {
 
 .faq-item[open] .faq-question::after {
     content: '−';
-    background: rgba(147, 51, 234, 0.25);
+    background: rgba(0, 107, 119, 0.25);
 }
 
 .faq-question:hover {
@@ -689,13 +757,13 @@ section {
 }
 
 .faq-answer a {
-    color: #a855f7;
+    color: var(--text-accent);
     text-decoration: underline;
     text-underline-offset: 2px;
 }
 
 .faq-answer a:hover {
-    color: #c084fc;
+    color: var(--accent-color);
 }
 
 @media (max-width: 600px) {
@@ -724,7 +792,7 @@ section {
 
 .event-detail__media {
     overflow: hidden;
-    border: 1px solid rgba(147, 51, 234, 0.22);
+    border: 1px solid rgba(0, 180, 200, 0.22);
     border-radius: 16px;
     background: var(--dark-bg-card);
 }
@@ -890,7 +958,7 @@ section {
 .event-detail__tickets--aside {
     margin-top: 0;
     padding: 1.25rem;
-    border: 1px solid rgba(147, 51, 234, 0.22);
+    border: 1px solid rgba(0, 180, 200, 0.22);
     border-radius: 12px;
     background: rgba(255, 255, 255, 0.04);
 }
@@ -904,7 +972,7 @@ section {
 .package-section {
     margin: 0 auto 3rem;
     padding: 1.5rem;
-    border: 1px solid rgba(147, 51, 234, 0.22);
+    border: 1px solid rgba(0, 180, 200, 0.22);
     border-radius: 12px;
     background: rgba(255, 255, 255, 0.04);
 }
@@ -1104,7 +1172,7 @@ section {
     border: 1px solid rgba(255, 255, 255, 0.16);
     border-radius: 18px;
     background:
-        linear-gradient(135deg, rgba(147, 51, 234, 0.22), rgba(236, 72, 153, 0.18)),
+        linear-gradient(135deg, rgba(0, 180, 200, 0.22), rgba(214, 0, 124, 0.18)),
         var(--dark-bg-card);
     box-shadow: 0 24px 70px rgba(0, 0, 0, 0.5);
     text-align: center;
@@ -1165,7 +1233,7 @@ section {
     max-width: 900px;
     margin: 0 auto;
     overflow: hidden;
-    border: 1px solid rgba(147, 51, 234, 0.2);
+    border: 1px solid rgba(0, 180, 200, 0.2);
     border-radius: 16px;
     background: var(--dark-bg-card);
 }
@@ -1199,7 +1267,7 @@ section {
 .checkout-test-note {
     min-height: 1.5rem;
     margin-top: 1rem;
-    color: var(--secondary-light);
+    color: var(--text-secondary);
     font-size: 0.95rem;
 }
 
@@ -1235,15 +1303,15 @@ section {
     display: grid;
     gap: 1rem;
     padding: 1.5rem;
-    border: 1px solid rgba(245, 158, 11, 0.35);
+    border: 1px solid rgba(249, 115, 22, 0.35);
     border-radius: 14px;
     background:
-        linear-gradient(135deg, rgba(245, 158, 11, 0.14), rgba(236, 72, 153, 0.12)),
+        linear-gradient(135deg, rgba(249, 115, 22, 0.14), rgba(214, 0, 124, 0.12)),
         var(--dark-bg-card);
 }
 
 .ticket-preview__label {
-    color: var(--secondary-light);
+    color: var(--text-secondary);
     font-size: 0.75rem;
     font-weight: 700;
     letter-spacing: 0.08em;
@@ -1316,7 +1384,7 @@ section {
 
 .ticket-email-form__message {
     min-height: 1.25rem;
-    color: var(--secondary-light) !important;
+    color: var(--text-secondary) !important;
     font-size: 0.88rem;
 }
 
@@ -1324,7 +1392,7 @@ section {
     max-width: 680px;
     margin: 0 auto;
     padding: 1.5rem;
-    border: 1px solid rgba(147, 51, 234, 0.2);
+    border: 1px solid rgba(0, 180, 200, 0.2);
     border-radius: 16px;
     background: var(--dark-bg-card);
 }
@@ -1450,8 +1518,8 @@ section {
 
 .event-scan-card:hover,
 .event-scan-card:focus-visible {
-    border-color: rgba(147, 51, 234, 0.55);
-    background: rgba(147, 51, 234, 0.12);
+    border-color: rgba(0, 180, 200, 0.55);
+    background: rgba(0, 180, 200, 0.12);
     outline: none;
     transform: translateY(-1px);
 }
@@ -1992,14 +2060,14 @@ section {
 }
 
 .cart-nav-btn:hover {
-    color: var(--primary-color);
+    color: var(--text-accent);
 }
 
 .cart-badge {
     position: absolute;
     top: -5px;
     right: -7px;
-    background: var(--primary-color);
+    background: var(--accent-color);
     color: #fff;
     font-size: 0.62rem;
     font-weight: 700;
@@ -2016,12 +2084,12 @@ section {
 /* Add to Cart button */
 .btn-cart {
     background: transparent;
-    border: 2px solid var(--primary-color);
-    color: var(--primary-color);
+    border: 2px solid var(--primary-dark);
+    color: var(--text-primary);
 }
 
 .btn-cart:hover {
-    background: var(--primary-color);
+    background: var(--primary-dark);
     color: #fff;
 }
 
@@ -2151,13 +2219,13 @@ body.checkout-modal-open {
     border-radius: 20px;
     text-align: center;
     transition: all 0.3s ease;
-    border: 1px solid rgba(147, 51, 234, 0.2);
+    border: 1px solid rgba(0, 180, 200, 0.2);
 }
 
 .announcement-card:hover {
     transform: translateY(-10px);
     border-color: var(--primary-color);
-    box-shadow: 0 15px 40px rgba(147, 51, 234, 0.3);
+    box-shadow: 0 15px 40px rgba(0, 180, 200, 0.3);
 }
 
 .announcement-icon {
@@ -2169,7 +2237,7 @@ body.checkout-modal-open {
     font-size: 1.5rem;
     font-weight: 700;
     margin-bottom: 0.5rem;
-    color: var(--primary-light);
+    color: var(--accent-color);
 }
 
 .announcement-date {
@@ -2203,7 +2271,7 @@ body.checkout-modal-open {
     text-decoration: none;
     color: var(--text-primary);
     transition: all 0.3s ease;
-    border: 1px solid rgba(147, 51, 234, 0.2);
+    border: 1px solid rgba(0, 180, 200, 0.2);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -2213,12 +2281,12 @@ body.checkout-modal-open {
 .link-card:hover {
     transform: translateY(-10px);
     border-color: var(--primary-color);
-    box-shadow: 0 15px 40px rgba(147, 51, 234, 0.3);
+    box-shadow: 0 15px 40px rgba(0, 180, 200, 0.3);
 }
 
 .link-card.eventbrite:hover {
     border-color: var(--secondary-color);
-    box-shadow: 0 15px 40px rgba(245, 158, 11, 0.3);
+    box-shadow: 0 15px 40px rgba(249, 115, 22, 0.3);
 }
 
 .link-card.whatsapp:hover {
@@ -2327,7 +2395,7 @@ body.checkout-modal-open {
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
-    background: rgba(147, 51, 234, 0.8);
+    background: rgba(0, 180, 200, 0.8);
     border: none;
     color: white;
     width: 50px;
@@ -2470,13 +2538,13 @@ body.checkout-modal-open {
     border-radius: 20px;
     overflow: hidden;
     transition: all 0.3s ease;
-    border: 1px solid rgba(147, 51, 234, 0.2);
+    border: 1px solid rgba(0, 180, 200, 0.2);
     text-align: center;
 }
 
 .team-card:hover {
     transform: translateY(-10px);
-    box-shadow: 0 15px 40px rgba(147, 51, 234, 0.3);
+    box-shadow: 0 15px 40px rgba(0, 180, 200, 0.3);
     border-color: var(--primary-color);
 }
 
@@ -2504,7 +2572,7 @@ body.checkout-modal-open {
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(147, 51, 234, 0.9);
+    background: rgba(0, 180, 200, 0.9);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -2554,13 +2622,13 @@ body.checkout-modal-open {
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
-    color: var(--primary-light);
+    color: var(--text-accent);
     text-decoration: none;
     font-weight: 600;
     transition: all 0.3s ease;
     padding: 0.5rem 1rem;
     border-radius: 20px;
-    background: rgba(147, 51, 234, 0.1);
+    background: rgba(0, 107, 119, 0.1);
 }
 
 .team-handle:hover {
@@ -2699,20 +2767,20 @@ body.checkout-modal-open {
     padding: 1.5rem;
     border-radius: 15px;
     text-align: center;
-    border: 1px solid rgba(147, 51, 234, 0.3);
+    border: 1px solid rgba(0, 180, 200, 0.3);
     transition: all 0.3s ease;
 }
 
 .popup-offer:hover {
     border-color: var(--primary-color);
     transform: translateY(-5px);
-    box-shadow: 0 10px 30px rgba(147, 51, 234, 0.3);
+    box-shadow: 0 10px 30px rgba(0, 180, 200, 0.3);
 }
 
 .popup-offer h3 {
     font-size: 1.3rem;
     margin-bottom: 0.5rem;
-    color: var(--primary-light);
+    color: var(--accent-color);
 }
 
 .popup-offer p {
@@ -2890,7 +2958,7 @@ body.checkout-modal-open {
 .footer {
     background: var(--dark-bg-alt);
     padding: 3rem 0 1.5rem;
-    border-top: 1px solid rgba(147, 51, 234, 0.2);
+    border-top: 1px solid rgba(0, 180, 200, 0.2);
 }
 
 .footer-content {
@@ -2925,7 +2993,7 @@ body.checkout-modal-open {
 .footer-social h3 {
     font-size: 1.2rem;
     margin-bottom: 1rem;
-    color: var(--primary-light);
+    color: var(--text-primary);
 }
 
 .footer-links ul {
@@ -2943,7 +3011,7 @@ body.checkout-modal-open {
 }
 
 .footer-links a:hover {
-    color: var(--primary-light);
+    color: var(--text-accent);
 }
 
 .social-icons {
@@ -2954,7 +3022,7 @@ body.checkout-modal-open {
 .footer-bottom {
     text-align: center;
     padding-top: 2rem;
-    border-top: 1px solid rgba(147, 51, 234, 0.1);
+    border-top: 1px solid rgba(0, 180, 200, 0.1);
     color: var(--text-muted);
     font-size: 0.9rem;
 }
@@ -2971,7 +3039,7 @@ body.checkout-modal-open {
         left: -100%;
         width: 100%;
         height: calc(100vh - 70px);
-        background: rgba(10, 10, 10, 0.98);
+        background: var(--mobile-nav-bg);
         backdrop-filter: blur(10px);
         flex-direction: column;
         align-items: center;
@@ -3148,7 +3216,7 @@ body.checkout-modal-open {
 .form-group select:focus {
     outline: none;
     border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(147, 51, 234, 0.1);
+    box-shadow: 0 0 0 3px rgba(0, 180, 200, 0.1);
 }
 
 .phone-input-group {
@@ -3186,7 +3254,7 @@ body.checkout-modal-open {
 .custom-country-code:focus {
     outline: none;
     border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(147, 51, 234, 0.1);
+    box-shadow: 0 0 0 3px rgba(0, 180, 200, 0.1);
 }
 
 .discount-success {
@@ -3219,7 +3287,7 @@ body.checkout-modal-open {
 .discount-code-display span {
     font-size: 2rem;
     font-weight: 700;
-    color: var(--primary-color);
+    color: var(--text-accent);
     letter-spacing: 2px;
 }
 
@@ -3283,14 +3351,14 @@ body.checkout-modal-open {
 }
 
 .admin-tab:hover {
-    border-color: rgba(147, 51, 234, 0.55);
-    background: rgba(147, 51, 234, 0.1);
+    border-color: rgba(0, 180, 200, 0.55);
+    background: rgba(0, 180, 200, 0.1);
     color: var(--text-primary);
 }
 
 .admin-tab--active {
-    border-color: rgba(147, 51, 234, 0.8);
-    background: rgba(147, 51, 234, 0.2);
+    border-color: rgba(0, 180, 200, 0.8);
+    background: rgba(0, 180, 200, 0.2);
     color: var(--text-primary);
 }
 
@@ -3355,7 +3423,7 @@ body.checkout-modal-open {
 .tc-tier-override-tag {
     padding: 0.15rem 0.5rem;
     border-radius: 999px;
-    background: rgba(245, 158, 11, 0.15);
+    background: rgba(249, 115, 22, 0.15);
     color: #F59E0B;
     font-size: 0.7rem;
     font-weight: 700;
@@ -3409,7 +3477,7 @@ body.checkout-modal-open {
 
 .tc-input:focus {
     outline: none;
-    border-color: rgba(147, 51, 234, 0.6);
+    border-color: rgba(0, 180, 200, 0.6);
 }
 
 .tc-save-btn {
@@ -3467,4 +3535,82 @@ body.checkout-modal-open {
     padding: 0.6rem 1rem !important;
     font-size: 0.85rem !important;
     white-space: nowrap;
+}
+
+/* ── Accessibility ───────────────────────────────────────────────────────── */
+
+/* Focus rings for keyboard navigation */
+:focus-visible {
+    outline: 3px solid var(--text-accent);
+    outline-offset: 3px;
+    border-radius: 4px;
+}
+
+.btn:focus-visible {
+    outline: 3px solid var(--text-accent);
+    outline-offset: 4px;
+}
+
+/* Respect reduced-motion preference */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+
+    html {
+        scroll-behavior: auto;
+    }
+}
+
+/* ── Theme Toggle Button ─────────────────────────────────────────────────── */
+
+.theme-toggle {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    transition: background 0.2s ease, transform 0.3s ease, color 0.3s ease;
+    flex-shrink: 0;
+    padding: 0;
+}
+
+.theme-toggle:hover {
+    background: rgba(128, 128, 128, 0.15);
+    transform: rotate(15deg) scale(1.1);
+}
+
+.theme-toggle svg {
+    width: 20px;
+    height: 20px;
+    display: block;
+    pointer-events: none;
+}
+
+/* Separator between nav links and theme toggle on desktop */
+.theme-toggle-item {
+    display: flex;
+    align-items: center;
+    padding-left: 0.75rem;
+    margin-left: 0.5rem;
+    border-left: 1px solid rgba(128, 128, 128, 0.25);
+}
+
+/* In the mobile nav panel, remove the border separator */
+@media (max-width: 768px) {
+    .theme-toggle-item {
+        border-left: none;
+        padding-left: 0;
+        margin-left: 0;
+    }
 }

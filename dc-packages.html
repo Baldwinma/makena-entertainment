@@ -70,39 +70,57 @@
                     <!-- Trio Pass -->
                     <article class="package-card">
                         <div class="package-card__top">
-                            <span>3 Events · Sep 3–4</span>
+                            <span>3 Events · Sep 3–7</span>
                             <strong>from $50</strong>
                         </div>
                         <h4>TRIO PASS | Weekend Kickoff</h4>
-                        <p>Lock in your first three events of AfroPlusFest DC at a discounted rate. The perfect entry into the week.</p>
-                        <ul style="margin: 0.75rem 0 1rem 1.25rem; font-size: 0.9rem; opacity: 0.85;">
-                            <li>Welcome Party (Sep 3, Night)</li>
-                            <li>R&amp;B Day Party (Sep 4, Day)</li>
-                            <li>Amapiano vs Afrobeat (Sep 4, Night)</li>
-                        </ul>
-                        <p class="package-card__note">Tier 1: $50 · Tier 2: $60 — vs $55 bought separately. Save up to $5.</p>
-                        <div class="ticket-actions">
-                            <button class="btn btn-secondary btn-small stripe-ticket-button" type="button" data-ticket-id="dc_trio_pass">Buy Trio Pass from $50</button>
+                        <p>Pick any 3 events from the full AfroPlusFest DC lineup at a discounted rate. The perfect entry into the week.</p>
+                        <div class="event-picker" data-max="3" data-ticket-id="dc_trio_pass">
+                            <p class="event-picker__label">Choose any <strong>3</strong> events:</p>
+                            <div class="event-picker__grid">
+                                <label class="event-picker__option"><input type="checkbox" value="dc_welcome_party"><span>Welcome Party <small>Sep 3 · Night</small></span></label>
+                                <label class="event-picker__option"><input type="checkbox" value="dc_rnb_day_party"><span>R&amp;B Day Party <small>Sep 4 · Day</small></span></label>
+                                <label class="event-picker__option"><input type="checkbox" value="dc_amapiano_vs_afrobeat"><span>Amapiano vs Afrobeat <small>Sep 4 · Night</small></span></label>
+                                <label class="event-picker__option"><input type="checkbox" value="dc_brunch_day_party"><span>Brunch Day Party <small>Sep 5 · Day</small></span></label>
+                                <label class="event-picker__option"><input type="checkbox" value="dc_dancehall_soca_party"><span>Dancehall Soca Kompa <small>Sep 5 · Night</small></span></label>
+                                <label class="event-picker__option"><input type="checkbox" value="dc_group_chat_linkup"><span>Group Chat Link Up <small>Sep 6 · Day</small></span></label>
+                                <label class="event-picker__option"><input type="checkbox" value="dc_last_last_after_party"><span>Last Last After Party <small>Sep 6 · Night</small></span></label>
+                                <label class="event-picker__option"><input type="checkbox" value="dc_all_white_closing_party"><span>All White Closing Party <small>Sep 7 · Night</small></span></label>
+                            </div>
+                            <div class="event-picker__footer">
+                                <span class="event-picker__count">0 / 3 selected</span>
+                                <button class="btn btn-secondary btn-small event-picker__add" type="button" disabled>Add to Cart</button>
+                            </div>
                         </div>
+                        <p class="package-card__note">Tier 1: $50 · Tier 2: $60 — vs $55 bought separately. Save up to $5.</p>
                     </article>
 
                     <!-- 5-Event Pass -->
                     <article class="package-card">
                         <div class="package-card__top">
-                            <span>5 Events · Sep 3–5</span>
+                            <span>5 Events · Sep 3–7</span>
                             <strong>from $75</strong>
                         </div>
                         <h4>5-EVENT PASS | The Full Run</h4>
-                        <p>Three nights, two days — the complete Sep 3–5 experience. Jump in for the whole opening weekend at a discount.</p>
-                        <ul style="margin: 0.75rem 0 1rem 1.25rem; font-size: 0.9rem; opacity: 0.85;">
-                            <li>Welcome Party (Sep 3, Night)</li>
-                            <li>R&amp;B Day Party + Amapiano vs Afrobeat (Sep 4)</li>
-                            <li>Brunch Day Party + Dancehall Soca Night (Sep 5)</li>
-                        </ul>
-                        <p class="package-card__note">Tier 1: $75 · Tier 2: $85 — vs $90 bought separately. Save up to $15.</p>
-                        <div class="ticket-actions">
-                            <button class="btn btn-secondary btn-small stripe-ticket-button" type="button" data-ticket-id="dc_five_event_pass">Buy 5-Event Pass from $75</button>
+                        <p>Pick any 5 events from the full lineup. Five nights or a mix of days and nights — your call.</p>
+                        <div class="event-picker" data-max="5" data-ticket-id="dc_five_event_pass">
+                            <p class="event-picker__label">Choose any <strong>5</strong> events:</p>
+                            <div class="event-picker__grid">
+                                <label class="event-picker__option"><input type="checkbox" value="dc_welcome_party"><span>Welcome Party <small>Sep 3 · Night</small></span></label>
+                                <label class="event-picker__option"><input type="checkbox" value="dc_rnb_day_party"><span>R&amp;B Day Party <small>Sep 4 · Day</small></span></label>
+                                <label class="event-picker__option"><input type="checkbox" value="dc_amapiano_vs_afrobeat"><span>Amapiano vs Afrobeat <small>Sep 4 · Night</small></span></label>
+                                <label class="event-picker__option"><input type="checkbox" value="dc_brunch_day_party"><span>Brunch Day Party <small>Sep 5 · Day</small></span></label>
+                                <label class="event-picker__option"><input type="checkbox" value="dc_dancehall_soca_party"><span>Dancehall Soca Kompa <small>Sep 5 · Night</small></span></label>
+                                <label class="event-picker__option"><input type="checkbox" value="dc_group_chat_linkup"><span>Group Chat Link Up <small>Sep 6 · Day</small></span></label>
+                                <label class="event-picker__option"><input type="checkbox" value="dc_last_last_after_party"><span>Last Last After Party <small>Sep 6 · Night</small></span></label>
+                                <label class="event-picker__option"><input type="checkbox" value="dc_all_white_closing_party"><span>All White Closing Party <small>Sep 7 · Night</small></span></label>
+                            </div>
+                            <div class="event-picker__footer">
+                                <span class="event-picker__count">0 / 5 selected</span>
+                                <button class="btn btn-secondary btn-small event-picker__add" type="button" disabled>Add to Cart</button>
+                            </div>
                         </div>
+                        <p class="package-card__note">Tier 1: $75 · Tier 2: $85 — vs $90 bought separately. Save up to $15.</p>
                     </article>
 
                     <!-- Party Pass -->
@@ -112,15 +130,18 @@
                             <strong>from $119</strong>
                         </div>
                         <h4>PARTY PASS | The Full Week</h4>
-                        <p>Access to all 8 AfroPlusFest DC events across the full week — every day party, every night party. The Boat Party is not included.</p>
-                        <ul style="margin: 0.75rem 0 1rem 1.25rem; font-size: 0.9rem; opacity: 0.85;">
-                            <li>Welcome Party (Sep 3)</li>
-                            <li>R&amp;B Day Party + Amapiano vs Afrobeat (Sep 4)</li>
-                            <li>Brunch Day Party + Dancehall Soca Kompa (Sep 5)</li>
-                            <li>Group Chat Link Up + Last Last After Party (Sep 6)</li>
-                            <li>All White Closing Party (Sep 7)</li>
+                        <p>Access to every AfroPlusFest DC event across the full week — every day party and every night party. Boat Party not included.</p>
+                        <ul class="party-pass-events">
+                            <li>Welcome Party <small>Sep 3 · Night</small></li>
+                            <li>R&amp;B Day Party <small>Sep 4 · Day</small></li>
+                            <li>Amapiano vs Afrobeat <small>Sep 4 · Night</small></li>
+                            <li>Brunch Day Party <small>Sep 5 · Day</small></li>
+                            <li>Dancehall Soca Kompa <small>Sep 5 · Night</small></li>
+                            <li>Group Chat Link Up <small>Sep 6 · Day</small></li>
+                            <li>Last Last After Party <small>Sep 6 · Night</small></li>
+                            <li>All White Closing Party <small>Sep 7 · Night</small></li>
                         </ul>
-                        <p class="package-card__note">Tier 1: $119 · Tier 2: $169 · Final Tier: $219 — vs up to $305 bought separately.</p>
+                        <p class="package-card__note">Tier 1: $119 · Tier 2: $169 · Final Tier: $219 — vs up to $305 bought separately. 8 QR codes generated on purchase.</p>
                         <div class="ticket-actions">
                             <button class="btn btn-secondary btn-small stripe-ticket-button" type="button" data-ticket-id="dc_party_pass">Buy Now from $119</button>
                         </div>

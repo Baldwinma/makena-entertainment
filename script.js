@@ -9,7 +9,8 @@
         var attr = document.documentElement.getAttribute('data-theme');
         if (attr === 'dark') return true;
         if (attr === 'light') return false;
-        return window.matchMedia('(prefers-color-scheme: dark)').matches;
+        // No explicit choice: default is dark unless system is explicitly light
+        return !window.matchMedia('(prefers-color-scheme: light)').matches;
     }
 
     function applyTheme(dark) {
@@ -43,7 +44,7 @@
     }
 
     // Listen for OS-level theme changes when user hasn't set an explicit preference
-    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function () {
+    window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', function () {
         if (!document.documentElement.hasAttribute('data-theme')) syncButtons();
     });
 
@@ -703,6 +704,9 @@ document.addEventListener('keydown', (e) => {
     syncCartUI();
     loadTicketAvailability();
 
+    // Expose addToCart for the event picker
+    window._makenaAddToCart = addToCart;
+
     // ── Bundle nudge (individual DC event pages only) ─────────────────────────
     var DC_INDIVIDUAL_IDS = new Set([
         'dc_welcome_party', 'dc_rnb_day_party', 'dc_amapiano_vs_afrobeat',
@@ -1343,3 +1347,67 @@ window.testGoogleSheets = async function() {
 
 // Make test function available globally
 console.log('💡 Test function ready! Run testGoogleSheets() in the console to test the integration');
+
+// ── Event Picker (DC Packages) ────────────────────────────────────────────
+(function () {
+    function initPickers() {
+        document.querySelectorAll('.event-picker').forEach(function (picker) {
+            var max       = parseInt(picker.getAttribute('data-max'), 10);
+            var ticketId  = picker.getAttribute('data-ticket-id');
+            var checkboxes = Array.from(picker.querySelectorAll('input[type="checkbox"]'));
+            var countEl   = picker.querySelector('.event-picker__count');
+            var addBtn    = picker.querySelector('.event-picker__add');
+
+            function update() {
+                var checked = checkboxes.filter(function (cb) { return cb.checked; });
+                var n = checked.length;
+
+                countEl.textContent = n + ' / ' + max + ' selected';
+                addBtn.disabled = (n !== max);
+
+                // Disable unchecked boxes once limit reached
+                checkboxes.forEach(function (cb) {
+                    var row = cb.closest('.event-picker__option');
+                    if (!cb.checked && n >= max) {
+                        row.classList.add('is-disabled');
+                        cb.disabled = true;
+                    } else {
+                        row.classList.remove('is-disabled');
+                        cb.disabled = false;
+                    }
+                });
+            }
+
+            checkboxes.forEach(function (cb) {
+                cb.addEventListener('change', update);
+            });
+
+            addBtn.addEventListener('click', function () {
+                var selected = checkboxes
+                    .filter(function (cb) { return cb.checked; })
+                    .map(function (cb) { return cb.value; });
+
+                // Use the existing cart system via the exposed global
+                if (typeof window._makenaAddToCart === 'function') {
+                    window._makenaAddToCart(ticketId);
+                }
+
+                // Store event selection in sessionStorage for checkout reference
+                try {
+                    sessionStorage.setItem(
+                        'makena_pkg_events_' + ticketId,
+                        JSON.stringify(selected)
+                    );
+                } catch (e) {}
+            });
+
+            update();
+        });
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initPickers);
+    } else {
+        initPickers();
+    }
+}());

@@ -4,7 +4,8 @@ const {
     getTicketDefinition,
     getTicketDefinitionByName,
     getTierDefinition,
-    getPackageEventDefinitions
+    getPackageEventDefinitions,
+    isPackageTicket
 } = require('./ticket-catalog');
 
 function buildTicketCode(sessionId, index) {
@@ -85,7 +86,33 @@ async function saveTicketsToSupabase(session, lineItems) {
             (tierDefinition && tierDefinition.amount) ||
             lineItem.amount_subtotal / lineItem.quantity
         );
-        const packageEvents = metadata.ticket_id ? getPackageEventDefinitions(metadata.ticket_id) : null;
+        const ticketId = metadata.ticket_id;
+
+        // Group mode: N people all attend the same single event
+        const groupModeKey = `group_mode_${ticketId}`;
+        if (ticketId && session.metadata && session.metadata[groupModeKey] === 'true') {
+            const groupEventId = session.metadata[`group_event_${ticketId}`];
+            const groupCount = parseInt(session.metadata[`group_count_${ticketId}`], 10) || 1;
+            const groupEventDef = groupEventId ? getTicketDefinition(groupEventId) : null;
+            return Array.from({ length: groupCount }, () => ({
+                order_id: order.id,
+                ticket_code: buildTicketCode(session.id, ticketIndex++),
+                event_name: (groupEventDef && groupEventDef.name) || groupEventId || 'Event',
+                event_date: (groupEventDef && groupEventDef.date) || null,
+                event_time: (groupEventDef && groupEventDef.time) || null,
+                event_location: (groupEventDef && groupEventDef.location) || null,
+                ticket_id: groupEventId || ticketId,
+                ticket_tier_id: metadata.tier_id || null,
+                ticket_tier_name: tierName,
+                ticket_tier_amount: tierAmount,
+                holder_name: holderName,
+                holder_email: holderEmail,
+                status: 'valid',
+                updated_at: new Date().toISOString()
+            }));
+        }
+
+        const packageEvents = ticketId ? getPackageEventDefinitions(ticketId) : null;
 
         if (packageEvents && packageEvents.length > 0) {
             return Array.from({ length: lineItem.quantity }).flatMap(() =>
@@ -196,49 +223,85 @@ async function recordAmbassadorSale(stripe, session, storage) {
         session.total_details.breakdown &&
         session.total_details.breakdown.discounts
     ) || [];
-    if (!discountList.length) return;
 
-    const firstDiscount = discountList[0];
-    const promoRef = firstDiscount && firstDiscount.discount && firstDiscount.discount.promotion_code;
-    if (!promoRef) return;
+    // Path 1: Stripe promotion code was applied (standard ambassador discount)
+    if (discountList.length) {
+        const firstDiscount = discountList[0];
+        const promoRef = firstDiscount && firstDiscount.discount && firstDiscount.discount.promotion_code;
+        if (!promoRef) return;
 
-    let codeString;
-    if (typeof promoRef === 'object' && promoRef.code) {
-        codeString = promoRef.code;
-    } else if (typeof promoRef === 'string') {
-        const promoCode = await stripe.promotionCodes.retrieve(promoRef);
-        codeString = promoCode.code;
+        let codeString;
+        if (typeof promoRef === 'object' && promoRef.code) {
+            codeString = promoRef.code;
+        } else if (typeof promoRef === 'string') {
+            const promoCode = await stripe.promotionCodes.retrieve(promoRef);
+            codeString = promoCode.code;
+        }
+        if (!codeString) return;
+
+        const { data: ambassador } = await supabase
+            .from('ambassador_applications')
+            .select('id')
+            .eq('status', 'approved')
+            .ilike('discount_code', codeString)
+            .maybeSingle();
+
+        if (!ambassador) return;
+
+        const ticketsCount = (storage.tickets || []).length || 1;
+        const amountPaid = session.amount_total || 0;
+        const discountAmount = discountList.reduce((s, d) => s + (d.amount || 0), 0);
+        const amountBeforeDiscount = amountPaid + discountAmount;
+        const eventNames = [...new Set((storage.tickets || []).map(t => t.event_name).filter(Boolean))].join(', ');
+
+        await supabase
+            .from('ambassador_sales')
+            .upsert({
+                ambassador_id: ambassador.id,
+                discount_code: codeString.toUpperCase(),
+                stripe_session_id: session.id,
+                customer_email: session.customer_details && session.customer_details.email,
+                customer_name: session.customer_details && session.customer_details.name,
+                event_names: eventNames,
+                tickets_count: ticketsCount,
+                amount_paid_cents: amountPaid,
+                amount_before_discount_cents: amountBeforeDiscount,
+                discount_amount_cents: discountAmount,
+                purchased_at: new Date(session.created * 1000).toISOString()
+            }, { onConflict: 'stripe_session_id,discount_code' });
+        return;
     }
-    if (!codeString) return;
+
+    // Path 2: Package purchase with a referral code (no Stripe discount applied)
+    const referralCode = session.metadata && session.metadata.referral_code;
+    if (!referralCode) return;
 
     const { data: ambassador } = await supabase
         .from('ambassador_applications')
         .select('id')
         .eq('status', 'approved')
-        .ilike('discount_code', codeString)
+        .ilike('discount_code', referralCode)
         .maybeSingle();
 
     if (!ambassador) return;
 
     const ticketsCount = (storage.tickets || []).length || 1;
     const amountPaid = session.amount_total || 0;
-    const discountAmount = discountList.reduce((s, d) => s + (d.amount || 0), 0);
-    const amountBeforeDiscount = amountPaid + discountAmount;
     const eventNames = [...new Set((storage.tickets || []).map(t => t.event_name).filter(Boolean))].join(', ');
 
     await supabase
         .from('ambassador_sales')
         .upsert({
             ambassador_id: ambassador.id,
-            discount_code: codeString.toUpperCase(),
+            discount_code: referralCode.toUpperCase(),
             stripe_session_id: session.id,
             customer_email: session.customer_details && session.customer_details.email,
             customer_name: session.customer_details && session.customer_details.name,
             event_names: eventNames,
             tickets_count: ticketsCount,
             amount_paid_cents: amountPaid,
-            amount_before_discount_cents: amountBeforeDiscount,
-            discount_amount_cents: discountAmount,
+            amount_before_discount_cents: amountPaid,
+            discount_amount_cents: 0,
             purchased_at: new Date(session.created * 1000).toISOString()
         }, { onConflict: 'stripe_session_id,discount_code' });
 }

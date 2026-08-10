@@ -120,6 +120,18 @@ exports.handler = async function(event) {
             cart: 'true',
             quantity: String(validated.reduce((s, { quantity }) => s + quantity, 0))
         };
+
+        // Attach group mode metadata for picker passes
+        if (payload.packageMeta && typeof payload.packageMeta === 'object') {
+            for (const [ticketId, groupData] of Object.entries(payload.packageMeta)) {
+                if (groupData && groupData.group_mode && groupData.group_event_id) {
+                    const safeId = String(ticketId).slice(0, 40);
+                    sessionMetadata[`group_mode_${safeId}`] = 'true';
+                    sessionMetadata[`group_event_${safeId}`] = String(groupData.group_event_id).slice(0, 60);
+                    sessionMetadata[`group_count_${safeId}`] = String(Number.parseInt(groupData.group_count, 10) || 1);
+                }
+            }
+        }
     } else {
         // Buy Now — single ticket
         const quantity = Number.parseInt(payload.quantity, 10);
@@ -161,6 +173,11 @@ exports.handler = async function(event) {
     }
 
     const hasPackage = validatedItems.some(({ ticketId }) => isPackageTicket(ticketId));
+
+    // Record referral code in metadata for package purchases (no Stripe discount applied)
+    if (hasPackage && payload.referralCode && typeof payload.referralCode === 'string') {
+        sessionMetadata.referral_code = payload.referralCode.toUpperCase().slice(0, 50);
+    }
 
     try {
         const session = await stripe.checkout.sessions.create({

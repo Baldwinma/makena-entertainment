@@ -358,6 +358,12 @@ document.addEventListener('keydown', (e) => {
         });
     }
 
+    // ── Package ticket IDs (mirrors backend isPackageTicket logic) ───────────
+    var PACKAGE_IDS = new Set([
+        'flex_trio_pass', 'five_elite_pass', 'weekend_pulse_pass', 'vip_infinite_pass',
+        'dc_trio_pass', 'dc_five_event_pass', 'dc_party_pass', 'dc_full_fest_pass'
+    ]);
+
     // ── Cart state (localStorage) ─────────────────────────────────────────────
     var CART_KEY = 'makena_cart';
 
@@ -466,6 +472,12 @@ document.addEventListener('keydown', (e) => {
 
         var totalEl = document.getElementById('makena-cart-total');
         if (totalEl) totalEl.textContent = fmt(cartTotal(), getCartCurrency(cart));
+
+        var referralSection = document.getElementById('makena-referral-section');
+        if (referralSection) {
+            var hasPackageInCart = cart.some(function (item) { return PACKAGE_IDS.has(item.ticketId); });
+            referralSection.hidden = !hasPackageInCart;
+        }
     }
 
     function renderTicketTierSummary(button, availability) {
@@ -541,6 +553,10 @@ document.addEventListener('keydown', (e) => {
             '<div class="cart-panel__items" id="makena-cart-items"></div>' +
             '<div class="cart-panel__footer" id="makena-cart-footer" hidden>' +
                 '<div class="cart-panel__total-row"><span>Total</span><span id="makena-cart-total">$0.00</span></div>' +
+                '<div class="cart-panel__referral" id="makena-referral-section" hidden>' +
+                    '<p class="cart-panel__referral-notice">Package passes are not eligible for price discounts. Enter a referral code to credit your ambassador.</p>' +
+                    '<input type="text" id="makena-referral-code" class="cart-panel__referral-input" placeholder="Referral code (optional)" maxlength="50">' +
+                '</div>' +
                 '<button class="btn btn-primary cart-panel__checkout-btn" id="makena-cart-checkout">Checkout</button>' +
             '</div>';
         document.body.appendChild(panel);
@@ -653,6 +669,25 @@ document.addEventListener('keydown', (e) => {
 
         try {
             var body = items ? { items: items } : { ticketId: ticketId, quantity: quantity };
+
+            // Include referral code from cart panel input (package purchases only)
+            var referralInput = document.getElementById('makena-referral-code');
+            if (referralInput && referralInput.value.trim()) {
+                body.referralCode = referralInput.value.trim().toUpperCase();
+            }
+
+            // Include group mode metadata from sessionStorage
+            if (items) {
+                var packageMeta = {};
+                items.forEach(function (item) {
+                    try {
+                        var groupData = JSON.parse(sessionStorage.getItem('makena_pkg_group_' + item.ticketId) || 'null');
+                        if (groupData && groupData.group_mode) packageMeta[item.ticketId] = groupData;
+                    } catch (e) {}
+                });
+                if (Object.keys(packageMeta).length) body.packageMeta = packageMeta;
+            }
+
             var response = await fetch('/.netlify/functions/create-checkout-session', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -1352,56 +1387,124 @@ console.log('💡 Test function ready! Run testGoogleSheets() in the console to 
 (function () {
     function initPickers() {
         document.querySelectorAll('.event-picker').forEach(function (picker) {
-            var max       = parseInt(picker.getAttribute('data-max'), 10);
-            var ticketId  = picker.getAttribute('data-ticket-id');
-            var checkboxes = Array.from(picker.querySelectorAll('input[type="checkbox"]'));
-            var countEl   = picker.querySelector('.event-picker__count');
-            var addBtn    = picker.querySelector('.event-picker__add');
+            var max      = parseInt(picker.getAttribute('data-max'), 10);
+            var ticketId = picker.getAttribute('data-ticket-id');
+            var countEl  = picker.querySelector('.event-picker__count');
+            var addBtn   = picker.querySelector('.event-picker__add');
+            var gridEl   = picker.querySelector('.event-picker__grid');
+            var labelEl  = picker.querySelector('.event-picker__label');
 
-            function update() {
-                var checked = checkboxes.filter(function (cb) { return cb.checked; });
-                var n = checked.length;
+            // Capture event list from the initial HTML once
+            var eventOptions = Array.from(gridEl.querySelectorAll('.event-picker__option')).map(function (opt) {
+                var inp = opt.querySelector('input');
+                var span = opt.querySelector('span');
+                return { value: inp ? inp.value : '', labelHTML: span ? span.innerHTML : '' };
+            });
 
-                countEl.textContent = n + ' / ' + max + ' selected';
-                addBtn.disabled = (n !== max);
+            var mode = 'solo';
 
-                // Disable unchecked boxes once limit reached
-                checkboxes.forEach(function (cb) {
-                    var row = cb.closest('.event-picker__option');
-                    if (!cb.checked && n >= max) {
-                        row.classList.add('is-disabled');
-                        cb.disabled = true;
-                    } else {
-                        row.classList.remove('is-disabled');
-                        cb.disabled = false;
-                    }
+            // Inject mode toggle above the label
+            var toggleRow = document.createElement('div');
+            toggleRow.className = 'event-picker__mode-toggle';
+            toggleRow.innerHTML =
+                '<button class="event-picker__mode-btn is-active" data-mode="solo">Individual</button>' +
+                '<button class="event-picker__mode-btn" data-mode="group">Group (' + max + ' people)</button>';
+            picker.insertBefore(toggleRow, labelEl);
+
+            toggleRow.querySelectorAll('.event-picker__mode-btn').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    mode = btn.getAttribute('data-mode');
+                    toggleRow.querySelectorAll('.event-picker__mode-btn').forEach(function (b) {
+                        b.classList.toggle('is-active', b === btn);
+                    });
+                    rebuildGrid();
                 });
+            });
+
+            function rebuildGrid() {
+                if (mode === 'solo') {
+                    labelEl.innerHTML = 'Choose any <strong>' + max + '</strong> events:';
+                    gridEl.innerHTML = eventOptions.map(function (ev) {
+                        return '<label class="event-picker__option">' +
+                            '<input type="checkbox" value="' + ev.value + '">' +
+                            '<span>' + ev.labelHTML + '</span>' +
+                        '</label>';
+                    }).join('');
+                } else {
+                    labelEl.innerHTML = 'Choose <strong>1</strong> event &mdash; all <strong>' + max + '</strong> people attend the same event:';
+                    gridEl.innerHTML = eventOptions.map(function (ev) {
+                        return '<label class="event-picker__option">' +
+                            '<input type="radio" name="group_evt_' + ticketId + '" value="' + ev.value + '">' +
+                            '<span>' + ev.labelHTML + '</span>' +
+                        '</label>';
+                    }).join('');
+                }
+                gridEl.querySelectorAll('input').forEach(function (inp) {
+                    inp.addEventListener('change', updateState);
+                });
+                updateState();
             }
 
-            checkboxes.forEach(function (cb) {
-                cb.addEventListener('change', update);
+            function updateState() {
+                var inputs = Array.from(gridEl.querySelectorAll('input'));
+                if (mode === 'solo') {
+                    var checked = inputs.filter(function (cb) { return cb.checked; });
+                    var n = checked.length;
+                    countEl.textContent = n + ' / ' + max + ' selected';
+                    addBtn.disabled = (n !== max);
+                    inputs.forEach(function (cb) {
+                        var row = cb.closest('.event-picker__option');
+                        if (!cb.checked && n >= max) {
+                            row.classList.add('is-disabled');
+                            cb.disabled = true;
+                        } else {
+                            row.classList.remove('is-disabled');
+                            cb.disabled = false;
+                        }
+                    });
+                } else {
+                    var selected = inputs.find(function (r) { return r.checked; });
+                    countEl.textContent = selected ? '1 / 1 event selected' : '0 / 1 selected';
+                    addBtn.disabled = !selected;
+                    inputs.forEach(function (r) {
+                        r.closest('.event-picker__option').classList.remove('is-disabled');
+                        r.disabled = false;
+                    });
+                }
+            }
+
+            // Attach listeners to initial checkboxes
+            gridEl.querySelectorAll('input').forEach(function (inp) {
+                inp.addEventListener('change', updateState);
             });
 
             addBtn.addEventListener('click', function () {
-                var selected = checkboxes
-                    .filter(function (cb) { return cb.checked; })
-                    .map(function (cb) { return cb.value; });
-
-                // Use the existing cart system via the exposed global
+                var inputs = Array.from(gridEl.querySelectorAll('input'));
+                if (mode === 'solo') {
+                    var selected = inputs
+                        .filter(function (cb) { return cb.checked; })
+                        .map(function (cb) { return cb.value; });
+                    try { sessionStorage.setItem('makena_pkg_events_' + ticketId, JSON.stringify(selected)); } catch (e) {}
+                    try { sessionStorage.removeItem('makena_pkg_group_' + ticketId); } catch (e) {}
+                } else {
+                    var radio = inputs.find(function (r) { return r.checked; });
+                    if (radio) {
+                        try {
+                            sessionStorage.setItem('makena_pkg_group_' + ticketId, JSON.stringify({
+                                group_mode: true,
+                                group_event_id: radio.value,
+                                group_count: max
+                            }));
+                        } catch (e) {}
+                        try { sessionStorage.removeItem('makena_pkg_events_' + ticketId); } catch (e) {}
+                    }
+                }
                 if (typeof window._makenaAddToCart === 'function') {
                     window._makenaAddToCart(ticketId);
                 }
-
-                // Store event selection in sessionStorage for checkout reference
-                try {
-                    sessionStorage.setItem(
-                        'makena_pkg_events_' + ticketId,
-                        JSON.stringify(selected)
-                    );
-                } catch (e) {}
             });
 
-            update();
+            updateState();
         });
     }
 

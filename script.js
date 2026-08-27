@@ -679,13 +679,19 @@ document.addEventListener('keydown', (e) => {
             // Include group mode metadata from sessionStorage
             if (items) {
                 var packageMeta = {};
+                var packageEvents = {};
                 items.forEach(function (item) {
                     try {
                         var groupData = JSON.parse(sessionStorage.getItem('makena_pkg_group_' + item.ticketId) || 'null');
                         if (groupData && groupData.group_mode) packageMeta[item.ticketId] = groupData;
                     } catch (e) {}
+                    try {
+                        var eventsData = JSON.parse(sessionStorage.getItem('makena_pkg_events_' + item.ticketId) || 'null');
+                        if (Array.isArray(eventsData) && eventsData.length > 0) packageEvents[item.ticketId] = eventsData;
+                    } catch (e) {}
                 });
                 if (Object.keys(packageMeta).length) body.packageMeta = packageMeta;
+                if (Object.keys(packageEvents).length) body.packageEvents = packageEvents;
             }
 
             var response = await fetch('/.netlify/functions/create-checkout-session', {

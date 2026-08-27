@@ -485,17 +485,18 @@
             }
 
             eventAttendeesList.innerHTML = selectedAttendees.map(attendee => `
-                <div class="event-attendee-row">
+                <div class="event-attendee-row${attendee.source === 'eventbrite' ? ' is-eventbrite' : ''}">
                     <div class="event-attendee-row__person">
-                        <strong>${escapeHtml(attendee.holderName || 'Guest')}</strong>
+                        <strong>${escapeHtml(attendee.holderName || 'Guest')}${attendee.quantity > 1 ? ` <em>(x${attendee.quantity})</em>` : ''}</strong>
                         <span>${escapeHtml(attendee.holderEmail || 'No email')}</span>
                         <span>${escapeHtml(attendee.tierName || 'General Admission')}${attendee.tierAmount ? ` - $${(attendee.tierAmount / 100).toFixed(2)}` : ''}</span>
-                        <small>${escapeHtml(attendee.ticketCode)}</small>
+                        ${attendee.ticketCode ? `<small>${escapeHtml(attendee.ticketCode)}</small>` : ''}
                     </div>
                     <div class="event-attendee-row__status">
-                        <span class="event-attendee-row__badge${attendee.checkedIn ? ' is-checked-in' : ''}">
-                            ${attendee.checkedIn ? 'Scanned' : 'Not scanned'}
-                        </span>
+                        ${attendee.source === 'eventbrite'
+                            ? `<span class="event-attendee-row__badge is-eventbrite-badge">Eventbrite</span>`
+                            : `<span class="event-attendee-row__badge${attendee.checkedIn ? ' is-checked-in' : ''}">${attendee.checkedIn ? 'Scanned' : 'Not scanned'}</span>`
+                        }
                         <small>${attendee.checkedIn ? `At ${escapeHtml(formatDateTime(attendee.checkedInAt))}` : `Bought ${escapeHtml(formatDateTime(attendee.purchasedAt))}`}</small>
                     </div>
                 </div>

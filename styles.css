@@ -1765,6 +1765,15 @@ section {
     color: #86EFA9;
 }
 
+.event-attendee-row__badge.is-eventbrite-badge {
+    background: rgba(255, 106, 0, 0.14);
+    color: #FF6A00;
+}
+
+.event-attendee-row.is-eventbrite {
+    border-left: 2px solid rgba(255, 106, 0, 0.35);
+}
+
 .recent-scans__header {
     display: flex;
     align-items: baseline;

@@ -112,6 +112,39 @@ async function saveTicketsToSupabase(session, lineItems) {
             }));
         }
 
+        // Solo mode: use the events the buyer actually selected in the picker
+        const pkgEventsKey = `pkg_events_${String(ticketId).slice(0, 30)}`;
+        if (ticketId && session.metadata && session.metadata[pkgEventsKey]) {
+            try {
+                const selectedIds = JSON.parse(session.metadata[pkgEventsKey]);
+                if (Array.isArray(selectedIds) && selectedIds.length > 0) {
+                    const selectedEventDefs = selectedIds
+                        .map(id => ({ id, ...getTicketDefinition(id) }))
+                        .filter(def => def && def.name);
+                    if (selectedEventDefs.length > 0) {
+                        return Array.from({ length: lineItem.quantity }).flatMap(() =>
+                            selectedEventDefs.map(eventDef => ({
+                                order_id: order.id,
+                                ticket_code: buildTicketCode(session.id, ticketIndex++),
+                                event_name: eventDef.name,
+                                event_date: eventDef.date || null,
+                                event_time: eventDef.time || null,
+                                event_location: eventDef.location || null,
+                                ticket_id: eventDef.id,
+                                ticket_tier_id: metadata.tier_id || null,
+                                ticket_tier_name: tierName,
+                                ticket_tier_amount: tierAmount,
+                                holder_name: holderName,
+                                holder_email: holderEmail,
+                                status: 'valid',
+                                updated_at: new Date().toISOString()
+                            }))
+                        );
+                    }
+                }
+            } catch (e) {}
+        }
+
         const packageEvents = ticketId ? getPackageEventDefinitions(ticketId) : null;
 
         if (packageEvents && packageEvents.length > 0) {

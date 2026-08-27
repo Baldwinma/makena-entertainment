@@ -132,6 +132,16 @@ exports.handler = async function(event) {
                 }
             }
         }
+
+        // Attach solo mode selected events for picker passes
+        if (payload.packageEvents && typeof payload.packageEvents === 'object') {
+            for (const [ticketId, eventIds] of Object.entries(payload.packageEvents)) {
+                if (Array.isArray(eventIds) && eventIds.length > 0) {
+                    const safeId = String(ticketId).slice(0, 30);
+                    sessionMetadata[`pkg_events_${safeId}`] = JSON.stringify(eventIds).slice(0, 480);
+                }
+            }
+        }
     } else {
         // Buy Now — single ticket
         const quantity = Number.parseInt(payload.quantity, 10);

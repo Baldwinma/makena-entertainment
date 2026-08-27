@@ -79,6 +79,11 @@ exports.handler = async function(event) {
         counts.set(key, current);
     });
 
+    // Build a lookup from event_id → internal ticket name
+    const ticketNameById = new Map(
+        listTicketDefinitions().map(t => [t.id, t.name])
+    );
+
     // Build a map of Eventbrite ticket counts keyed by event_id
     const ebCounts = new Map();
     (ebImports || []).forEach(row => {
@@ -110,7 +115,7 @@ exports.handler = async function(event) {
 
     const ebAttendees = (ebImports || []).map(row => ({
         ticketCode: null,
-        eventName: row.event_name,
+        eventName: ticketNameById.get(row.event_id) || row.event_name,
         holderName: row.holder_name || 'Guest',
         holderEmail: row.holder_email || '',
         tierName: 'Eventbrite',

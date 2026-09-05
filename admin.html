@@ -131,6 +131,27 @@
                         <div class="title-underline"></div>
                         <p class="section-description">Edit prices and availability. Changes go live immediately and affect checkout.</p>
                     </div>
+
+                    <div class="tc-ticket" style="margin-bottom:1.5rem">
+                        <div class="tc-ticket__header">
+                            <strong>Global Settings</strong>
+                        </div>
+                        <div class="tc-tier-row">
+                            <div class="tc-tier-row__info">
+                                <span class="tc-tier-name">Sold Out Delay</span>
+                                <span class="tc-tier-default">Hours after an event ends before tickets show as sold out. Default: 24.</span>
+                            </div>
+                            <div class="tc-tier-row__inputs">
+                                <div class="tc-input-group">
+                                    <label>Hours after event ends</label>
+                                    <input type="number" id="soldOutDelayInput" class="tc-input" value="24" min="0" step="1" placeholder="24" style="width:100px">
+                                </div>
+                                <button class="btn btn-primary" id="saveSoldOutDelayBtn">Save</button>
+                            </div>
+                            <div class="tc-tier-result" id="soldOutDelayResult"></div>
+                        </div>
+                    </div>
+
                     <div id="ticketConfigStatus"></div>
                     <div id="ticketConfigList"></div>
                 </div>
@@ -830,8 +851,11 @@
             document.getElementById('adminTicketsContent').hidden = tabName !== 'tickets';
             document.getElementById('adminEventContentPanel').hidden = tabName !== 'content';
             document.getElementById('adminAmbassadorsPanel').hidden = tabName !== 'ambassadors';
-            if (tabName === 'tickets' && !ticketConfigLoaded) {
-                loadTicketConfig();
+            if (tabName === 'tickets') {
+                loadGlobalSettings();
+                if (!ticketConfigLoaded) {
+                    loadTicketConfig();
+                }
             }
             if (tabName === 'content' && !eventContentLoaded) {
                 loadEventContent();
@@ -853,6 +877,53 @@
             ticketConfigLoaded = false;
             eventContentLoaded = false;
             ambassadorsLoaded = false;
+        });
+
+        // ── Global settings ──────────────────────────────────────────────────
+        async function loadGlobalSettings() {
+            var response = await authedFetch('/.netlify/functions/admin-settings');
+            if (response.status === 401) {
+                localStorage.removeItem(tokenKey);
+                setLoggedInState(false);
+                return;
+            }
+            if (!response.ok) return;
+            var data = await response.json();
+            var settings = data.settings || [];
+            var delaySetting = settings.find(function(s) { return s.key === 'sold_out_delay_hours'; });
+            if (delaySetting) {
+                document.getElementById('soldOutDelayInput').value = delaySetting.value;
+            }
+        }
+
+        document.getElementById('saveSoldOutDelayBtn').addEventListener('click', async function() {
+            var btn = document.getElementById('saveSoldOutDelayBtn');
+            var resultEl = document.getElementById('soldOutDelayResult');
+            var val = parseInt(document.getElementById('soldOutDelayInput').value, 10);
+            if (isNaN(val) || val < 0) {
+                showResult(resultEl, 'error', 'Invalid', 'Enter a whole number of hours (0 or more).');
+                return;
+            }
+            btn.disabled = true;
+            btn.textContent = 'Saving...';
+            var response = await authedFetch('/.netlify/functions/admin-settings', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ key: 'sold_out_delay_hours', value: String(val) })
+            });
+            var data = await response.json();
+            btn.disabled = false;
+            btn.textContent = 'Save';
+            if (response.status === 401) {
+                localStorage.removeItem(tokenKey);
+                setLoggedInState(false);
+                return;
+            }
+            if (!response.ok) {
+                showResult(resultEl, 'error', 'Save Failed', escapeHtml(data.error || 'Could not save setting.'));
+                return;
+            }
+            showResult(resultEl, 'success', 'Saved', 'Tickets will show as sold out ' + val + ' hour' + (val === 1 ? '' : 's') + ' after each event ends.');
         });
 
         // ── Ticket config ────────────────────────────────────────────────────

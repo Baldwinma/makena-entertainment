@@ -65,12 +65,82 @@ function getTicketDateKey(dateText) {
     return `${match[3]}-${month}-${match[2].padStart(2, '0')}`;
 }
 
-function buildAvailability(ticketId, ticket, soldTickets = [], reservations = [], overrideMap = new Map()) {
+// Parses "3:30 AM" or "11 PM" into minutes from midnight
+function parseTimeToMinutes(timeStr) {
+    const m = String(timeStr).trim().match(/^(\d{1,2})(?::(\d{2}))?\s*(AM|PM)$/i);
+    if (!m) return null;
+    let hours = parseInt(m[1], 10);
+    const minutes = parseInt(m[2] || '0', 10);
+    const ampm = m[3].toUpperCase();
+    if (ampm === 'PM' && hours !== 12) hours += 12;
+    if (ampm === 'AM' && hours === 12) hours = 0;
+    return hours * 60 + minutes;
+}
+
+// Returns UTC offset in minutes for America/New_York at the given date
+function getEasternOffsetMinutes(date) {
+    const parts = new Intl.DateTimeFormat('en-US', {
+        timeZone: 'America/New_York',
+        timeZoneName: 'shortOffset'
+    }).formatToParts(date);
+    const tzPart = parts.find(p => p.type === 'timeZoneName');
+    if (!tzPart) return -300;
+    const match = tzPart.value.match(/GMT([+-])(\d{1,2})(?::(\d{2}))?/);
+    if (!match) return -300;
+    const sign = match[1] === '+' ? 1 : -1;
+    const h = parseInt(match[2], 10);
+    const mins = parseInt(match[3] || '0', 10);
+    return sign * (h * 60 + mins);
+}
+
+// Returns a UTC Date representing when the event ends, parsed from the ticket's date and time fields.
+// Handles overnight events (e.g. "11 PM - 3:30 AM") by adding a day when end < start.
+function getEventEndDatetime(dateText, timeText) {
+    const dateKey = getTicketDateKey(dateText);
+    if (!dateKey) return null;
+
+    const [year, month, day] = dateKey.split('-').map(Number);
+
+    let endMinutes = null;
+    let startMinutes = null;
+
+    if (timeText) {
+        const dashIdx = timeText.indexOf(' - ');
+        if (dashIdx !== -1) {
+            startMinutes = parseTimeToMinutes(timeText.slice(0, dashIdx).trim());
+            endMinutes = parseTimeToMinutes(timeText.slice(dashIdx + 3).trim());
+        }
+    }
+
+    // Fall back to end of event day if time is missing or unparseable
+    const minutesFromMidnight = endMinutes !== null ? endMinutes : 23 * 60 + 59;
+    const isNextDay = startMinutes !== null && endMinutes !== null && endMinutes < startMinutes;
+
+    // Compute UTC offset for America/New_York on the event date
+    const approxDate = new Date(Date.UTC(year, month - 1, day, 12, 0, 0));
+    const offsetMinutes = getEasternOffsetMinutes(approxDate);
+
+    // UTC = local_time - offset
+    let utcMs = Date.UTC(year, month - 1, day, 0, 0, 0)
+        + minutesFromMidnight * 60 * 1000
+        - offsetMinutes * 60 * 1000;
+
+    if (isNextDay) {
+        utcMs += 24 * 60 * 60 * 1000;
+    }
+
+    return new Date(utcMs);
+}
+
+function buildAvailability(ticketId, ticket, soldTickets = [], reservations = [], overrideMap = new Map(), soldOutDelayHours = 24) {
     const tiers = getTicketTiers(ticket);
     const isWhitelistedEvent = ACTIVE_TICKET_IDS.has(ticketId);
-    const ticketDateKey = getTicketDateKey(ticket.date);
-    const todayKey = getLisbonDateKey();
-    const isPastEvent = ticketDateKey ? ticketDateKey < todayKey : false;
+
+    const now = new Date();
+    const eventEnd = getEventEndDatetime(ticket.date, ticket.time);
+    const isPastEvent = eventEnd
+        ? now > new Date(eventEnd.getTime() + soldOutDelayHours * 60 * 60 * 1000)
+        : (getTicketDateKey(ticket.date) ? getTicketDateKey(ticket.date) < getLisbonDateKey() : false);
 
     if (!isWhitelistedEvent || isPastEvent) {
         return {
@@ -158,7 +228,20 @@ function buildAvailability(ticketId, ticket, soldTickets = [], reservations = []
     };
 }
 
-async function getAvailabilityForTicket(supabase, ticketId, preloadedOverrides = null) {
+async function getSoldOutDelayHours(supabase) {
+    try {
+        const { data } = await supabase
+            .from('app_settings')
+            .select('value')
+            .eq('key', 'sold_out_delay_hours')
+            .limit(1);
+        return (data && data.length > 0) ? (parseFloat(data[0].value) || 24) : 24;
+    } catch {
+        return 24;
+    }
+}
+
+async function getAvailabilityForTicket(supabase, ticketId, preloadedOverrides = null, preloadedSoldOutDelayHours = null) {
     const ticket = getTicketDefinition(ticketId);
     if (!ticket) {
         return null;
@@ -179,7 +262,11 @@ async function getAvailabilityForTicket(supabase, ticketId, preloadedOverrides =
             });
     }
 
-    const [{ data: soldTickets, error: ticketsError }, { data: reservations, error: reservationsError }, overrideMap] = await Promise.all([
+    const delayHoursPromise = preloadedSoldOutDelayHours !== null
+        ? Promise.resolve(preloadedSoldOutDelayHours)
+        : getSoldOutDelayHours(supabase);
+
+    const [{ data: soldTickets, error: ticketsError }, { data: reservations, error: reservationsError }, overrideMap, soldOutDelayHours] = await Promise.all([
         supabase
             .from('event_tickets')
             .select('ticket_tier_id')
@@ -191,7 +278,8 @@ async function getAvailabilityForTicket(supabase, ticketId, preloadedOverrides =
             .eq('ticket_id', ticketId)
             .eq('status', 'pending')
             .gt('expires_at', getNowIso()),
-        overridesPromise
+        overridesPromise,
+        delayHoursPromise
     ]);
 
     if (ticketsError) {
@@ -202,15 +290,26 @@ async function getAvailabilityForTicket(supabase, ticketId, preloadedOverrides =
         throw reservationsError;
     }
 
-    return buildAvailability(ticketId, ticket, soldTickets || [], reservations || [], overrideMap);
+    return buildAvailability(ticketId, ticket, soldTickets || [], reservations || [], overrideMap, soldOutDelayHours);
 }
 
 async function listAvailability(supabase) {
     const ticketIds = listTicketDefinitions().map(ticket => ticket.id);
 
-    const { data: allOverrides } = await supabase
-        .from('ticket_config_overrides')
-        .select('ticket_id, tier_id, price_cents, capacity');
+    const [{ data: allOverrides }, { data: settingData }] = await Promise.all([
+        supabase
+            .from('ticket_config_overrides')
+            .select('ticket_id, tier_id, price_cents, capacity'),
+        supabase
+            .from('app_settings')
+            .select('value')
+            .eq('key', 'sold_out_delay_hours')
+            .limit(1)
+    ]);
+
+    const soldOutDelayHours = (settingData && settingData.length > 0)
+        ? (parseFloat(settingData[0].value) || 24)
+        : 24;
 
     const overridesByTicket = new Map();
     (allOverrides || []).forEach(o => {
@@ -221,7 +320,7 @@ async function listAvailability(supabase) {
     });
 
     return Promise.all(ticketIds.map(ticketId =>
-        getAvailabilityForTicket(supabase, ticketId, overridesByTicket.get(ticketId) || new Map())
+        getAvailabilityForTicket(supabase, ticketId, overridesByTicket.get(ticketId) || new Map(), soldOutDelayHours)
     ));
 }
 

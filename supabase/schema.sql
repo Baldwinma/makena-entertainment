@@ -103,3 +103,19 @@ create policy "No public reservation access"
     on public.event_ticket_reservations
     for all
     using (false);
+
+create table if not exists public.app_settings (
+    key text primary key,
+    value text not null,
+    updated_at timestamptz not null default now(),
+    updated_by text
+);
+
+alter table public.app_settings enable row level security;
+
+drop policy if exists "No public app_settings access" on public.app_settings;
+
+create policy "No public app_settings access"
+    on public.app_settings
+    for all
+    using (false);

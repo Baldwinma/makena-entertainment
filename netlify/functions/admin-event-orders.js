@@ -13,7 +13,7 @@ function json(statusCode, body) {
 
 // Packages that include dc_all_white_boat_party and how many events they cover
 const PACKAGE_REFUND_RULES = {
-    'AfroPlusFest DC - Full Fest Pass': { totalEvents: 9 }
+    'AfroPlusFest DC - Full Fest Pass': { refundAmount: 7500 }
 };
 
 async function enrichWithRefundStatus(orders, stripe) {
@@ -83,7 +83,7 @@ exports.handler = async function(event) {
         const rule = PACKAGE_REFUND_RULES[o.event_name];
         return {
             ...o, refundType: 'partial',
-            refundAmount: rule ? Math.round(o.amount_total / rule.totalEvents) : null,
+            refundAmount: rule ? rule.refundAmount : null,
             packageName: o.event_name
         };
     });

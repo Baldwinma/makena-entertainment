@@ -1615,6 +1615,38 @@
             loadBlastOrders(eventId);
         });
 
+        function renderOrderRow(o, refundColor) {
+            var paidFmt = '$' + ((o.amount_total || 0) / 100).toFixed(2);
+            var refundFmt = '$' + ((o.refundAmount || 0) / 100).toFixed(2);
+            var date = o.purchased_at ? new Date(o.purchased_at).toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' }) : '';
+            var paymentId = o.stripe_payment_intent_id || '';
+
+            var alreadyRefunded = (o.amountRefunded || 0) >= (o.refundAmount || 0) && (o.refundAmount || 0) > 0;
+            var partiallyRefunded = !alreadyRefunded && (o.amountRefunded || 0) > 0;
+
+            var actionHtml;
+            if (alreadyRefunded) {
+                actionHtml = '<span style="font-size:0.78rem;font-weight:700;color:#6ee7b7">✓ Refunded</span>';
+            } else if (partiallyRefunded) {
+                var alreadyFmt = '$' + ((o.amountRefunded || 0) / 100).toFixed(2);
+                actionHtml = '<button class="btn btn-primary blast-refund-btn" data-payment-id="' + escapeHtml(paymentId) + '" data-amount="' + (o.refundAmount || 0) + '" data-name="' + escapeHtml(o.customer_name || 'Guest') + '" style="font-size:0.78rem;padding:0.3rem 0.75rem;white-space:nowrap">Refund ' + escapeHtml(refundFmt) + '</button>' +
+                    '<span style="font-size:0.72rem;color:#fbbf24">' + escapeHtml(alreadyFmt) + ' already refunded</span>';
+            } else if (paymentId) {
+                actionHtml = '<button class="btn btn-primary blast-refund-btn" data-payment-id="' + escapeHtml(paymentId) + '" data-amount="' + (o.refundAmount || 0) + '" data-name="' + escapeHtml(o.customer_name || 'Guest') + '" style="font-size:0.78rem;padding:0.3rem 0.75rem;white-space:nowrap">Refund ' + escapeHtml(refundFmt) + '</button>';
+            } else {
+                actionHtml = '<span style="font-size:0.78rem;color:var(--text-muted)">No payment ID</span>';
+            }
+
+            return '<div style="display:flex;gap:0.75rem;align-items:center;padding:0.5rem 0;border-bottom:1px solid rgba(255,255,255,0.06);font-size:0.85rem;flex-wrap:wrap' + (alreadyRefunded ? ';opacity:0.55' : '') + '">' +
+                '<span style="flex:1;min-width:120px;font-weight:600">' + escapeHtml(o.customer_name || 'Guest') + '</span>' +
+                '<span style="color:var(--text-muted);min-width:160px;font-size:0.8rem">' + escapeHtml(o.customer_email || '') + '</span>' +
+                '<span style="color:var(--text-muted);font-size:0.78rem">' + escapeHtml(paidFmt) + ' paid</span>' +
+                '<span style="font-weight:700;color:' + refundColor + '">' + escapeHtml(refundFmt) + ' refund</span>' +
+                '<span style="color:var(--text-muted);font-size:0.78rem">' + escapeHtml(date) + '</span>' +
+                '<div style="display:flex;flex-direction:column;gap:0.25rem;align-items:flex-end">' + actionHtml + '<span class="blast-refund-result" style="font-size:0.75rem"></span></div>' +
+            '</div>';
+        }
+
         async function loadBlastOrders(eventId) {
             var listEl = document.getElementById('blastOrderList');
             var countEl = document.getElementById('blastOrderCount');
@@ -1626,33 +1658,65 @@
                 return;
             }
             var data = await response.json();
-            var orders = data.orders || [];
-            countEl.textContent = orders.length + ' Stripe order' + (orders.length === 1 ? '' : 's');
+            var fullOrders = data.fullRefundOrders || [];
+            var partialOrders = data.partialRefundOrders || [];
+            var total = fullOrders.length + partialOrders.length;
+            countEl.textContent = total + ' Stripe order' + (total === 1 ? '' : 's');
 
-            if (!orders.length) {
-                listEl.innerHTML = '<p style="color:var(--text-muted);font-size:0.85rem;margin:0">No Stripe orders found for this event.</p>';
+            if (!total) {
+                listEl.innerHTML = '<p style="color:var(--text-muted);font-size:0.85rem;margin:0">No Stripe orders found.</p>';
                 return;
             }
 
-            var isLive = (window.location.hostname !== 'localhost' && !window.location.hostname.includes('local'));
-            var stripeBase = isLive ? 'https://dashboard.stripe.com/payments/' : 'https://dashboard.stripe.com/test/payments/';
+            var html = '';
 
-            listEl.innerHTML = orders.map(function(o) {
-                var amount = '$' + ((o.amount_total || 0) / 100).toFixed(2);
-                var date = o.purchased_at ? new Date(o.purchased_at).toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' }) : '';
-                var paymentId = o.stripe_payment_intent_id || '';
-                var stripeUrl = paymentId ? stripeBase + paymentId : '';
+            if (fullOrders.length) {
+                html += '<p style="font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted);margin:0.5rem 0 0.25rem">Full Refunds — bought ticket directly</p>';
+                html += fullOrders.map(function(o) { return renderOrderRow(o, '#6ee7b7'); }).join('');
+            }
 
-                return '<div style="display:flex;gap:0.75rem;align-items:center;padding:0.45rem 0;border-bottom:1px solid rgba(255,255,255,0.06);font-size:0.85rem;flex-wrap:wrap">' +
-                    '<span style="flex:1;min-width:120px;font-weight:600">' + escapeHtml(o.customer_name || 'Guest') + '</span>' +
-                    '<span style="color:var(--text-muted);min-width:160px">' + escapeHtml(o.customer_email || '') + '</span>' +
-                    '<span style="font-weight:600;color:#6ee7b7">' + escapeHtml(amount) + '</span>' +
-                    '<span style="color:var(--text-muted);font-size:0.78rem">' + escapeHtml(date) + '</span>' +
-                    (stripeUrl
-                        ? '<a href="' + escapeHtml(stripeUrl) + '" target="_blank" rel="noopener" class="btn btn-secondary" style="font-size:0.78rem;padding:0.3rem 0.65rem">Refund in Stripe →</a>'
-                        : '<span style="font-size:0.78rem;color:var(--text-muted)">No payment ID</span>') +
-                '</div>';
-            }).join('');
+            if (partialOrders.length) {
+                html += '<p style="font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted);margin:1rem 0 0.25rem">Partial Refunds — Full Fest Pass (1 of 9 events)</p>';
+                html += partialOrders.map(function(o) { return renderOrderRow(o, '#fbbf24'); }).join('');
+            }
+
+            listEl.innerHTML = html;
+
+            listEl.querySelectorAll('.blast-refund-btn').forEach(function(btn) {
+                btn.addEventListener('click', async function() {
+                    var paymentId = btn.dataset.paymentId;
+                    var amount = parseInt(btn.dataset.amount, 10);
+                    var name = btn.dataset.name;
+                    var resultEl = btn.parentElement.querySelector('.blast-refund-result');
+
+                    if (!confirm('Issue a $' + (amount / 100).toFixed(2) + ' refund to ' + name + '?')) return;
+
+                    btn.disabled = true;
+                    btn.textContent = 'Processing...';
+
+                    var res = await authedFetch('/.netlify/functions/admin-issue-refund', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ paymentIntentId: paymentId, amount: amount })
+                    });
+                    var resData = await res.json();
+
+                    if (res.status === 401) { localStorage.removeItem(tokenKey); setLoggedInState(false); return; }
+
+                    if (!res.ok) {
+                        btn.disabled = false;
+                        btn.textContent = 'Retry';
+                        resultEl.style.color = '#fca5a5';
+                        resultEl.textContent = resData.error || 'Failed';
+                        return;
+                    }
+
+                    btn.textContent = 'Refunded';
+                    btn.style.opacity = '0.5';
+                    resultEl.style.color = '#6ee7b7';
+                    resultEl.textContent = '✓ Done';
+                });
+            });
         }
 
         function renderBlastBuyers(buyers) {

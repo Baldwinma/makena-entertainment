@@ -210,6 +210,17 @@
                         </div>
 
                         <div class="tc-ticket" style="margin-bottom:1.5rem">
+                            <div class="tc-ticket__header">
+                                <strong>Stripe Refund Links</strong>
+                                <span style="font-size:0.8rem;color:var(--text-muted)" id="blastOrderCount"></span>
+                            </div>
+                            <p style="font-size:0.82rem;color:var(--text-muted);margin:0 0 0.75rem">Click a payment to open it in Stripe and issue the refund.</p>
+                            <div id="blastOrderList" style="max-height:300px;overflow-y:auto;padding:0.5rem 0">
+                                <p style="color:var(--text-muted);font-size:0.85rem;margin:0">Loading orders...</p>
+                            </div>
+                        </div>
+
+                        <div class="tc-ticket" style="margin-bottom:1.5rem">
                             <div class="tc-ticket__header"><strong>Email Draft</strong></div>
                             <div class="tc-tier-row">
                                 <div class="tc-tier-row__inputs" style="flex-direction:column;gap:0.75rem;width:100%">
@@ -1601,7 +1612,48 @@
             renderBlastBuyers(blastBuyers);
             document.getElementById('blastBuyerSection').hidden = false;
             document.getElementById('blastStatus').innerHTML = '';
+            loadBlastOrders(eventId);
         });
+
+        async function loadBlastOrders(eventId) {
+            var listEl = document.getElementById('blastOrderList');
+            var countEl = document.getElementById('blastOrderCount');
+            listEl.innerHTML = '<p style="color:var(--text-muted);font-size:0.85rem;margin:0">Loading orders...</p>';
+
+            var response = await authedFetch('/.netlify/functions/admin-event-orders?eventId=' + encodeURIComponent(eventId));
+            if (!response.ok) {
+                listEl.innerHTML = '<p style="color:var(--text-muted);font-size:0.85rem;margin:0">Could not load Stripe orders.</p>';
+                return;
+            }
+            var data = await response.json();
+            var orders = data.orders || [];
+            countEl.textContent = orders.length + ' Stripe order' + (orders.length === 1 ? '' : 's');
+
+            if (!orders.length) {
+                listEl.innerHTML = '<p style="color:var(--text-muted);font-size:0.85rem;margin:0">No Stripe orders found for this event.</p>';
+                return;
+            }
+
+            var isLive = (window.location.hostname !== 'localhost' && !window.location.hostname.includes('local'));
+            var stripeBase = isLive ? 'https://dashboard.stripe.com/payments/' : 'https://dashboard.stripe.com/test/payments/';
+
+            listEl.innerHTML = orders.map(function(o) {
+                var amount = '$' + ((o.amount_total || 0) / 100).toFixed(2);
+                var date = o.purchased_at ? new Date(o.purchased_at).toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' }) : '';
+                var paymentId = o.stripe_payment_intent_id || '';
+                var stripeUrl = paymentId ? stripeBase + paymentId : '';
+
+                return '<div style="display:flex;gap:0.75rem;align-items:center;padding:0.45rem 0;border-bottom:1px solid rgba(255,255,255,0.06);font-size:0.85rem;flex-wrap:wrap">' +
+                    '<span style="flex:1;min-width:120px;font-weight:600">' + escapeHtml(o.customer_name || 'Guest') + '</span>' +
+                    '<span style="color:var(--text-muted);min-width:160px">' + escapeHtml(o.customer_email || '') + '</span>' +
+                    '<span style="font-weight:600;color:#6ee7b7">' + escapeHtml(amount) + '</span>' +
+                    '<span style="color:var(--text-muted);font-size:0.78rem">' + escapeHtml(date) + '</span>' +
+                    (stripeUrl
+                        ? '<a href="' + escapeHtml(stripeUrl) + '" target="_blank" rel="noopener" class="btn btn-secondary" style="font-size:0.78rem;padding:0.3rem 0.65rem">Refund in Stripe →</a>'
+                        : '<span style="font-size:0.78rem;color:var(--text-muted)">No payment ID</span>') +
+                '</div>';
+            }).join('');
+        }
 
         function renderBlastBuyers(buyers) {
             document.getElementById('blastBuyerHeading').textContent = buyers.length + ' buyer' + (buyers.length === 1 ? '' : 's');

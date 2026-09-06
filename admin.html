@@ -70,6 +70,7 @@
                     <button class="admin-tab" data-tab="tickets">Manage Tickets</button>
                     <button class="admin-tab" data-tab="content">Event Details</button>
                     <button class="admin-tab" data-tab="ambassadors">Ambassadors</button>
+                    <button class="admin-tab" data-tab="blast">Email Blast</button>
                 </div>
 
                 <div id="adminCheckinContent">
@@ -164,6 +165,73 @@
                     </div>
                     <div id="eventContentStatus"></div>
                     <div id="eventContentList"></div>
+                </div>
+
+                <div id="adminBlastPanel" hidden>
+                    <div class="section-header" style="margin-bottom: 1.5rem;">
+                        <h2 class="section-title" style="font-size: 1.8rem;">Email Blast</h2>
+                        <div class="title-underline"></div>
+                        <p class="section-description">Send a message to everyone who bought a ticket for a specific event. Use {name} in the body to personalise with each buyer's first name.</p>
+                    </div>
+
+                    <div class="tc-ticket" style="margin-bottom:1.5rem">
+                        <div class="tc-ticket__header"><strong>Select Event</strong></div>
+                        <div class="tc-tier-row">
+                            <div class="tc-tier-row__inputs" style="flex-wrap:wrap;gap:0.75rem">
+                                <div class="tc-input-group" style="flex:1;min-width:220px">
+                                    <label>Event</label>
+                                    <select id="blastEventSelect" class="tc-input">
+                                        <option value="">— choose an event —</option>
+                                        <option value="dc_welcome_party">Welcome Party (Sep 3)</option>
+                                        <option value="dc_rnb_day_party">R&amp;B Day Party (Sep 4)</option>
+                                        <option value="dc_amapiano_vs_afrobeat">Amapiano vs Afrobeat (Sep 5)</option>
+                                        <option value="dc_brunch_day_party">Brunch Day Party (Sep 5)</option>
+                                        <option value="dc_dancehall_soca_party">Dancehall / Soca (Sep 5)</option>
+                                        <option value="dc_group_chat_linkup">Group Chat Linkup (Sep 6)</option>
+                                        <option value="dc_last_last_after_party">Last Last After Party (Sep 6)</option>
+                                        <option value="dc_all_white_boat_party">All White Boat Party (Sep 7)</option>
+                                        <option value="dc_all_white_closing_party">All White Closing Party (Sep 7)</option>
+                                    </select>
+                                </div>
+                                <div style="display:flex;align-items:flex-end">
+                                    <button class="btn btn-secondary" id="blastLoadBtn">Load Buyers</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="blastBuyerSection" hidden>
+                        <div class="tc-ticket" style="margin-bottom:1.5rem">
+                            <div class="tc-ticket__header">
+                                <strong id="blastBuyerHeading">Buyers</strong>
+                                <button class="btn btn-secondary" id="blastCopyEmailsBtn" style="font-size:0.82rem;padding:0.4rem 0.8rem">Copy All Emails</button>
+                            </div>
+                            <div id="blastBuyerList" style="max-height:220px;overflow-y:auto;padding:0.5rem 0"></div>
+                        </div>
+
+                        <div class="tc-ticket" style="margin-bottom:1.5rem">
+                            <div class="tc-ticket__header"><strong>Email Draft</strong></div>
+                            <div class="tc-tier-row">
+                                <div class="tc-tier-row__inputs" style="flex-direction:column;gap:0.75rem;width:100%">
+                                    <div class="tc-input-group">
+                                        <label>Subject</label>
+                                        <input type="text" id="blastSubject" class="tc-input">
+                                    </div>
+                                    <div class="tc-input-group">
+                                        <label>Body — use {name} for the buyer's first name</label>
+                                        <textarea id="blastBody" class="tc-input tc-textarea" rows="12"></textarea>
+                                    </div>
+                                    <div style="display:flex;gap:0.75rem;align-items:center;flex-wrap:wrap">
+                                        <button class="btn btn-primary" id="blastSendBtn">Send to All Buyers</button>
+                                        <span style="font-size:0.82rem;color:var(--text-muted)" id="blastSendCount"></span>
+                                    </div>
+                                    <div id="blastSendResult"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="blastStatus"></div>
                 </div>
 
                 <div id="adminAmbassadorsPanel" hidden>
@@ -851,6 +919,7 @@
             document.getElementById('adminTicketsContent').hidden = tabName !== 'tickets';
             document.getElementById('adminEventContentPanel').hidden = tabName !== 'content';
             document.getElementById('adminAmbassadorsPanel').hidden = tabName !== 'ambassadors';
+            document.getElementById('adminBlastPanel').hidden = tabName !== 'blast';
             if (tabName === 'tickets') {
                 loadGlobalSettings();
                 if (!ticketConfigLoaded) {
@@ -1476,6 +1545,130 @@
             ambassadorsLoaded = false;
             setTimeout(function() { loadAmbassadors(); }, 900);
         }
+
+        // ── Email Blast ──────────────────────────────────────────────────────
+        var blastBuyers = [];
+
+        var CANCELLATION_SUBJECT = 'Important Update: AfroPlusFest DC All White Boat Party Cancelled';
+        var CANCELLATION_BODY = [
+            'Hi {name},',
+            '',
+            'We\'re reaching out with an important update regarding the AfroPlusFest DC All White Boat Party scheduled for September 7, 2026.',
+            '',
+            'Unfortunately, we have made the difficult decision to cancel this event. Despite weeks of planning and our best efforts to secure the right vessel and confirm all the necessary permits and logistics, we were unable to finalise the arrangements to the standard we hold ourselves to. Rather than host an event that didn\'t live up to what you deserved, we made the call to cancel.',
+            '',
+            'We are truly sorry for the short notice and for any inconvenience this causes. We know many of you were excited for this one, and so were we.',
+            '',
+            'A full refund will be issued to the original payment method used at checkout. Please allow 5–10 business days for the refund to appear depending on your bank or card provider.',
+            '',
+            'If you purchased through Eventbrite, your refund will be processed through Eventbrite directly.',
+            '',
+            'All of our other AfroPlusFest DC events are going ahead as planned — we hope to see you there and make the rest of the weekend unforgettable.',
+            '',
+            'If you have any questions, please reply to this email or reach out at admin@makenaevents.com.',
+            '',
+            'Thank you so much for your patience, your understanding, and your continued support of Makena Events.',
+            '',
+            'With love,',
+            'The Makena Events Team'
+        ].join('\n');
+
+        document.getElementById('blastSubject').value = CANCELLATION_SUBJECT;
+        document.getElementById('blastBody').value = CANCELLATION_BODY;
+
+        document.getElementById('blastLoadBtn').addEventListener('click', async function() {
+            var eventId = document.getElementById('blastEventSelect').value;
+            if (!eventId) {
+                showResult(document.getElementById('blastStatus'), 'error', 'No Event', 'Please select an event first.');
+                return;
+            }
+            var btn = document.getElementById('blastLoadBtn');
+            btn.disabled = true;
+            btn.textContent = 'Loading...';
+
+            var response = await authedFetch('/.netlify/functions/admin-event-blast?eventId=' + encodeURIComponent(eventId));
+            btn.disabled = false;
+            btn.textContent = 'Load Buyers';
+
+            if (response.status === 401) { localStorage.removeItem(tokenKey); setLoggedInState(false); return; }
+            var data = await response.json();
+            if (!response.ok) {
+                showResult(document.getElementById('blastStatus'), 'error', 'Error', escapeHtml(data.error || 'Could not load buyers.'));
+                return;
+            }
+
+            blastBuyers = data.buyers || [];
+            renderBlastBuyers(blastBuyers);
+            document.getElementById('blastBuyerSection').hidden = false;
+            document.getElementById('blastStatus').innerHTML = '';
+        });
+
+        function renderBlastBuyers(buyers) {
+            document.getElementById('blastBuyerHeading').textContent = buyers.length + ' buyer' + (buyers.length === 1 ? '' : 's');
+            document.getElementById('blastSendCount').textContent = 'Will send to ' + buyers.length + ' email' + (buyers.length === 1 ? '' : 's');
+            var listEl = document.getElementById('blastBuyerList');
+            if (!buyers.length) {
+                listEl.innerHTML = '<p style="color:var(--text-muted);font-size:0.85rem;margin:0.5rem 0">No buyers found for this event.</p>';
+                return;
+            }
+            listEl.innerHTML = buyers.map(function(b) {
+                return '<div style="display:flex;gap:0.75rem;align-items:center;padding:0.4rem 0;border-bottom:1px solid rgba(255,255,255,0.06);font-size:0.85rem">' +
+                    '<span style="flex:1;font-weight:600">' + escapeHtml(b.name) + '</span>' +
+                    '<span style="color:var(--text-muted)">' + escapeHtml(b.email) + '</span>' +
+                    '<span style="font-size:0.72rem;padding:0.15rem 0.5rem;border-radius:100px;background:rgba(255,255,255,0.07);color:var(--text-muted)">' + escapeHtml(b.source) + '</span>' +
+                '</div>';
+            }).join('');
+        }
+
+        document.getElementById('blastCopyEmailsBtn').addEventListener('click', function() {
+            var emails = blastBuyers.map(function(b) { return b.email; }).join(', ');
+            navigator.clipboard.writeText(emails).then(function() {
+                document.getElementById('blastCopyEmailsBtn').textContent = 'Copied!';
+                setTimeout(function() { document.getElementById('blastCopyEmailsBtn').textContent = 'Copy All Emails'; }, 2000);
+            });
+        });
+
+        document.getElementById('blastSendBtn').addEventListener('click', async function() {
+            if (!blastBuyers.length) {
+                showResult(document.getElementById('blastSendResult'), 'error', 'No Buyers', 'Load buyers first.');
+                return;
+            }
+            var subject = document.getElementById('blastSubject').value.trim();
+            var body = document.getElementById('blastBody').value.trim();
+            if (!subject || !body) {
+                showResult(document.getElementById('blastSendResult'), 'error', 'Missing Content', 'Subject and body are required.');
+                return;
+            }
+
+            if (!confirm('Send this email to ' + blastBuyers.length + ' buyer(s)? This cannot be undone.')) return;
+
+            var btn = document.getElementById('blastSendBtn');
+            btn.disabled = true;
+            btn.textContent = 'Sending...';
+
+            var eventId = document.getElementById('blastEventSelect').value;
+            var response = await authedFetch('/.netlify/functions/admin-event-blast?eventId=' + encodeURIComponent(eventId), {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ eventId: eventId, subject: subject, body: body })
+            });
+            var data = await response.json();
+            btn.disabled = false;
+            btn.textContent = 'Send to All Buyers';
+
+            if (response.status === 401) { localStorage.removeItem(tokenKey); setLoggedInState(false); return; }
+
+            if (!response.ok) {
+                showResult(document.getElementById('blastSendResult'), 'error', 'Failed', escapeHtml(data.error || 'Could not send emails.'));
+                return;
+            }
+
+            var msg = 'Sent to ' + data.sent + ' of ' + data.total + ' buyers.';
+            if (data.failed && data.failed.length) {
+                msg += ' ' + data.failed.length + ' failed: ' + data.failed.map(function(f) { return f.email; }).join(', ');
+            }
+            showResult(document.getElementById('blastSendResult'), data.failed && data.failed.length ? 'warning' : 'success', 'Done', msg);
+        });
     </script>
 </body>
 </html>

@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Makena Punta Cana 2026 — Group Trip</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --green: #86EFA9;
+  --dark: #080d09;
+  --card: #111411;
+  --dg: #0b2a1a;
+  --grey: rgba(255,255,255,0.5);
+  --gold: #F5C842;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100vw;height:100vh;overflow:hidden;font-family:'Poppins',sans-serif;background:var(--dark);color:#fff}
+
+/* ── chrome ── */
+#progress{position:fixed;top:0;left:0;height:3px;background:var(--green);transition:width .5s ease;z-index:200}
+#logo{position:fixed;top:1.2rem;left:1.5rem;font-size:.65rem;font-weight:800;letter-spacing:.25em;color:rgba(255,255,255,.25);z-index:200;text-transform:uppercase}
+#audioBtn{position:fixed;top:1rem;right:1rem;z-index:200;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);border-radius:50%;width:42px;height:42px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1.1rem;transition:all .3s}
+#audioBtn:hover{border-color:var(--green);background:rgba(134,239,172,.1)}
+#fsBtn{position:fixed;top:1rem;right:3.5rem;z-index:200;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);border-radius:8px;padding:.35rem .7rem;font-size:.68rem;font-weight:600;color:rgba(255,255,255,.4);cursor:pointer;font-family:inherit;transition:all .3s}
+#fsBtn:hover{border-color:var(--green);color:var(--green)}
+#counter{position:fixed;bottom:1.2rem;right:1.5rem;font-size:.7rem;color:rgba(255,255,255,.2);z-index:200}
+#hint{position:fixed;bottom:1.2rem;left:1.5rem;font-size:.65rem;color:rgba(255,255,255,.18);z-index:200;display:flex;gap:.4rem;align-items:center}
+.key{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:4px;padding:.1rem .35rem}
+#dots{position:fixed;right:1.2rem;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:.55rem;z-index:200}
+.dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.22);cursor:pointer;transition:all .3s}
+.dot.on{background:var(--green);transform:scale(1.5)}
+#prevBtn,#nextBtn{position:fixed;bottom:1rem;z-index:200;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:50%;width:40px;height:40px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.95rem;transition:all .3s;color:#fff;user-select:none}
+#prevBtn:hover,#nextBtn:hover{border-color:var(--green);color:var(--green)}
+#prevBtn{left:calc(50% - 2.8rem)}
+#nextBtn{left:calc(50% + .8rem)}
+
+/* ── slides ── */
+#deck{position:relative;width:100vw;height:100vh}
+.slide{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .65s ease}
+.slide.on{opacity:1;pointer-events:all}
+
+/* ── anim classes ── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes scaleUp{from{opacity:0;transform:scale(.88)}to{opacity:1;transform:scale(1)}}
+@keyframes slideL{from{opacity:0;transform:translateX(-40px)}to{opacity:1;transform:translateX(0)}}
+@keyframes slideR{from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:translateX(0)}}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(134,239,172,.4)}50%{box-shadow:0 0 0 18px rgba(134,239,172,0)}}
+@keyframes waveScroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+@keyframes glowPulse{0%,100%{text-shadow:0 0 30px rgba(134,239,172,.2)}50%{text-shadow:0 0 80px rgba(134,239,172,.6),0 0 120px rgba(134,239,172,.3)}}
+
+.fu{opacity:0}.fi{opacity:0}.su{opacity:0}.sl{opacity:0}.sr{opacity:0}
+.slide.on .fu{animation:fadeUp .7s ease forwards}
+.slide.on .fi{animation:fadeIn .7s ease forwards}
+.slide.on .su{animation:scaleUp .7s ease forwards}
+.slide.on .sl{animation:slideL .7s ease forwards}
+.slide.on .sr{animation:slideR .7s ease forwards}
+.d1{animation-delay:.05s!important}.d2{animation-delay:.2s!important}.d3{animation-delay:.35s!important}
+.d4{animation-delay:.5s!important}.d5{animation-delay:.65s!important}.d6{animation-delay:.8s!important}
+.d7{animation-delay:.95s!important}.d8{animation-delay:1.1s!important}
+
+/* ── shared ── */
+.eyebrow{font-size:.68rem;font-weight:700;letter-spacing:.25em;text-transform:uppercase;color:var(--green);display:block;margin-bottom:.6rem}
+.stitle{font-size:clamp(2rem,5vw,3.6rem);font-weight:900;line-height:1.05;margin-bottom:.65rem}
+.ssub{font-size:clamp(.85rem,1.4vw,1rem);color:var(--grey);line-height:1.75;max-width:580px}
+.green{color:var(--green)}
+.pill{display:inline-block;padding:.3rem .9rem;border:1px solid rgba(255,255,255,.14);border-radius:30px;font-size:.78rem;color:rgba(255,255,255,.65)}
+.pill strong{color:var(--green);font-weight:700}
+.card{background:rgba(20,22,20,.85);border:1px solid rgba(255,255,255,.07);border-radius:16px;padding:1.4rem 1.2rem;transition:all .3s}
+.card:hover{border-color:rgba(134,239,172,.35);transform:translateY(-5px)}
+
+/* ══════ SLIDE 1 — HERO ══════ */
+#s1{background:#050d08;overflow:hidden}
+#s1 canvas{position:absolute;inset:0;width:100%;height:100%}
+.hero{position:relative;z-index:2;text-align:center;padding:2rem;max-width:900px}
+.htitle{font-size:clamp(4rem,10vw,8rem);font-weight:900;line-height:.9;background:linear-gradient(135deg,#fff 40%,#86EFA9 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:.4rem}
+.hsub{font-size:clamp(1rem,2.5vw,1.5rem);font-weight:300;color:rgba(255,255,255,.5);letter-spacing:.18em;margin-bottom:.3rem}
+.hpills{display:flex;gap:.6rem;justify-content:center;flex-wrap:wrap;margin:1.4rem 0 2rem}
+.hcta{display:inline-block;background:var(--green);color:#060d08;font-weight:800;font-size:.95rem;padding:.95rem 2.5rem;border-radius:50px;cursor:pointer;border:none;font-family:inherit;animation:pulse 2.5s infinite;transition:transform .2s}
+.hcta:hover{transform:scale(1.05)}
+.scroll-hint{position:absolute;bottom:2rem;left:50%;transform:translateX(-50%);font-size:.68rem;color:rgba(255,255,255,.25);letter-spacing:.12em;text-transform:uppercase;display:flex;flex-direction:column;align-items:center;gap:.4rem}
+.scroll-hint::after{content:'';width:1px;height:28px;background:linear-gradient(to bottom,rgba(134,239,172,.5),transparent)}
+
+/* ══════ SLIDE 2 — DESTINATION ══════ */
+#s2{background:linear-gradient(150deg,#050d08,#090f14)}
+.s2wrap{max-width:900px;width:100%;padding:2rem;text-align:center}
+.sgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin:2rem 0}
+.scard{background:rgba(134,239,172,.05);border:1px solid rgba(134,239,172,.18);border-radius:14px;padding:1.4rem .8rem;text-align:center}
+.snum{font-size:clamp(1.8rem,4vw,2.8rem);font-weight:900;color:var(--green);display:block}
+.slbl{font-size:.72rem;color:var(--grey);text-transform:uppercase;letter-spacing:.1em;margin-top:.2rem}
+.flist{display:flex;gap:1.2rem;flex-wrap:wrap;justify-content:center;margin-top:1.5rem}
+.fi-item{font-size:.85rem;color:rgba(255,255,255,.75);display:flex;align-items:center;gap:.4rem}
+.fi-item::before{content:'✓';color:var(--green);font-weight:700}
+
+/* ══════ SLIDE 3 — TIMELINE ══════ */
+#s3{background:linear-gradient(150deg,#06090d,#060d08)}
+.s3wrap{max-width:1080px;width:100%;padding:0 2rem;text-align:center}
+.tline{display:flex;gap:0;margin-top:1.8rem}
+.titem{flex:1;position:relative;padding:1rem .8rem 0}
+.titem:not(:last-child)::after{content:'';position:absolute;top:1.7rem;right:0;width:50%;height:2px;background:linear-gradient(to right,rgba(134,239,172,.35),rgba(134,239,172,.08))}
+.titem:not(:first-child)::before{content:'';position:absolute;top:1.7rem;left:0;width:50%;height:2px;background:linear-gradient(to right,rgba(134,239,172,.08),rgba(134,239,172,.35))}
+.tdot{width:34px;height:34px;border-radius:50%;background:#0b2a1a;border:2px solid var(--green);display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:800;color:var(--green);margin-bottom:.7rem;position:relative;z-index:1}
+.tday{font-size:.6rem;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.2rem}
+.tevent{font-size:.82rem;font-weight:700;color:#fff;margin-bottom:.3rem;line-height:1.3}
+.tdesc{font-size:.72rem;color:var(--grey);line-height:1.5}
+.ttag{display:inline-block;margin-top:.4rem;padding:.18rem .6rem;border-radius:20px;font-size:.58rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em}
+.tg{background:rgba(134,239,172,.12);color:var(--green)}
+.tp{background:rgba(160,100,255,.15);color:#c4a0ff}
+.tb{background:rgba(80,160,255,.12);color:#80c0ff}
+.to{background:rgba(255,180,50,.12);color:#ffc857}
+
+/* ══════ SLIDE 4 — ACTIVITIES ══════ */
+#s4{background:linear-gradient(160deg,#060a07,#0a0d13)}
+.s4wrap{text-align:center;width:100%;padding:0 2rem}
+.agrid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;max-width:880px;margin:1.5rem auto 0}
+.acard{background:rgba(15,20,15,.9);border:1px solid rgba(255,255,255,.07);border-radius:16px;padding:1.5rem 1rem;text-align:center;transition:all .3s;cursor:default}
+.acard:hover{border-color:rgba(134,239,172,.35);background:rgba(134,239,172,.04);transform:translateY(-6px)}
+.aicon{font-size:2.2rem;display:block;margin-bottom:.6rem}
+.aname{font-size:.92rem;font-weight:700;margin-bottom:.3rem}
+.adesc{font-size:.75rem;color:var(--grey);line-height:1.55}
+
+/* ══════ SLIDE 5 — CATAMARAN PHOTO ══════ */
+#s5{overflow:hidden}
+#s5 img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scale(1.06);transition:transform 8s ease}
+#s5.on img{transform:scale(1)}
+.overlay{position:absolute;inset:0;background:linear-gradient(to right,rgba(0,0,0,.88) 40%,rgba(0,0,0,.3))}
+.wavesvg{position:absolute;bottom:0;left:0;width:200%;height:90px;animation:waveScroll 10s linear infinite;opacity:.18}
+.pcontent{position:relative;z-index:2;max-width:560px;padding:3rem 3rem 3rem 4rem}
+.bquote{font-size:clamp(1.5rem,3.2vw,2.6rem);font-weight:900;line-height:1.15;margin-bottom:1.2rem}
+.bquote em{font-style:normal;color:var(--green)}
+.pstats{display:flex;gap:2.5rem;margin-top:1.8rem}
+.pnum{font-size:1.9rem;font-weight:900;color:var(--green);display:block}
+.plbl{font-size:.7rem;color:var(--grey);text-transform:uppercase;letter-spacing:.1em}
+
+/* ══════ SLIDE 6 — ALL WHITE ══════ */
+#s6{background:#040404;overflow:hidden}
+#s6 canvas{position:absolute;inset:0;width:100%;height:100%}
+.awrap{position:relative;z-index:2;text-align:center;padding:2rem}
+.aw-label{font-size:.68rem;font-weight:700;letter-spacing:.35em;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:2rem;display:block}
+.awtitle{font-size:clamp(3.5rem,9vw,7.5rem);font-weight:900;color:#fff;line-height:.95;animation:glowPulse 3s ease-in-out infinite}
+.awsub{font-size:clamp(.95rem,2vw,1.35rem);color:rgba(255,255,255,.42);font-weight:300;margin:1rem 0 2.5rem}
+.awdetails{display:flex;gap:2rem;justify-content:center;flex-wrap:wrap}
+.awdet{text-align:center}
+.awdet-icon{font-size:1.5rem;display:block;margin-bottom:.35rem}
+.awdet-text{font-size:.78rem;color:rgba(255,255,255,.5);line-height:1.4}
+
+/* ══════ SLIDE 7 — INCLUDED ══════ */
+#s7{background:linear-gradient(150deg,#050d07,#08080e)}
+.s7wrap{text-align:center;width:100%;padding:0 2rem}
+.igrid{display:grid;grid-template-columns:1fr 1fr;gap:3rem;max-width:860px;margin:1.5rem auto 0;text-align:left}
+.icol h3{font-size:.75rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;margin-bottom:1rem}
+.icol.yes h3{color:var(--green)}.icol.no h3{color:rgba(255,110,110,.8)}
+.ci{display:flex;align-items:center;gap:.7rem;padding:.5rem 0;font-size:.85rem;color:rgba(255,255,255,.78);border-bottom:1px solid rgba(255,255,255,.05)}
+.ci-icon{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:700;flex-shrink:0}
+.ci-icon.y{background:rgba(134,239,172,.18);color:var(--green)}
+.ci-icon.n{background:rgba(255,110,110,.12);color:rgba(255,110,110,.8)}
+.pay-note{background:rgba(134,239,172,.06);border:1px solid rgba(134,239,172,.18);border-radius:12px;padding:.9rem 1rem;margin-top:1.2rem;font-size:.8rem;color:rgba(255,255,255,.55);line-height:1.6}
+.pay-note strong{color:var(--green)}
+
+/* ══════ SLIDE 8 — PRICING ══════ */
+#s8{background:linear-gradient(160deg,#060a0d,#060d07)}
+.s8wrap{text-align:center;width:100%;padding:0 2rem}
+.pgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem;max-width:880px;margin:1.5rem auto 0}
+.pcard{background:rgba(14,18,14,.9);border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:2rem 1.4rem;text-align:center;position:relative;transition:transform .3s}
+.pcard:hover{transform:translateY(-8px)}
+.pcard.feat{border-color:rgba(134,239,172,.45);background:linear-gradient(160deg,rgba(134,239,172,.06),rgba(14,18,14,.9));box-shadow:0 0 50px rgba(134,239,172,.08)}
+.pbadge{position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--green);color:#060d07;font-size:.6rem;font-weight:800;padding:.2rem .9rem;border-radius:20px;text-transform:uppercase;letter-spacing:.1em;white-space:nowrap}
+.ptier{font-size:.65rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--grey);margin-bottom:.6rem}
+.pcard.feat .ptier{color:var(--green)}
+.pprice{font-size:2.4rem;font-weight:900;margin-bottom:.2rem}
+.pprice span{font-size:.9rem;color:var(--grey);font-weight:400}
+.pperiod{font-size:.72rem;color:var(--grey);margin-bottom:1.4rem}
+.pfeat{list-style:none;text-align:left;margin-bottom:1.4rem}
+.pfeat li{font-size:.78rem;color:rgba(255,255,255,.68);padding:.3rem 0;display:flex;align-items:center;gap:.45rem}
+.pfeat li::before{content:'✓';color:var(--green);font-weight:700;flex-shrink:0}
+.pcta{width:100%;padding:.8rem;border-radius:12px;font-size:.82rem;font-weight:700;cursor:pointer;font-family:inherit;transition:all .3s;border:none}
+.pcta.out{background:transparent;border:1px solid rgba(255,255,255,.18);color:#fff}
+.pcta.out:hover{border-color:var(--green);color:var(--green)}
+.pcta.fill{background:var(--green);color:#060d07}
+.pcta.fill:hover{opacity:.9}
+.pnote{font-size:.7rem;color:rgba(255,255,255,.25);margin-top:.9rem}
+
+/* ══════ SLIDE 9 — CTA ══════ */
+#s9{background:linear-gradient(160deg,#050d08,#080810);overflow:hidden}
+#s9 canvas{position:absolute;inset:0;width:100%;height:100%}
+.ctawrap{position:relative;z-index:2;text-align:center;max-width:680px;padding:2rem}
+.urgency{display:inline-block;background:rgba(245,200,66,.08);border:1px solid rgba(245,200,66,.28);border-radius:10px;padding:.55rem 1.2rem;font-size:.8rem;color:var(--gold);margin-bottom:1.8rem}
+.ctatitle{font-size:clamp(2.8rem,7vw,5.5rem);font-weight:900;line-height:1;margin-bottom:1rem}
+.ctasub{font-size:clamp(.88rem,1.4vw,.98rem);color:var(--grey);line-height:1.75;margin-bottom:2.2rem;max-width:520px;margin-left:auto;margin-right:auto}
+.ctabtns{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap}
+.btn-g{background:var(--green);color:#060d07;font-weight:800;font-size:.92rem;padding:.95rem 2.4rem;border-radius:50px;border:none;cursor:pointer;font-family:inherit;animation:pulse 2.5s infinite;transition:transform .2s}
+.btn-g:hover{transform:scale(1.04)}
+.btn-o{background:transparent;color:#fff;font-weight:600;font-size:.92rem;padding:.95rem 2.4rem;border-radius:50px;border:1px solid rgba(255,255,255,.2);cursor:pointer;font-family:inherit;transition:all .3s}
+.btn-o:hover{border-color:var(--green);color:var(--green)}
+.cta-ig{margin-top:2rem;font-size:.78rem;color:rgba(255,255,255,.28)}
+.cta-ig strong{color:var(--green)}
+
+/* responsive */
+@media(max-width:768px){
+  .sgrid{grid-template-columns:1fr 1fr}
+  .tline{flex-direction:column;gap:.5rem}
+  .titem::before,.titem::after{display:none}
+  .agrid{grid-template-columns:1fr 1fr}
+  .igrid{grid-template-columns:1fr;gap:1.2rem}
+  .pgrid{grid-template-columns:1fr;overflow-y:auto;max-height:70vh}
+  #dots{display:none}
+  .pstats{gap:1.2rem}
+}
+@media(max-width:480px){
+  .agrid{grid-template-columns:1fr}
+  .pgrid{grid-template-columns:1fr}
+  .htitle{font-size:3rem}
+}
+</style>
+</head>
+<body>
+
+<div id="progress"></div>
+<div id="logo">Makena</div>
+<button id="fsBtn">⛶ Fullscreen</button>
+<button id="audioBtn" title="Toggle ambient music">🎵</button>
+<div id="dots"></div>
+<div id="prevBtn">←</div>
+<div id="nextBtn">→</div>
+<div id="counter">1 / 9</div>
+<div id="hint"><span class="key">←</span><span class="key">→</span> navigate &nbsp;·&nbsp; <span class="key">F</span> fullscreen</div>
+
+<div id="deck">
+
+  <!-- ═══ SLIDE 1 — HERO ═══ -->
+  <section class="slide on" id="s1">
+    <canvas id="heroCanvas"></canvas>
+    <div class="hero">
+      <div class="eyebrow fi d1">✈ Makena Group Travel · 2026</div>
+      <div class="htitle su d2">PUNTA<br>CANA</div>
+      <div class="hsub fu d3">Dominican Republic &nbsp;·&nbsp; November 2026</div>
+      <div class="hpills fu d4">
+        <div class="pill"><strong>5</strong> Days</div>
+        <div class="pill"><strong>All-Inclusive</strong> Resort</div>
+        <div class="pill">Private <strong>Catamaran</strong></div>
+        <div class="pill">All White <strong>Dinner</strong></div>
+        <div class="pill">Island <strong>Day Trip</strong></div>
+      </div>
+      <button class="hcta fu d5" onclick="go(1)">Explore the Trip →</button>
+    </div>
+    <div class="scroll-hint fi d6">Scroll to explore</div>
+  </section>
+
+  <!-- ═══ SLIDE 2 — DESTINATION ═══ -->
+  <section class="slide" id="s2">
+    <div class="s2wrap">
+      <span class="eyebrow fi d1">The Destination</span>
+      <h2 class="stitle fu d2">Why <span class="green">Punta Cana?</span></h2>
+      <p class="ssub fu d3" style="margin:0 auto">Crystal-clear turquoise water, endless white sand beaches, and a nightlife that doesn't quit. Punta Cana is paradise — and Makena is turning it into a party.</p>
+      <div class="sgrid fu d4">
+        <div class="scard"><span class="snum" data-count="5">0</span><span class="slbl">Days of Vibes</span></div>
+        <div class="scard"><span class="snum" data-count="6">0</span><span class="slbl">Activities Planned</span></div>
+        <div class="scard"><span class="snum">100%</span><span class="slbl">All-Inclusive</span></div>
+        <div class="scard"><span class="snum">0</span><span class="slbl">Stress. Zero.</span></div>
+      </div>
+      <div class="flist fu d5">
+        <div class="fi-item">Perfect November weather (28°C / 82°F)</div>
+        <div class="fi-item">Direct flights from most US cities</div>
+        <div class="fi-item">World-class all-inclusive resorts</div>
+        <div class="fi-item">Natural pools & pristine island beaches</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ SLIDE 3 — TIMELINE ═══ -->
+  <section class="slide" id="s3">
+    <div class="s3wrap">
+      <span class="eyebrow fi d1">The Journey</span>
+      <h2 class="stitle fu d2">5 Days. <span class="green">Zero Planning Required.</span></h2>
+      <p class="ssub fu d3" style="margin:0 auto">We handle everything. You just show up.</p>
+      <div class="tline fu d4">
+        <div class="titem">
+          <div class="tdot">01</div>
+          <div class="tday">Day 1 · Arrival</div>
+          <div class="tevent">Welcome & Check-In</div>
+          <div class="tdesc">Airport pickup, resort check-in, Makena gift bag, sunset welcome mixer.</div>
+          <span class="ttag tg">Welcome</span>
+        </div>
+        <div class="titem">
+          <div class="tdot">02</div>
+          <div class="tday">Day 2 · Ocean</div>
+          <div class="tevent">Private Catamaran</div>
+          <div class="tdesc">Full-day charter. Open bar, DJ on deck, snorkeling, sandbar sunset.</div>
+          <span class="ttag tb">Excursion</span>
+        </div>
+        <div class="titem">
+          <div class="tdot">03</div>
+          <div class="tday">Day 3 · Island</div>
+          <div class="tevent">Island Day Trip</div>
+          <div class="tdesc">Speedboat to Saona Island. Natural pools, beach lunch with open bar.</div>
+          <span class="ttag tb">Excursion</span>
+        </div>
+        <div class="titem">
+          <div class="tdot">04</div>
+          <div class="tday">Day 4 · Night</div>
+          <div class="tevent">Adventure + All White Dinner</div>
+          <div class="tdesc">Morning: dune buggies. Evening: All White private group dinner. Night: dancing until late.</div>
+          <span class="ttag tp">Night Party</span>
+        </div>
+        <div class="titem">
+          <div class="tdot">05</div>
+          <div class="tday">Day 5 · Farewell</div>
+          <div class="tevent">Brunch & Departure</div>
+          <div class="tdesc">Group farewell breakfast, trip highlight reel, final photo, airport transfers.</div>
+          <span class="ttag to">Send-Off</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ SLIDE 4 — ACTIVITIES ═══ -->
+  <section class="slide" id="s4">
+    <div class="s4wrap">
+      <span class="eyebrow fi d1">What's Waiting For You</span>
+      <h2 class="stitle fu d2">Every Activity. <span class="green">Already Planned.</span></h2>
+      <div class="agrid">
+        <div class="acard su d2"><span class="aicon">⛵</span><div class="aname">Private Catamaran</div><div class="adesc">Open bar, DJ on deck, snorkeling, and a sandbar sunset. The day everyone talks about.</div></div>
+        <div class="acard su d3"><span class="aicon">🏝️</span><div class="aname">Island Day Trip</div><div class="adesc">Speedboat to a stunning island. Natural pools, beach lunch, and crystal-clear water.</div></div>
+        <div class="acard su d4"><span class="aicon">🏍️</span><div class="aname">Adventure Day</div><div class="adesc">Dune buggies, ATV rides, zip-lines. Your choice of adrenaline rush in the DR jungle.</div></div>
+        <div class="acard su d5"><span class="aicon">🍾</span><div class="aname">All White Dinner</div><div class="adesc">Dress code: all white. Private setting, curated menu, ambient music, and a night you'll remember.</div></div>
+        <div class="acard su d6"><span class="aicon">🍽️</span><div class="aname">Private Group Dinner</div><div class="adesc">Curated menu, drinks included. No bills to split, no logistics to figure out.</div></div>
+        <div class="acard su d7"><span class="aicon">🏨</span><div class="aname">All-Inclusive Resort</div><div class="adesc">4 nights fully covered — every meal, every drink, pools, beach. Everything sorted.</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ SLIDE 5 — CATAMARAN PHOTO ═══ -->
+  <section class="slide" id="s5">
+    <img src="images/boat-party.jpeg" alt="Boat Party">
+    <div class="overlay"></div>
+    <svg class="wavesvg" viewBox="0 0 1440 90" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+      <path d="M0,45 C360,90 1080,0 1440,45 L1440,90 L0,90 Z" fill="rgba(134,239,172,.35)"/>
+      <path d="M0,65 C480,15 960,80 1440,30 L1440,90 L0,90 Z" fill="rgba(134,239,172,.15)"/>
+    </svg>
+    <div class="pcontent">
+      <span class="eyebrow fi d1" style="display:block;margin-bottom:1.2rem">Day 2 · Private Catamaran</span>
+      <div class="bquote fu d2">"The day you'll <em>never</em> stop talking about."</div>
+      <p class="fu d3" style="font-size:.92rem;color:rgba(255,255,255,.6);line-height:1.75;max-width:400px">A private catamaran chartered exclusively for your group. Open bar from the moment you board. A DJ playing your soundtrack. Snorkeling, a sandbar stop, and a champagne toast at sunset.</p>
+      <div class="pstats fu d4">
+        <div><span class="pnum">All Day</span><span class="plbl">9AM – Sunset</span></div>
+        <div><span class="pnum">Open Bar</span><span class="plbl">Fully Included</span></div>
+        <div><span class="pnum">Private</span><span class="plbl">Just Our Group</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ SLIDE 6 — ALL WHITE ═══ -->
+  <section class="slide" id="s6">
+    <canvas id="whiteCanvas"></canvas>
+    <div class="awrap">
+      <span class="aw-label fi d1">Day 4 · The Main Event</span>
+      <div class="awtitle su d2">ALL WHITE</div>
+      <div class="su d3" style="font-size:clamp(1.5rem,4vw,3rem);font-weight:900;color:var(--green);margin-top:.2rem">MAKENA DINNER</div>
+      <p class="awsub fu d4">An intimate evening. Dressed in white. Unforgettable.</p>
+      <div class="awdetails fu d5">
+        <div class="awdet"><span class="awdet-icon">👗</span><div class="awdet-text">All White<br>Dress Code</div></div>
+        <div class="awdet"><span class="awdet-icon">🕯️</span><div class="awdet-text">Private<br>Venue</div></div>
+        <div class="awdet"><span class="awdet-icon">🍽️</span><div class="awdet-text">Curated<br>Menu</div></div>
+        <div class="awdet"><span class="awdet-icon">🥂</span><div class="awdet-text">Open Bar<br>Included</div></div>
+        <div class="awdet"><span class="awdet-icon">🎶</span><div class="awdet-text">Ambient<br>Live Music</div></div>
+        <div class="awdet"><span class="awdet-icon">📸</span><div class="awdet-text">Professional<br>Photographer</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ SLIDE 7 — INCLUDED ═══ -->
+  <section class="slide" id="s7">
+    <div class="s7wrap">
+      <span class="eyebrow fi d1">No Hidden Costs</span>
+      <h2 class="stitle fu d2">Everything's <span class="green">Covered.</span></h2>
+      <p class="ssub fu d3" style="margin:0 auto .2rem">One all-inclusive price. Just show up.</p>
+      <div class="igrid">
+        <div class="icol yes sl d3">
+          <h3>✓ What's Included</h3>
+          <div class="ci"><span class="ci-icon y">✓</span>4-Night All-Inclusive Resort Stay</div>
+          <div class="ci"><span class="ci-icon y">✓</span>Round-Trip Airport Transfers</div>
+          <div class="ci"><span class="ci-icon y">✓</span>Private Catamaran (open bar + DJ)</div>
+          <div class="ci"><span class="ci-icon y">✓</span>Island Day Trip to Saona</div>
+          <div class="ci"><span class="ci-icon y">✓</span>Adventure Day Activity</div>
+          <div class="ci"><span class="ci-icon y">✓</span>All White Makena Dinner</div>
+          <div class="ci"><span class="ci-icon y">✓</span>Private Group Dinner</div>
+          <div class="ci"><span class="ci-icon y">✓</span>All Meals & Drinks at Resort</div>
+          <div class="ci"><span class="ci-icon y">✓</span>Makena Welcome Gift Bag</div>
+          <div class="ci"><span class="ci-icon y">✓</span>Professional Trip Photographer</div>
+        </div>
+        <div class="icol no sr d4">
+          <h3>✕ Not Included</h3>
+          <div class="ci"><span class="ci-icon n">✕</span>Flights (book your own)</div>
+          <div class="ci"><span class="ci-icon n">✕</span>Personal shopping</div>
+          <div class="ci"><span class="ci-icon n">✕</span>Spa treatments</div>
+          <div class="ci"><span class="ci-icon n">✕</span>Tips (recommended)</div>
+          <div class="ci"><span class="ci-icon n">✕</span>Travel insurance (recommended)</div>
+          <div class="pay-note">💡 <strong>Payment Plan Available.</strong><br>Secure your spot with a deposit and pay in installments. No need to pay everything upfront.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ SLIDE 8 — PRICING ═══ -->
+  <section class="slide" id="s8">
+    <div class="s8wrap">
+      <span class="eyebrow fi d1">Investment</span>
+      <h2 class="stitle fu d2">Choose <span class="green">Your Experience.</span></h2>
+      <p class="ssub fu d3" style="margin:0 auto .2rem">All tiers include every activity. Upgrade = your personal paradise level.</p>
+      <div class="pgrid">
+        <div class="pcard su d3">
+          <div class="ptier">Standard</div>
+          <div class="pprice">$1,500 <span>/ person</span></div>
+          <div class="pperiod">All-inclusive · 5 days</div>
+          <ul class="pfeat">
+            <li>Standard Room (share option)</li>
+            <li>All 6 activities included</li>
+            <li>All meals & drinks at resort</li>
+            <li>Makena welcome gift bag</li>
+            <li>Airport transfers</li>
+          </ul>
+          <button class="pcta out" onclick="window.location.href='trips.html'">Reserve My Spot</button>
+        </div>
+        <div class="pcard feat su d4">
+          <div class="pbadge">Most Popular</div>
+          <div class="ptier">Deluxe</div>
+          <div class="pprice">$1,800 <span>/ person</span></div>
+          <div class="pperiod">All-inclusive · 5 days</div>
+          <ul class="pfeat">
+            <li>Deluxe Ocean-View Room</li>
+            <li>All 6 activities included</li>
+            <li>All meals & drinks at resort</li>
+            <li>Makena welcome gift bag</li>
+            <li>Airport transfers</li>
+            <li>Priority activity booking</li>
+          </ul>
+          <button class="pcta fill" onclick="window.location.href='trips.html'">Reserve My Spot</button>
+        </div>
+        <div class="pcard su d5">
+          <div class="ptier">VIP Suite</div>
+          <div class="pprice">$2,200 <span>/ person</span></div>
+          <div class="pperiod">All-inclusive · 5 days</div>
+          <ul class="pfeat">
+            <li>Private Suite (ocean view)</li>
+            <li>All 6 activities included</li>
+            <li>All meals & drinks at resort</li>
+            <li>Premium gift bag</li>
+            <li>Airport transfers</li>
+            <li>VIP table at night party</li>
+            <li>Personal trip concierge</li>
+          </ul>
+          <button class="pcta out" onclick="window.location.href='trips.html'">Reserve My Spot</button>
+        </div>
+      </div>
+      <p class="pnote fi d6">Prices are estimates — confirmed once hotel is locked in. Flights not included. Payment plans available.</p>
+    </div>
+  </section>
+
+  <!-- ═══ SLIDE 9 — CTA ═══ -->
+  <section class="slide" id="s9">
+    <canvas id="ctaCanvas"></canvas>
+    <div class="ctawrap">
+      <div class="urgency fi d1">⚡ Limited to 30 Spots — Group Size Capped</div>
+      <h2 class="ctatitle fu d2">Are You<br><span class="green">Coming?</span></h2>
+      <p class="ctasub fu d3">No commitment to express interest. Drop your details and we'll reach out with everything you need. The only thing worse than missing a trip is wishing you'd gone.</p>
+      <div class="ctabtns fu d4">
+        <button class="btn-g" onclick="window.location.href='trips.html'">I'm In — Reserve My Spot</button>
+        <button class="btn-o" onclick="window.location.href='index.html#links'">Ask a Question</button>
+      </div>
+      <p class="cta-ig fi d5">Follow the journey &nbsp;·&nbsp; <strong>@makena_entertainment</strong> &nbsp;·&nbsp; <strong>makenaevents.com</strong></p>
+    </div>
+  </section>
+
+</div>
+
+<script>
+// ── STATE ──────────────────────────────────────────────────────────────
+const slides = [...document.querySelectorAll('.slide')];
+const N = slides.length;
+let cur = 0, busy = false, touchX = 0;
+let audioCtx = null, audioOn = false, audioNodes = [];
+let whiteInited = false, ctaInited = false;
+
+// ── DOTS ──────────────────────────────────────────────────────────────
+const dotsEl = document.getElementById('dots');
+slides.forEach((_,i) => {
+  const d = document.createElement('div');
+  d.className = 'dot' + (i===0?' on':'');
+  d.onclick = () => go(i);
+  dotsEl.appendChild(d);
+});
+
+// ── NAVIGATION ────────────────────────────────────────────────────────
+function go(idx) {
+  if (busy || idx === cur || idx < 0 || idx >= N) return;
+  busy = true;
+  slides[cur].classList.remove('on');
+  resetAnims(slides[cur]);
+  cur = idx;
+  slides[cur].classList.add('on');
+  updateUI();
+  if (cur === 1) animCounters();
+  if (cur === 5) initWhite();
+  if (cur === 8) initCta();
+  setTimeout(() => { busy = false; }, 700);
+}
+
+function resetAnims(slide) {
+  slide.querySelectorAll('.fu,.fi,.su,.sl,.sr').forEach(el => {
+    el.style.animation = 'none';
+    el.offsetHeight;
+    el.style.animation = '';
+  });
+}
+
+function updateUI() {
+  document.getElementById('progress').style.width = ((cur+1)/N*100) + '%';
+  document.getElementById('counter').textContent = (cur+1) + ' / ' + N;
+  document.querySelectorAll('.dot').forEach((d,i) => d.classList.toggle('on', i===cur));
+}
+
+document.getElementById('nextBtn').onclick = () => go(cur+1);
+document.getElementById('prevBtn').onclick = () => go(cur-1);
+document.addEventListener('keydown', e => {
+  if (e.key==='ArrowRight'||e.key===' ') { e.preventDefault(); go(cur+1); }
+  if (e.key==='ArrowLeft') { e.preventDefault(); go(cur-1); }
+  if (e.key==='f'||e.key==='F') toggleFS();
+});
+document.addEventListener('touchstart', e => { touchX = e.touches[0].clientX; });
+document.addEventListener('touchend', e => {
+  const d = touchX - e.changedTouches[0].clientX;
+  if (Math.abs(d) > 50) go(d > 0 ? cur+1 : cur-1);
+});
+
+// ── FULLSCREEN ────────────────────────────────────────────────────────
+function toggleFS() {
+  if (!document.fullscreenElement) {
+    document.documentElement.requestFullscreen().catch(()=>{});
+    document.getElementById('fsBtn').textContent = '✕ Exit';
+  } else {
+    document.exitFullscreen();
+    document.getElementById('fsBtn').textContent = '⛶ Fullscreen';
+  }
+}
+document.getElementById('fsBtn').onclick = toggleFS;
+
+// ── HERO PARTICLES ────────────────────────────────────────────────────
+(function() {
+  const c = document.getElementById('heroCanvas');
+  const cx = c.getContext('2d');
+  function resize() { c.width = innerWidth; c.height = innerHeight; }
+  resize(); window.addEventListener('resize', resize);
+  const pts = Array.from({length:130}, () => mkPt(c));
+  function mkPt(c) {
+    return { x:Math.random()*c.width, y:Math.random()*c.height,
+      r:Math.random()*2+.4, vx:(Math.random()-.5)*.25, vy:-(Math.random()*.5+.15),
+      a:Math.random()*.55+.1, col:Math.random()>.65?'#86EFA9':'#ffffff' };
+  }
+  (function loop() {
+    cx.clearRect(0,0,c.width,c.height);
+    // radial glow
+    const g = cx.createRadialGradient(c.width/2,c.height/2,0,c.width/2,c.height/2,c.width*.65);
+    g.addColorStop(0,'rgba(11,42,26,.45)'); g.addColorStop(1,'rgba(5,13,8,0)');
+    cx.fillStyle=g; cx.fillRect(0,0,c.width,c.height);
+    pts.forEach(p => {
+      p.x+=p.vx; p.y+=p.vy;
+      if(p.y<-5){p.y=c.height+5;p.x=Math.random()*c.width;}
+      if(p.x<0||p.x>c.width){p.x=Math.random()*c.width;p.y=c.height+5;}
+      cx.save(); cx.globalAlpha=p.a; cx.fillStyle=p.col;
+      cx.beginPath(); cx.arc(p.x,p.y,p.r,0,Math.PI*2); cx.fill(); cx.restore();
+    });
+    requestAnimationFrame(loop);
+  })();
+})();
+
+// ── WHITE PARTICLES (Slide 6) ─────────────────────────────────────────
+function initWhite() {
+  if (whiteInited) return; whiteInited = true;
+  const c = document.getElementById('whiteCanvas');
+  const cx = c.getContext('2d');
+  c.width = innerWidth; c.height = innerHeight;
+  const pts = Array.from({length:90}, () => mkW(c));
+  function mkW(c) {
+    return { x:Math.random()*c.width, y:c.height+10,
+      r:Math.random()*2.5+.5, vy:-(Math.random()*1.2+.4),
+      vx:(Math.random()-.5)*.4, a:Math.random()*.5+.15, life:Math.random() };
+  }
+  (function loop() {
+    cx.clearRect(0,0,c.width,c.height);
+    pts.forEach(p => {
+      p.x+=p.vx; p.y+=p.vy; p.life-=.003;
+      if(p.y<-10||p.life<=0){Object.assign(p,mkW(c));}
+      cx.save(); cx.globalAlpha=p.life*p.a; cx.fillStyle='#fff';
+      cx.beginPath(); cx.arc(p.x,p.y,p.r,0,Math.PI*2); cx.fill(); cx.restore();
+    });
+    requestAnimationFrame(loop);
+  })();
+}
+
+// ── CTA PARTICLES (Slide 9) ───────────────────────────────────────────
+function initCta() {
+  if (ctaInited) return; ctaInited = true;
+  const c = document.getElementById('ctaCanvas');
+  const cx = c.getContext('2d');
+  c.width = innerWidth; c.height = innerHeight;
+  const pts = Array.from({length:60}, () => ({
+    x:Math.random()*c.width, y:Math.random()*c.height,
+    r:Math.random()*1.8+.3, vx:(Math.random()-.5)*.3, vy:(Math.random()-.5)*.3,
+    a:Math.random()*.4+.05, col:Math.random()>.5?'#86EFA9':'#F5C842'
+  }));
+  (function loop() {
+    cx.clearRect(0,0,c.width,c.height);
+    pts.forEach(p => {
+      p.x+=p.vx; p.y+=p.vy;
+      if(p.x<0)p.x=c.width; if(p.x>c.width)p.x=0;
+      if(p.y<0)p.y=c.height; if(p.y>c.height)p.y=0;
+      cx.save(); cx.globalAlpha=p.a; cx.fillStyle=p.col;
+      cx.beginPath(); cx.arc(p.x,p.y,p.r,0,Math.PI*2); cx.fill(); cx.restore();
+    });
+    requestAnimationFrame(loop);
+  })();
+}
+
+// ── COUNTERS ──────────────────────────────────────────────────────────
+function animCounters() {
+  document.querySelectorAll('[data-count]').forEach(el => {
+    const target = +el.dataset.count, step = target/40;
+    let v = 0;
+    const t = setInterval(() => {
+      v = Math.min(v+step, target);
+      el.textContent = Math.floor(v);
+      if (v >= target) clearInterval(t);
+    }, 30);
+  });
+}
+
+// ── AMBIENT MUSIC ─────────────────────────────────────────────────────
+function initAC() {
+  if (!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+  if (audioCtx.state==='suspended') audioCtx.resume();
+}
+
+function makePad(freq, gain, detune=0) {
+  const osc = audioCtx.createOscillator();
+  const gn  = audioCtx.createGain();
+  const flt = audioCtx.createBiquadFilter();
+  const lfo = audioCtx.createOscillator();
+  const lg  = audioCtx.createGain();
+  osc.type = 'sine'; osc.frequency.value = freq; osc.detune.value = detune;
+  flt.type = 'lowpass'; flt.frequency.value = 1100; flt.Q.value = .4;
+  gn.gain.value = gain;
+  lfo.frequency.value = .12; lg.gain.value = gain * .25;
+  lfo.connect(lg); lg.connect(gn.gain);
+  osc.connect(flt); flt.connect(gn); gn.connect(audioCtx.destination);
+  osc.start(); lfo.start();
+  // fade in
+  gn.gain.setValueAtTime(0, audioCtx.currentTime);
+  gn.gain.linearRampToValueAtTime(gain, audioCtx.currentTime+2.5);
+  return {osc, gn, lfo};
+}
+
+function startMusic() {
+  initAC();
+  // A minor ambient chord — warm, tropical
+  audioNodes = [
+    makePad(55,   .065),       // A1 sub
+    makePad(110,  .04),        // A2
+    makePad(164.8,.032),       // E3
+    makePad(220,  .026),       // A3
+    makePad(261.6,.02),        // C4
+    makePad(329.6,.016),       // E4
+    makePad(440,  .01, 9),     // A4 shimmer
+  ];
+  audioOn = true;
+  document.getElementById('audioBtn').textContent = '🔊';
+}
+
+function stopMusic() {
+  if (!audioCtx) return;
+  const t = audioCtx.currentTime;
+  audioNodes.forEach(({osc,gn,lfo}) => {
+    gn.gain.linearRampToValueAtTime(0.001, t+2);
+    setTimeout(()=>{ try{osc.stop();lfo.stop();}catch(e){} }, 2200);
+  });
+  audioNodes = [];
+  audioOn = false;
+  document.getElementById('audioBtn').textContent = '🎵';
+}
+
+document.getElementById('audioBtn').onclick = () => audioOn ? stopMusic() : startMusic();
+
+// init
+updateUI();
+</script>
+</body>
+</html>

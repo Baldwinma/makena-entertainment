@@ -36,7 +36,7 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'Poppins',sans-seri
 
 /* ── slides ── */
 #deck{position:fixed;top:0;left:0;width:100%;height:100%;height:100dvh}
-.slide{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .65s ease;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding:4.5rem 0 5rem}
+.slide{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .65s ease;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding:4.5rem 0 5rem;align-items:flex-start}
 .slide.on{opacity:1;pointer-events:all}
 
 @media(min-width:769px){
@@ -44,7 +44,7 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'Poppins',sans-seri
   #fsBtn:hover{border-color:var(--green);color:var(--green)}
   #hint{position:fixed;bottom:1.2rem;left:1.5rem;font-size:.65rem;color:rgba(255,255,255,.18);z-index:200;display:flex;gap:.4rem;align-items:center}
   #counter{bottom:1.2rem;right:1.5rem}
-  .slide{padding:0;overflow:hidden}
+  .slide{padding:0;overflow:hidden;align-items:center}
 }
 
 /* ── anim classes ── */

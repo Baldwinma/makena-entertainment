@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Punta Cana Bookings — Makena Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --green:#86EFA9;--dark:#0a0a0a;--card:#141414;--border:rgba(255,255,255,.08);
+  --grey:rgba(255,255,255,.45);--gold:#F5C842;
+  --paid:#86EFA9;--pending:#F5C842;--failed:#f87171;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Poppins',sans-serif;background:var(--dark);color:#fff;min-height:100vh}
+
+/* ── Login ── */
+#loginScreen{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:1rem}
+.login-card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:2.5rem;width:100%;max-width:380px;text-align:center}
+.login-card h1{font-size:1.6rem;font-weight:900;margin-bottom:.3rem}
+.login-card p{font-size:.84rem;color:var(--grey);margin-bottom:2rem}
+.login-card input{width:100%;padding:.8rem 1rem;background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:10px;color:#fff;font-size:.9rem;font-family:inherit;margin-bottom:.85rem;transition:border-color .2s}
+.login-card input:focus{outline:none;border-color:var(--green)}
+.login-card input::placeholder{color:rgba(255,255,255,.22)}
+.login-btn{width:100%;padding:.85rem;background:var(--green);color:#060d07;font-weight:800;font-size:.92rem;border:none;border-radius:10px;cursor:pointer;font-family:inherit;transition:opacity .2s}
+.login-btn:hover{opacity:.88}
+.login-btn:disabled{opacity:.45;cursor:not-allowed}
+.login-error{font-size:.78rem;color:#f87171;margin-top:.6rem;min-height:1.2rem}
+.logo-txt{font-size:.65rem;font-weight:800;letter-spacing:.25em;text-transform:uppercase;color:var(--green);margin-bottom:1.5rem;display:block}
+
+/* ── App shell ── */
+#appScreen{display:none}
+.topbar{
+  position:sticky;top:0;z-index:100;
+  background:rgba(10,10,10,.96);backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--border);
+  padding:.9rem 1.5rem;
+  display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;
+}
+.topbar-left{display:flex;align-items:center;gap:1rem}
+.topbar-logo{font-size:.6rem;font-weight:800;letter-spacing:.25em;text-transform:uppercase;color:var(--green)}
+.topbar h1{font-size:1rem;font-weight:700;color:#fff}
+.topbar-right{display:flex;align-items:center;gap:.75rem;flex-wrap:wrap}
+.topbar-btn{background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:8px;padding:.4rem .85rem;font-size:.75rem;font-weight:600;color:rgba(255,255,255,.55);cursor:pointer;font-family:inherit;transition:all .2s}
+.topbar-btn:hover{border-color:var(--green);color:var(--green)}
+.topbar-btn.danger:hover{border-color:#f87171;color:#f87171}
+
+.main{padding:1.5rem;max-width:1400px;margin:0 auto}
+
+/* ── Stats ── */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1rem;margin-bottom:2rem}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:1.3rem 1.2rem}
+.stat-card__label{font-size:.62rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--grey);margin-bottom:.4rem}
+.stat-card__value{font-size:2rem;font-weight:900;color:#fff;line-height:1}
+.stat-card__sub{font-size:.72rem;color:var(--grey);margin-top:.3rem}
+.stat-card.green .stat-card__value{color:var(--green)}
+.stat-card.gold .stat-card__value{color:var(--gold)}
+
+/* ── Filters ── */
+.filters{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1.5rem;align-items:center}
+.filter-btn{padding:.4rem .9rem;border-radius:20px;border:1px solid var(--border);background:transparent;color:rgba(255,255,255,.5);font-size:.75rem;font-weight:600;cursor:pointer;font-family:inherit;transition:all .2s}
+.filter-btn:hover{border-color:rgba(255,255,255,.25);color:#fff}
+.filter-btn.active{background:var(--green);border-color:var(--green);color:#060d07}
+.filter-label{font-size:.72rem;color:var(--grey);margin-right:.25rem}
+.search-input{padding:.4rem .85rem;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:8px;color:#fff;font-size:.78rem;font-family:inherit;min-width:200px;transition:border-color .2s}
+.search-input:focus{outline:none;border-color:var(--green)}
+.search-input::placeholder{color:rgba(255,255,255,.22)}
+
+/* ── Table ── */
+.table-wrap{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden}
+.table-header{padding:1rem 1.4rem;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
+.table-header h2{font-size:.85rem;font-weight:700;color:#fff}
+.count-badge{font-size:.7rem;color:var(--grey)}
+
+table{width:100%;border-collapse:collapse}
+thead th{
+  padding:.75rem 1rem;text-align:left;
+  font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--grey);border-bottom:1px solid var(--border);
+  white-space:nowrap;background:rgba(255,255,255,.02);
+}
+tbody tr{border-bottom:1px solid rgba(255,255,255,.04);transition:background .15s;cursor:pointer}
+tbody tr:last-child{border-bottom:none}
+tbody tr:hover{background:rgba(255,255,255,.03)}
+tbody tr.expanded{background:rgba(134,239,172,.03)}
+td{padding:.85rem 1rem;font-size:.82rem;color:rgba(255,255,255,.8);vertical-align:middle}
+td.mono{font-family:monospace;font-size:.78rem;color:var(--green)}
+
+.status-badge{
+  display:inline-block;padding:.2rem .65rem;border-radius:20px;
+  font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
+}
+.status-badge.paid{background:rgba(134,239,172,.12);color:var(--paid)}
+.status-badge.pending{background:rgba(245,200,66,.1);color:var(--pending)}
+.status-badge.failed{background:rgba(248,113,113,.1);color:var(--failed)}
+
+.room-tag{
+  display:inline-block;padding:.18rem .55rem;border-radius:6px;
+  font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
+  background:rgba(255,255,255,.07);color:rgba(255,255,255,.6);
+}
+.room-tag.triple{background:rgba(134,239,172,.1);color:#86EFA9}
+.room-tag.double{background:rgba(160,100,255,.12);color:#c4a0ff}
+.room-tag.single{background:rgba(80,160,255,.1);color:#80c0ff}
+
+.expand-icon{font-size:.8rem;color:var(--grey);transition:transform .2s}
+tr.expanded .expand-icon{transform:rotate(180deg)}
+
+/* ── Expanded row ── */
+.expanded-row{display:none}
+.expanded-row.open{display:table-row}
+.expanded-row td{padding:0}
+.expanded-inner{padding:1.2rem 1.4rem 1.4rem;border-top:1px solid rgba(255,255,255,.05)}
+.expanded-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:.75rem;margin-bottom:1.2rem}
+.exp-field label{font-size:.6rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--grey);display:block;margin-bottom:.15rem}
+.exp-field span{font-size:.84rem;color:#fff}
+.guests-table{width:100%;border-collapse:collapse;margin-top:.5rem}
+.guests-table th{font-size:.6rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--grey);padding:.4rem .6rem;text-align:left;border-bottom:1px solid var(--border)}
+.guests-table td{font-size:.8rem;color:rgba(255,255,255,.75);padding:.5rem .6rem;border-bottom:1px solid rgba(255,255,255,.04)}
+.guests-table tr:last-child td{border-bottom:none}
+.guests-section-label{font-size:.65rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--green);margin-bottom:.5rem}
+
+/* ── Empty / Loading ── */
+.empty-state{text-align:center;padding:4rem 2rem;color:var(--grey)}
+.empty-state .icon{font-size:2.5rem;margin-bottom:.75rem}
+.loading-spinner{text-align:center;padding:3rem;color:var(--grey);font-size:.85rem}
+
+/* ── Export btn ── */
+.export-btn{background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:8px;padding:.45rem .9rem;font-size:.75rem;font-weight:600;color:rgba(255,255,255,.55);cursor:pointer;font-family:inherit;transition:all .2s}
+.export-btn:hover{border-color:var(--green);color:var(--green)}
+
+@media(max-width:768px){
+  thead th:nth-child(4),thead th:nth-child(5),tbody td:nth-child(4),tbody td:nth-child(5){display:none}
+  .stats-grid{grid-template-columns:1fr 1fr}
+  .main{padding:1rem}
+  .topbar{padding:.75rem 1rem}
+}
+</style>
+</head>
+<body>
+
+<!-- Login Screen -->
+<div id="loginScreen">
+  <div class="login-card">
+    <span class="logo-txt">Makena Admin</span>
+    <h1>Punta Cana Bookings</h1>
+    <p>Sign in to view and manage trip bookings</p>
+    <input type="text" id="loginUser" placeholder="Username" autocomplete="username" autocapitalize="none">
+    <input type="password" id="loginPass" placeholder="Password" autocomplete="current-password">
+    <button class="login-btn" id="loginBtn">Sign In</button>
+    <div class="login-error" id="loginError"></div>
+  </div>
+</div>
+
+<!-- App Screen -->
+<div id="appScreen">
+  <div class="topbar">
+    <div class="topbar-left">
+      <span class="topbar-logo">Makena</span>
+      <h1>✈ Punta Cana 2026 — Bookings</h1>
+    </div>
+    <div class="topbar-right">
+      <button class="export-btn" id="exportCsvBtn">⬇ Export CSV</button>
+      <button class="topbar-btn" onclick="loadBookings()">⟳ Refresh</button>
+      <button class="topbar-btn danger" id="logoutBtn">Logout</button>
+    </div>
+  </div>
+
+  <div class="main">
+    <!-- Stats -->
+    <div class="stats-grid" id="statsGrid">
+      <div class="stat-card green">
+        <div class="stat-card__label">Total Bookings</div>
+        <div class="stat-card__value" id="statTotal">—</div>
+        <div class="stat-card__sub">All time</div>
+      </div>
+      <div class="stat-card gold">
+        <div class="stat-card__label">Deposits Collected</div>
+        <div class="stat-card__value" id="statRevenue">—</div>
+        <div class="stat-card__sub">Paid only</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card__label">Paid</div>
+        <div class="stat-card__value" id="statPaid">—</div>
+        <div class="stat-card__sub">Confirmed</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card__label">Pending</div>
+        <div class="stat-card__value" id="statPending">—</div>
+        <div class="stat-card__sub">Awaiting payment</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card__label">Triple Rooms</div>
+        <div class="stat-card__value" id="statTriple">—</div>
+        <div class="stat-card__sub" id="statTripleGuests"></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card__label">Double Rooms</div>
+        <div class="stat-card__value" id="statDouble">—</div>
+        <div class="stat-card__sub" id="statDoubleGuests"></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card__label">Single Rooms</div>
+        <div class="stat-card__value" id="statSingle">—</div>
+        <div class="stat-card__sub" id="statSingleGuests"></div>
+      </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="filters">
+      <span class="filter-label">Filter:</span>
+      <button class="filter-btn active" data-filter="all">All</button>
+      <button class="filter-btn" data-filter="paid">Paid</button>
+      <button class="filter-btn" data-filter="pending">Pending</button>
+      <button class="filter-btn" data-filter="triple">Triple</button>
+      <button class="filter-btn" data-filter="double">Double</button>
+      <button class="filter-btn" data-filter="single">Single</button>
+      <input class="search-input" id="searchInput" type="text" placeholder="Search name, email, ref…">
+    </div>
+
+    <!-- Table -->
+    <div class="table-wrap">
+      <div class="table-header">
+        <h2>All Bookings</h2>
+        <span class="count-badge" id="tableCount"></span>
+      </div>
+      <div id="tableBody">
+        <div class="loading-spinner">Loading bookings…</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+var adminToken = sessionStorage.getItem('makena_admin_token');
+var allBookings = [];
+var activeFilter = 'all';
+
+// ── Auth ──────────────────────────────────────────────────────────────────────
+if (adminToken) showApp();
+
+document.getElementById('loginBtn').addEventListener('click', doLogin);
+document.getElementById('loginPass').addEventListener('keydown', function(e){ if(e.key==='Enter') doLogin(); });
+
+function doLogin() {
+  var btn = document.getElementById('loginBtn');
+  var errEl = document.getElementById('loginError');
+  var user = document.getElementById('loginUser').value.trim();
+  var pass = document.getElementById('loginPass').value;
+  errEl.textContent = '';
+  if (!user || !pass) { errEl.textContent = 'Please enter username and password.'; return; }
+  btn.disabled = true; btn.textContent = 'Signing in…';
+  fetch('/.netlify/functions/admin-login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username: user, password: pass })
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(d){
+    if (d.error) throw new Error(d.error);
+    adminToken = d.token;
+    sessionStorage.setItem('makena_admin_token', adminToken);
+    showApp();
+  })
+  .catch(function(e){
+    errEl.textContent = e.message || 'Login failed.';
+    btn.disabled = false; btn.textContent = 'Sign In';
+  });
+}
+
+function showApp() {
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('appScreen').style.display = 'block';
+  loadBookings();
+}
+
+document.getElementById('logoutBtn').addEventListener('click', function(){
+  sessionStorage.removeItem('makena_admin_token');
+  adminToken = null;
+  document.getElementById('appScreen').style.display = 'none';
+  document.getElementById('loginScreen').style.display = 'flex';
+});
+
+// ── Load Data ─────────────────────────────────────────────────────────────────
+function loadBookings() {
+  document.getElementById('tableBody').innerHTML = '<div class="loading-spinner">Loading bookings…</div>';
+  fetch('/.netlify/functions/admin-trip-bookings', {
+    headers: { 'Authorization': 'Bearer ' + adminToken }
+  })
+  .then(function(r){
+    if (r.status === 401) { sessionStorage.removeItem('makena_admin_token'); window.location.reload(); return null; }
+    return r.json();
+  })
+  .then(function(d){
+    if (!d) return;
+    if (d.error) throw new Error(d.error);
+    allBookings = d.bookings || [];
+    updateStats();
+    renderTable();
+  })
+  .catch(function(e){
+    document.getElementById('tableBody').innerHTML = '<div class="empty-state"><div class="icon">⚠️</div><p>' + (e.message || 'Failed to load bookings.') + '</p></div>';
+  });
+}
+
+// ── Stats ─────────────────────────────────────────────────────────────────────
+function updateStats() {
+  var paid = allBookings.filter(function(b){ return b.payment_status === 'paid'; });
+  var pending = allBookings.filter(function(b){ return b.payment_status === 'pending'; });
+  var triple = allBookings.filter(function(b){ return b.room_type === 'triple'; });
+  var double_ = allBookings.filter(function(b){ return b.room_type === 'double'; });
+  var single = allBookings.filter(function(b){ return b.room_type === 'single'; });
+  var totalRevenue = paid.reduce(function(s,b){ return s + (b.deposit_total || 0); }, 0);
+  var tripleGuests = triple.reduce(function(s,b){ return s + (b.guest_count||0); }, 0);
+  var doubleGuests = double_.reduce(function(s,b){ return s + (b.guest_count||0); }, 0);
+  var singleGuests = single.reduce(function(s,b){ return s + (b.guest_count||0); }, 0);
+
+  document.getElementById('statTotal').textContent = allBookings.length;
+  document.getElementById('statRevenue').textContent = '$' + (totalRevenue/100).toLocaleString();
+  document.getElementById('statPaid').textContent = paid.length;
+  document.getElementById('statPending').textContent = pending.length;
+  document.getElementById('statTriple').textContent = triple.length;
+  document.getElementById('statTripleGuests').textContent = tripleGuests + ' guests';
+  document.getElementById('statDouble').textContent = double_.length;
+  document.getElementById('statDoubleGuests').textContent = doubleGuests + ' guests';
+  document.getElementById('statSingle').textContent = single.length;
+  document.getElementById('statSingleGuests').textContent = singleGuests + ' guests';
+}
+
+// ── Filters ───────────────────────────────────────────────────────────────────
+document.querySelectorAll('.filter-btn').forEach(function(btn){
+  btn.addEventListener('click', function(){
+    activeFilter = this.dataset.filter;
+    document.querySelectorAll('.filter-btn').forEach(function(b){ b.classList.remove('active'); });
+    this.classList.add('active');
+    renderTable();
+  });
+});
+
+document.getElementById('searchInput').addEventListener('input', renderTable);
+
+function getFiltered() {
+  var q = document.getElementById('searchInput').value.toLowerCase().trim();
+  return allBookings.filter(function(b){
+    if (activeFilter !== 'all') {
+      if (activeFilter === 'paid' && b.payment_status !== 'paid') return false;
+      if (activeFilter === 'pending' && b.payment_status !== 'pending') return false;
+      if (['triple','double','single'].includes(activeFilter) && b.room_type !== activeFilter) return false;
+    }
+    if (!q) return true;
+    var search = [b.booking_ref, b.primary_first_name, b.primary_last_name, b.primary_email, b.primary_phone].join(' ').toLowerCase();
+    if (b.guests) b.guests.forEach(function(g){ search += ' ' + [g.first_name, g.last_name, g.email].join(' ').toLowerCase(); });
+    return search.includes(q);
+  });
+}
+
+// ── Render Table ──────────────────────────────────────────────────────────────
+function renderTable() {
+  var filtered = getFiltered();
+  document.getElementById('tableCount').textContent = filtered.length + ' booking' + (filtered.length !== 1 ? 's' : '');
+
+  if (!filtered.length) {
+    document.getElementById('tableBody').innerHTML = '<div class="empty-state"><div class="icon">📭</div><p>No bookings match your filter.</p></div>';
+    return;
+  }
+
+  var html = '<table><thead><tr>' +
+    '<th></th><th>Ref</th><th>Primary Guest</th><th>Room</th><th>Guests</th>' +
+    '<th>Deposit</th><th>Status</th><th>Date</th>' +
+    '</tr></thead><tbody>';
+
+  filtered.forEach(function(b){
+    var date = b.created_at ? new Date(b.created_at).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) : '—';
+    var deposit = b.deposit_total ? '$' + (b.deposit_total/100).toLocaleString() : '—';
+    html += '<tr onclick="toggleExpand(\'' + b.id + '\')" id="row-' + b.id + '">' +
+      '<td><span class="expand-icon">▾</span></td>' +
+      '<td class="mono">' + (b.booking_ref || '—') + '</td>' +
+      '<td><div style="font-weight:600">' + esc(b.primary_first_name) + ' ' + esc(b.primary_last_name||'') + '</div>' +
+          '<div style="font-size:.74rem;color:rgba(255,255,255,.4)">' + esc(b.primary_email) + '</div></td>' +
+      '<td><span class="room-tag ' + b.room_type + '">' + b.room_type + '</span></td>' +
+      '<td>' + (b.guest_count||'—') + '</td>' +
+      '<td>' + deposit + '</td>' +
+      '<td><span class="status-badge ' + b.payment_status + '">' + b.payment_status + '</span></td>' +
+      '<td style="font-size:.76rem;color:rgba(255,255,255,.5)">' + date + '</td>' +
+      '</tr>';
+
+    // Expanded detail row
+    html += '<tr class="expanded-row" id="exp-' + b.id + '"><td colspan="8">' +
+      '<div class="expanded-inner">' +
+      '<div class="expanded-grid">' +
+        expField('Phone', b.primary_phone) +
+        expField('Country', b.primary_country) +
+        expField('Room Type', capitalize(b.room_type) + ' Share') +
+        expField('Price / Person', b.price_per_person ? '$' + (b.price_per_person/100).toFixed(0) : '—') +
+        expField('Deposit / Person', b.deposit_per_person ? '$' + (b.deposit_per_person/100).toFixed(0) : '—') +
+        expField('Total Deposit', deposit) +
+        expField('Payment Status', capitalize(b.payment_status||'')) +
+        (b.paid_at ? expField('Paid At', new Date(b.paid_at).toLocaleString()) : '') +
+        (b.stripe_session_id ? expField('Stripe Session', '<span style="font-size:.7rem;font-family:monospace;color:rgba(255,255,255,.4)">' + b.stripe_session_id + '</span>') : '') +
+      '</div>';
+
+    if (b.guests && b.guests.length) {
+      html += '<div class="guests-section-label">All Guests in This Room</div>';
+      html += '<table class="guests-table"><thead><tr><th>#</th><th>Name</th><th>Email</th><th>Phone</th><th>Country</th></tr></thead><tbody>';
+      b.guests.forEach(function(g){
+        html += '<tr>' +
+          '<td style="color:var(--green);font-weight:700">' + g.guest_number + '</td>' +
+          '<td style="font-weight:600">' + esc(g.first_name) + ' ' + esc(g.last_name||'') + '</td>' +
+          '<td>' + esc(g.email) + '</td>' +
+          '<td>' + esc(g.phone||'—') + '</td>' +
+          '<td>' + esc(g.country||'—') + '</td>' +
+          '</tr>';
+      });
+      html += '</tbody></table>';
+    }
+
+    html += '</div></td></tr>';
+  });
+
+  html += '</tbody></table>';
+  document.getElementById('tableBody').innerHTML = html;
+}
+
+function toggleExpand(id) {
+  var row = document.getElementById('row-' + id);
+  var expRow = document.getElementById('exp-' + id);
+  if (!expRow) return;
+  var isOpen = expRow.classList.contains('open');
+  expRow.classList.toggle('open', !isOpen);
+  if (row) row.classList.toggle('expanded', !isOpen);
+}
+
+function expField(label, value) {
+  return '<div class="exp-field"><label>' + label + '</label><span>' + (value || '—') + '</span></div>';
+}
+
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function capitalize(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : s; }
+
+// ── Export CSV ────────────────────────────────────────────────────────────────
+document.getElementById('exportCsvBtn').addEventListener('click', exportCsv);
+
+function exportCsv() {
+  var rows = [['Booking Ref','Room Type','Price/Person','Guests','Deposit Total','Status','Primary First','Primary Last','Primary Email','Primary Phone','Country','Paid At','Created At','Guest #','Guest First','Guest Last','Guest Email','Guest Phone','Guest Country']];
+  allBookings.forEach(function(b){
+    var base = [
+      b.booking_ref||'', b.room_type||'',
+      b.price_per_person ? (b.price_per_person/100).toFixed(2) : '',
+      b.guest_count||'',
+      b.deposit_total ? (b.deposit_total/100).toFixed(2) : '',
+      b.payment_status||'',
+      b.primary_first_name||'', b.primary_last_name||'',
+      b.primary_email||'', b.primary_phone||'', b.primary_country||'',
+      b.paid_at ? new Date(b.paid_at).toISOString() : '',
+      b.created_at ? new Date(b.created_at).toISOString() : ''
+    ];
+    if (b.guests && b.guests.length) {
+      b.guests.forEach(function(g){
+        rows.push(base.concat([g.guest_number, g.first_name||'', g.last_name||'', g.email||'', g.phone||'', g.country||'']));
+      });
+    } else {
+      rows.push(base.concat(['','','','','','']));
+    }
+  });
+  var csv = rows.map(function(r){ return r.map(function(v){ return '"' + String(v).replace(/"/g,'""') + '"'; }).join(','); }).join('\n');
+  var blob = new Blob([csv], { type: 'text/csv' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url; a.download = 'punta-cana-bookings-' + new Date().toISOString().slice(0,10) + '.csv';
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a); URL.revokeObjectURL(url);
+}
+</script>
+</body>
+</html>

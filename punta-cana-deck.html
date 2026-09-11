@@ -255,6 +255,17 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'Poppins',sans-seri
   .sgrid{grid-template-columns:1fr 1fr}
   .htitle{font-size:3rem}
 }
+/* ── slide background photos ── */
+.slide-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;pointer-events:none;z-index:0}
+.bg-overlay{position:absolute;inset:0;pointer-events:none;z-index:1}
+.s2wrap,.s3wrap,.s4wrap,.s7wrap,.s8wrap{position:relative;z-index:2}
+/* activity card photo strips */
+.acard{position:relative;overflow:hidden}
+.acard-snap{width:calc(100% + 2rem);margin:-1.5rem -1rem .9rem;height:90px;background-size:cover;background-position:center;opacity:.6;transition:opacity .3s}
+.acard:hover .acard-snap{opacity:.85}
+@media(max-width:768px){
+  .acard-snap{width:calc(100% + 1.6rem);margin:-1rem -.8rem .6rem;height:70px}
+}
 </style>
 </head>
 <body>
@@ -273,6 +284,7 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'Poppins',sans-seri
 
   <!-- ═══ SLIDE 1 — HERO ═══ -->
   <section class="slide on" id="s1">
+    <img class="slide-bg" src="https://images.pexels.com/photos/5007457/pexels-photo-5007457.jpeg?auto=compress&cs=tinysrgb&w=1600" alt="" style="opacity:.22" loading="lazy">
     <canvas id="heroCanvas"></canvas>
     <div class="hero">
       <div class="eyebrow fi d1">✈ Makena Group Travel · 2026</div>
@@ -292,6 +304,8 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'Poppins',sans-seri
 
   <!-- ═══ SLIDE 2 — DESTINATION ═══ -->
   <section class="slide" id="s2">
+    <img class="slide-bg" src="https://images.pexels.com/photos/12858509/pexels-photo-12858509.jpeg?auto=compress&cs=tinysrgb&w=1600" alt="" loading="lazy">
+    <div class="bg-overlay" style="background:linear-gradient(150deg,rgba(5,13,8,.84),rgba(9,15,20,.82))"></div>
     <div class="s2wrap">
       <span class="eyebrow fi d1">The Destination</span>
       <h2 class="stitle fu d2">Why <span class="green">Punta Cana?</span></h2>
@@ -313,6 +327,8 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'Poppins',sans-seri
 
   <!-- ═══ SLIDE 3 — TIMELINE ═══ -->
   <section class="slide" id="s3">
+    <img class="slide-bg" src="https://images.pexels.com/photos/15298798/pexels-photo-15298798.jpeg?auto=compress&cs=tinysrgb&w=1600" alt="" loading="lazy">
+    <div class="bg-overlay" style="background:rgba(6,9,13,.87)"></div>
     <div class="s3wrap">
       <span class="eyebrow fi d1">The Journey</span>
       <h2 class="stitle fu d2">5 Days. <span class="green">Zero Planning Required.</span></h2>
@@ -359,16 +375,18 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'Poppins',sans-seri
 
   <!-- ═══ SLIDE 4 — ACTIVITIES ═══ -->
   <section class="slide" id="s4">
+    <img class="slide-bg" src="https://images.pexels.com/photos/5007457/pexels-photo-5007457.jpeg?auto=compress&cs=tinysrgb&w=1600" alt="" loading="lazy" style="object-position:center 35%">
+    <div class="bg-overlay" style="background:rgba(6,10,7,.85)"></div>
     <div class="s4wrap">
       <span class="eyebrow fi d1">What's Waiting For You</span>
       <h2 class="stitle fu d2">Every Activity. <span class="green">Already Planned.</span></h2>
       <div class="agrid">
-        <div class="acard su d2"><span class="aicon">⛵</span><div class="aname">Private Catamaran</div><div class="adesc">Open bar, DJ on deck, snorkeling, and a sandbar sunset. The day everyone talks about.</div></div>
-        <div class="acard su d3"><span class="aicon">🏝️</span><div class="aname">Island Day Trip</div><div class="adesc">Speedboat to a stunning island. Natural pools, beach lunch, and crystal-clear water.</div></div>
-        <div class="acard su d4"><span class="aicon">🏍️</span><div class="aname">Adventure Day</div><div class="adesc">Dune buggies, ATV rides, zip-lines. Your choice of adrenaline rush in the DR jungle.</div></div>
-        <div class="acard su d5"><span class="aicon">🍾</span><div class="aname">All White Dinner</div><div class="adesc">Dress code: all white. Private setting, curated menu, ambient music, and a night you'll remember.</div></div>
-        <div class="acard su d6"><span class="aicon">🍽️</span><div class="aname">Private Group Dinner</div><div class="adesc">Curated menu, drinks included. No bills to split, no logistics to figure out.</div></div>
-        <div class="acard su d7"><span class="aicon">🏨</span><div class="aname">All-Inclusive Resort</div><div class="adesc">4 nights fully covered — every meal, every drink, pools, beach. Everything sorted.</div></div>
+        <div class="acard su d2"><div class="acard-snap" style="background-image:url(https://images.pexels.com/photos/4600762/pexels-photo-4600762.jpeg?auto=compress&cs=tinysrgb&w=600)"></div><span class="aicon">⛵</span><div class="aname">Private Catamaran</div><div class="adesc">Open bar, DJ on deck, snorkeling, and a sandbar sunset. The day everyone talks about.</div></div>
+        <div class="acard su d3"><div class="acard-snap" style="background-image:url(https://images.pexels.com/photos/5007457/pexels-photo-5007457.jpeg?auto=compress&cs=tinysrgb&w=600);background-position:center 60%"></div><span class="aicon">🏝️</span><div class="aname">Island Day Trip</div><div class="adesc">Speedboat to a stunning island. Natural pools, beach lunch, and crystal-clear water.</div></div>
+        <div class="acard su d4"><div class="acard-snap" style="background-image:url(https://images.pexels.com/photos/4340825/pexels-photo-4340825.jpeg?auto=compress&cs=tinysrgb&w=600)"></div><span class="aicon">🏍️</span><div class="aname">Adventure Day</div><div class="adesc">Dune buggies, ATV rides, zip-lines. Your choice of adrenaline rush in the DR jungle.</div></div>
+        <div class="acard su d5"><div class="acard-snap" style="background-image:url(https://images.pexels.com/photos/10821303/pexels-photo-10821303.jpeg?auto=compress&cs=tinysrgb&w=600)"></div><span class="aicon">🍾</span><div class="aname">All White Dinner</div><div class="adesc">Dress code: all white. Private setting, curated menu, ambient music, and a night you'll remember.</div></div>
+        <div class="acard su d6"><div class="acard-snap" style="background-image:url(https://images.pexels.com/photos/10867128/pexels-photo-10867128.jpeg?auto=compress&cs=tinysrgb&w=600)"></div><span class="aicon">🍽️</span><div class="aname">Private Group Dinner</div><div class="adesc">Curated menu, drinks included. No bills to split, no logistics to figure out.</div></div>
+        <div class="acard su d7"><div class="acard-snap" style="background-image:url(https://images.pexels.com/photos/15298798/pexels-photo-15298798.jpeg?auto=compress&cs=tinysrgb&w=600)"></div><span class="aicon">🏨</span><div class="aname">All-Inclusive Resort</div><div class="adesc">4 nights fully covered — every meal, every drink, pools, beach. Everything sorted.</div></div>
       </div>
     </div>
   </section>
@@ -395,6 +413,7 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'Poppins',sans-seri
 
   <!-- ═══ SLIDE 6 — ALL WHITE ═══ -->
   <section class="slide" id="s6">
+    <img class="slide-bg" src="https://images.pexels.com/photos/10821303/pexels-photo-10821303.jpeg?auto=compress&cs=tinysrgb&w=1600" alt="" loading="lazy" style="opacity:.1">
     <canvas id="whiteCanvas"></canvas>
     <div class="awrap">
       <span class="aw-label fi d1">Day 4 · The Main Event</span>
@@ -414,6 +433,8 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'Poppins',sans-seri
 
   <!-- ═══ SLIDE 7 — INCLUDED ═══ -->
   <section class="slide" id="s7">
+    <img class="slide-bg" src="https://images.pexels.com/photos/6437583/pexels-photo-6437583.jpeg?auto=compress&cs=tinysrgb&w=1600" alt="" loading="lazy">
+    <div class="bg-overlay" style="background:linear-gradient(150deg,rgba(5,13,7,.86),rgba(8,8,14,.84))"></div>
     <div class="s7wrap">
       <span class="eyebrow fi d1">No Hidden Costs</span>
       <h2 class="stitle fu d2">Everything's <span class="green">Covered.</span></h2>
@@ -447,31 +468,32 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'Poppins',sans-seri
 
   <!-- ═══ SLIDE 8 — PRICING ═══ -->
   <section class="slide" id="s8">
+    <img class="slide-bg" src="https://images.pexels.com/photos/30016219/pexels-photo-30016219.jpeg?auto=compress&cs=tinysrgb&w=1600" alt="" loading="lazy">
+    <div class="bg-overlay" style="background:linear-gradient(160deg,rgba(6,10,13,.85),rgba(6,13,7,.83))"></div>
     <div class="s8wrap">
-      <span class="eyebrow fi d1">Investment</span>
-      <h2 class="stitle fu d2">Choose <span class="green">Your Experience.</span></h2>
-      <p class="ssub fu d3" style="margin:0 auto .2rem">All tiers include every activity. Upgrade = your personal paradise level.</p>
+      <span class="eyebrow fi d1">Investment · Adults-Only 5-Star Resort</span>
+      <h2 class="stitle fu d2">Choose <span class="green">Your Room.</span></h2>
+      <p class="ssub fu d3" style="margin:0 auto .2rem">Same resort. Same activities. Pick the room setup that works for you.</p>
       <div class="pgrid">
         <div class="pcard su d3">
-          <div class="ptier">Standard</div>
-          <div class="pprice">$1,500 <span>/ person</span></div>
-          <div class="pperiod">All-inclusive · 5 days</div>
+          <div class="ptier">Triple Share</div>
+          <div class="pprice">$650 <span>/ person</span></div>
+          <div class="pperiod">3 people · 1 room · 5 days</div>
           <ul class="pfeat">
-            <li>Standard Room (share option)</li>
+            <li>Shared room with 2 others</li>
             <li>All 6 activities included</li>
             <li>All meals & drinks at resort</li>
-            <li>Makena welcome gift bag</li>
             <li>Airport transfers</li>
           </ul>
           <button class="pcta out" onclick="window.location.href='trips.html'">Reserve My Spot</button>
         </div>
         <div class="pcard feat su d4">
           <div class="pbadge">Most Popular</div>
-          <div class="ptier">Deluxe</div>
-          <div class="pprice">$1,800 <span>/ person</span></div>
-          <div class="pperiod">All-inclusive · 5 days</div>
+          <div class="ptier">Double Share</div>
+          <div class="pprice">$799 <span>/ person</span></div>
+          <div class="pperiod">2 people · 1 room · 5 days</div>
           <ul class="pfeat">
-            <li>Deluxe Ocean-View Room</li>
+            <li>Shared room with 1 other</li>
             <li>All 6 activities included</li>
             <li>All meals & drinks at resort</li>
             <li>Makena welcome gift bag</li>
@@ -481,35 +503,36 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'Poppins',sans-seri
           <button class="pcta fill" onclick="window.location.href='trips.html'">Reserve My Spot</button>
         </div>
         <div class="pcard su d5">
-          <div class="ptier">VIP Suite</div>
-          <div class="pprice">$2,200 <span>/ person</span></div>
-          <div class="pperiod">All-inclusive · 5 days</div>
+          <div class="ptier">Single Room</div>
+          <div class="pprice">$1,399 <span>/ person</span></div>
+          <div class="pperiod">Solo · Private room · 5 days</div>
           <ul class="pfeat">
-            <li>Private Suite (ocean view)</li>
+            <li>Private room — just for you</li>
             <li>All 6 activities included</li>
             <li>All meals & drinks at resort</li>
-            <li>Premium gift bag</li>
+            <li>Makena welcome gift bag</li>
             <li>Airport transfers</li>
-            <li>VIP table at night party</li>
+            <li>VIP table at All White Dinner</li>
             <li>Personal trip concierge</li>
           </ul>
           <button class="pcta out" onclick="window.location.href='trips.html'">Reserve My Spot</button>
         </div>
       </div>
-      <p class="pnote fi d6">Prices are estimates — confirmed once hotel is locked in. Flights not included. Payment plans available.</p>
+      <p class="pnote fi d6">Adults-only 5-star all-inclusive resort · $250 non-refundable deposit to secure your spot · Flights not included · Balance due by date TBC</p>
     </div>
   </section>
 
   <!-- ═══ SLIDE 9 — CTA ═══ -->
   <section class="slide" id="s9">
+    <img class="slide-bg" src="https://images.pexels.com/photos/8971062/pexels-photo-8971062.jpeg?auto=compress&cs=tinysrgb&w=1600" alt="" loading="lazy" style="opacity:.18">
     <canvas id="ctaCanvas"></canvas>
     <div class="ctawrap">
-      <div class="urgency fi d1">⚡ Limited to 30 Spots — Group Size Capped</div>
+      <div class="urgency fi d1">⚡ Spots Are Limited — Secure Yours Now</div>
       <h2 class="ctatitle fu d2">Are You<br><span class="green">Coming?</span></h2>
       <p class="ctasub fu d3">No commitment to express interest. Drop your details and we'll reach out with everything you need. The only thing worse than missing a trip is wishing you'd gone.</p>
       <div class="ctabtns fu d4">
         <button class="btn-g" onclick="window.location.href='trips.html'">I'm In — Reserve My Spot</button>
-        <button class="btn-o" onclick="window.location.href='index.html#links'">Ask a Question</button>
+        <button class="btn-o" onclick="window.open('https://chat.whatsapp.com/JNc6URa4lsh5qwROm2Inxn?mode=gi_t','_blank')">Ask a Question</button>
       </div>
       <p class="cta-ig fi d5">Follow the journey &nbsp;·&nbsp; <strong>@makena_entertainment</strong> &nbsp;·&nbsp; <strong>makenaevents.com</strong></p>
     </div>

@@ -119,3 +119,51 @@ create policy "No public app_settings access"
     on public.app_settings
     for all
     using (false);
+
+-- ── Trip Bookings ─────────────────────────────────────────────────────────
+create table if not exists public.trip_bookings (
+    id uuid primary key default gen_random_uuid(),
+    booking_ref text not null unique,
+    stripe_session_id text unique,
+    stripe_payment_intent_id text,
+    room_type text not null,
+    price_per_person integer not null,
+    guest_count integer not null,
+    deposit_per_person integer not null default 25000,
+    deposit_total integer not null,
+    payment_status text not null default 'pending',
+    primary_first_name text not null,
+    primary_last_name text,
+    primary_email text not null,
+    primary_phone text not null,
+    primary_country text,
+    special_requests text,
+    paid_at timestamptz,
+    created_at timestamptz not null default now(),
+    updated_at timestamptz not null default now()
+);
+
+create table if not exists public.trip_booking_guests (
+    id uuid primary key default gen_random_uuid(),
+    booking_id uuid not null references public.trip_bookings(id) on delete cascade,
+    guest_number integer not null,
+    first_name text not null,
+    last_name text,
+    email text not null,
+    phone text,
+    country text,
+    created_at timestamptz not null default now()
+);
+
+create index if not exists trip_bookings_status_idx on public.trip_bookings (payment_status);
+create index if not exists trip_bookings_room_type_idx on public.trip_bookings (room_type);
+create index if not exists trip_booking_guests_booking_idx on public.trip_booking_guests (booking_id);
+
+alter table public.trip_bookings enable row level security;
+alter table public.trip_booking_guests enable row level security;
+
+drop policy if exists "No public trip_bookings access" on public.trip_bookings;
+drop policy if exists "No public trip_booking_guests access" on public.trip_booking_guests;
+
+create policy "No public trip_bookings access" on public.trip_bookings for all using (false);
+create policy "No public trip_booking_guests access" on public.trip_booking_guests for all using (false);

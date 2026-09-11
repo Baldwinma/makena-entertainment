@@ -295,162 +295,51 @@
             margin-right: auto;
         }
 
-        /* ── Interest Modal ──────────────────────────────────────────────────── */
-        .interest-modal__backdrop {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.75);
-            z-index: 9100;
-            align-items: center;
-            justify-content: center;
-            padding: 1rem;
-        }
-
-        .interest-modal__backdrop.is-open {
-            display: flex;
-        }
-
-        .interest-modal__card {
-            background: #141414;
-            border: 1px solid rgba(134,239,172,0.2);
-            border-radius: 16px;
-            padding: 2rem;
-            width: 100%;
-            max-width: 440px;
-            position: relative;
-            max-height: 90vh;
-            overflow-y: auto;
-        }
-
-        .interest-modal__close {
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
-            background: none;
-            border: none;
-            color: rgba(255,255,255,0.4);
-            font-size: 1.3rem;
-            cursor: pointer;
-            line-height: 1;
-            padding: 0.25rem;
-            transition: color 0.2s;
-        }
-
-        .interest-modal__close:hover { color: #fff; }
-
-        .interest-modal__card h3 {
-            font-size: 1.3rem;
-            font-weight: 800;
-            color: #fff;
-            margin-bottom: 0.35rem;
-        }
-
-        .interest-modal__card > p {
-            font-size: 0.82rem;
-            color: rgba(255,255,255,0.5);
-            margin-bottom: 1.5rem;
-            line-height: 1.5;
-        }
-
-        .interest-form {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-
-        .interest-form label {
-            font-size: 0.78rem;
-            font-weight: 600;
-            color: rgba(255,255,255,0.6);
-            display: block;
-            margin-bottom: 0.35rem;
-            letter-spacing: 0.03em;
-        }
-
-        .interest-form input,
-        .interest-form select {
-            width: 100%;
-            padding: 0.8rem 1rem;
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.12);
-            border-radius: 8px;
-            color: #fff;
-            font-size: 0.9rem;
-            font-family: inherit;
-            transition: border-color 0.2s;
-            -webkit-appearance: none;
-        }
-
-        .interest-form input::placeholder {
-            color: rgba(255,255,255,0.25);
-        }
-
-        .interest-form input:focus,
-        .interest-form select:focus {
-            outline: none;
-            border-color: #86EFA9;
-        }
-
-        .interest-form select option {
-            background: #1a1a1a;
-            color: #fff;
-        }
-
-        .interest-form__row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 0.75rem;
-        }
-
-        .interest-form__submit {
-            width: 100%;
-            background: #86EFA9;
-            color: #0a0a0a;
-            font-weight: 800;
-            font-size: 0.92rem;
-            padding: 0.9rem;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            font-family: inherit;
-            transition: opacity 0.2s;
-            margin-top: 0.5rem;
-        }
-
-        .interest-form__submit:hover { opacity: 0.88; }
-        .interest-form__submit:disabled { opacity: 0.5; cursor: not-allowed; }
-
-        .interest-modal__success {
-            display: none;
-            text-align: center;
-            padding: 1rem 0;
-        }
-
-        .interest-modal__success .tick {
-            font-size: 2.5rem;
-            margin-bottom: 0.75rem;
-        }
-
-        .interest-modal__success h3 {
-            font-size: 1.2rem;
-            font-weight: 800;
-            color: #86EFA9;
-            margin-bottom: 0.5rem;
-        }
-
-        .interest-modal__success p {
-            font-size: 0.85rem;
-            color: rgba(255,255,255,0.55);
-            line-height: 1.6;
-        }
-
         .interest-form__error {
             font-size: 0.78rem;
             color: #f87171;
             margin-top: -0.25rem;
             display: none;
         }
+
+        .deposit-notice {
+            background: rgba(245,200,66,.06);
+            border: 1px solid rgba(245,200,66,.25);
+            border-radius: 10px;
+            padding: 1rem 1.1rem;
+            font-size: 0.76rem;
+            color: rgba(255,255,255,0.55);
+            line-height: 1.65;
+        }
+        .deposit-notice strong {
+            color: #F5C842;
+            display: block;
+            margin-bottom: 0.35rem;
+            font-size: 0.8rem;
+        }
+
+        .whatsapp-cta {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.9rem;
+            margin-top: 1.2rem;
+        }
+        .whatsapp-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+            background: #25D366;
+            color: #fff;
+            font-weight: 800;
+            font-size: 0.92rem;
+            padding: 0.85rem 1.8rem;
+            border-radius: 50px;
+            text-decoration: none;
+            transition: opacity 0.2s;
+            font-family: inherit;
+        }
+        .whatsapp-btn:hover { opacity: 0.88; }
 
         .not-included-item {
             display: flex;
@@ -471,6 +360,361 @@
         @media (max-width: 480px) {
             .interest-form__row { grid-template-columns: 1fr; }
             .includes-cols { grid-template-columns: 1fr; }
+        }
+
+        /* ── Booking Modal ───────────────────────────────────────────────────── */
+        .booking-modal__backdrop {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.82);
+            z-index: 9200;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            overflow-y: auto;
+        }
+        .booking-modal__backdrop.is-open { display: flex; }
+
+        .booking-modal__card {
+            background: #121212;
+            border: 1px solid rgba(134,239,172,0.18);
+            border-radius: 20px;
+            padding: 2rem;
+            width: 100%;
+            max-width: 560px;
+            position: relative;
+            margin: auto;
+        }
+
+        .booking-modal__close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            color: rgba(255,255,255,0.4);
+            font-size: 1.3rem;
+            cursor: pointer;
+            padding: 0.25rem;
+            transition: color 0.2s;
+        }
+        .booking-modal__close:hover { color: #fff; }
+
+        .booking-steps {
+            display: flex;
+            gap: 0.4rem;
+            margin-bottom: 1.8rem;
+        }
+        .booking-step-dot {
+            flex: 1;
+            height: 3px;
+            border-radius: 2px;
+            background: rgba(255,255,255,0.1);
+            transition: background 0.3s;
+        }
+        .booking-step-dot.active { background: #86EFA9; }
+
+        .booking-step { display: none; }
+        .booking-step.active { display: block; }
+
+        /* Step 1 — Room Selection */
+        .room-cards {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 0.85rem;
+            margin-top: 1.2rem;
+        }
+        .room-card {
+            border: 2px solid rgba(255,255,255,0.08);
+            border-radius: 14px;
+            padding: 1.2rem 1.3rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+        .room-card:hover { border-color: rgba(134,239,172,0.4); background: rgba(134,239,172,0.03); }
+        .room-card.selected { border-color: #86EFA9; background: rgba(134,239,172,0.06); }
+        .room-card__left {}
+        .room-card__type {
+            font-size: 0.68rem;
+            font-weight: 700;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.45);
+            margin-bottom: 0.2rem;
+        }
+        .room-card.selected .room-card__type { color: #86EFA9; }
+        .room-card__name { font-size: 1rem; font-weight: 800; color: #fff; }
+        .room-card__sub { font-size: 0.78rem; color: rgba(255,255,255,0.45); margin-top: 0.15rem; }
+        .room-card__right { text-align: right; flex-shrink: 0; }
+        .room-card__price { font-size: 1.3rem; font-weight: 900; color: #fff; }
+        .room-card__price span { font-size: 0.72rem; color: rgba(255,255,255,0.4); font-weight: 400; }
+        .room-card__deposit { font-size: 0.7rem; color: rgba(134,239,172,0.7); margin-top: 0.1rem; }
+        .room-badge {
+            display: inline-block;
+            background: #86EFA9;
+            color: #060d07;
+            font-size: 0.58rem;
+            font-weight: 800;
+            padding: 0.15rem 0.55rem;
+            border-radius: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-left: 0.5rem;
+            vertical-align: middle;
+        }
+
+        /* Step 2 — Guest Details */
+        .guest-section {
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 12px;
+            padding: 1.2rem;
+            margin-bottom: 1rem;
+        }
+        .guest-section__header {
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: #86EFA9;
+            margin-bottom: 1rem;
+        }
+        .booking-form label {
+            font-size: 0.76rem;
+            font-weight: 600;
+            color: rgba(255,255,255,0.55);
+            display: block;
+            margin-bottom: 0.3rem;
+        }
+        .booking-form input,
+        .booking-form select {
+            width: 100%;
+            padding: 0.75rem 0.9rem;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            color: #fff;
+            font-size: 0.88rem;
+            font-family: inherit;
+            transition: border-color 0.2s;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+        .booking-form input::placeholder { color: rgba(255,255,255,0.22); }
+        .booking-form input:focus,
+        .booking-form select:focus { outline: none; border-color: #86EFA9; }
+        .booking-form select option { background: #1a1a1a; }
+        .booking-form__row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.7rem; margin-bottom: 0.7rem; }
+        .booking-form__field { margin-bottom: 0.7rem; }
+
+        /* Step 3 — Review */
+        .review-summary {
+            background: rgba(134,239,172,0.04);
+            border: 1px solid rgba(134,239,172,0.15);
+            border-radius: 12px;
+            padding: 1.2rem;
+            margin-bottom: 1.2rem;
+        }
+        .review-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.84rem;
+            padding: 0.35rem 0;
+            color: rgba(255,255,255,0.7);
+        }
+        .review-row strong { color: #fff; }
+        .review-row.total {
+            border-top: 1px solid rgba(255,255,255,0.08);
+            margin-top: 0.5rem;
+            padding-top: 0.75rem;
+            font-weight: 700;
+            color: #fff;
+            font-size: 0.95rem;
+        }
+        .review-row.total span { color: #86EFA9; font-size: 1.1rem; font-weight: 900; }
+        .review-guests { margin: 1rem 0; }
+        .review-guest-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            background: rgba(255,255,255,0.06);
+            border-radius: 20px;
+            padding: 0.3rem 0.75rem;
+            font-size: 0.76rem;
+            color: rgba(255,255,255,0.7);
+            margin: 0.2rem 0.2rem 0.2rem 0;
+        }
+        .legal-checkbox {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.7rem;
+            margin: 1rem 0;
+            cursor: pointer;
+        }
+        .legal-checkbox input[type=checkbox] { flex-shrink: 0; margin-top: 0.15rem; accent-color: #86EFA9; width: 16px; height: 16px; cursor: pointer; }
+        .legal-checkbox span { font-size: 0.74rem; color: rgba(255,255,255,0.45); line-height: 1.6; }
+
+        /* Step 4 — Stripe */
+        #trip-stripe-container { min-height: 200px; }
+
+        /* Step 5 — Success */
+        .booking-success { text-align: center; padding: 0.5rem 0; }
+        .booking-success .tick { font-size: 2.8rem; margin-bottom: 0.75rem; }
+        .booking-success h3 { font-size: 1.3rem; font-weight: 800; color: #86EFA9; margin-bottom: 0.4rem; }
+        .booking-success p { font-size: 0.84rem; color: rgba(255,255,255,0.55); line-height: 1.65; margin-bottom: 0.5rem; }
+        .booking-ref-badge {
+            display: inline-block;
+            background: rgba(134,239,172,0.1);
+            border: 1px solid rgba(134,239,172,0.25);
+            border-radius: 8px;
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+            font-weight: 800;
+            color: #86EFA9;
+            letter-spacing: 0.06em;
+            margin: 0.75rem 0 1.2rem;
+        }
+
+        /* Nav buttons */
+        .booking-nav {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1.5rem;
+        }
+        .booking-nav .btn-back {
+            flex: 0 0 auto;
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.14);
+            color: rgba(255,255,255,0.55);
+            font-size: 0.88rem;
+            font-weight: 600;
+            padding: 0.8rem 1.2rem;
+            border-radius: 10px;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.2s;
+        }
+        .booking-nav .btn-back:hover { border-color: rgba(255,255,255,0.3); color: #fff; }
+        .booking-nav .btn-next {
+            flex: 1;
+            background: #86EFA9;
+            color: #060d07;
+            font-size: 0.92rem;
+            font-weight: 800;
+            padding: 0.85rem;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-family: inherit;
+            transition: opacity 0.2s;
+        }
+        .booking-nav .btn-next:hover { opacity: 0.88; }
+        .booking-nav .btn-next:disabled { opacity: 0.45; cursor: not-allowed; }
+
+        .booking-error {
+            font-size: 0.78rem;
+            color: #f87171;
+            margin-top: 0.5rem;
+            display: none;
+        }
+
+        @media (max-width: 480px) {
+            .booking-form__row { grid-template-columns: 1fr; }
+            .booking-modal__card { padding: 1.5rem 1.2rem; }
+        }
+
+        /* Pricing section on trips page */
+        .trip-pricing-section { padding: 4rem 0; }
+        .trip-pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.2rem;
+            max-width: 860px;
+            margin: 0 auto;
+        }
+        .trip-pcard {
+            background: var(--dark-bg-card);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 18px;
+            padding: 1.8rem 1.4rem;
+            text-align: center;
+            position: relative;
+            transition: transform 0.25s;
+        }
+        .trip-pcard:hover { transform: translateY(-6px); }
+        .trip-pcard.featured {
+            border-color: rgba(134,239,172,0.4);
+            background: rgba(134,239,172,0.04);
+            box-shadow: 0 0 40px rgba(134,239,172,0.07);
+        }
+        .trip-pcard__badge {
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #86EFA9;
+            color: #060d07;
+            font-size: 0.6rem;
+            font-weight: 800;
+            padding: 0.18rem 0.9rem;
+            border-radius: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            white-space: nowrap;
+        }
+        .trip-pcard__tier {
+            font-size: 0.62rem;
+            font-weight: 700;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.4);
+            margin-bottom: 0.5rem;
+        }
+        .trip-pcard.featured .trip-pcard__tier { color: #86EFA9; }
+        .trip-pcard__price { font-size: 2.2rem; font-weight: 900; color: #fff; }
+        .trip-pcard__price span { font-size: 0.85rem; color: rgba(255,255,255,0.4); font-weight: 400; }
+        .trip-pcard__period { font-size: 0.7rem; color: rgba(255,255,255,0.4); margin-bottom: 1.2rem; }
+        .trip-pcard__features { list-style: none; text-align: left; margin-bottom: 1.4rem; }
+        .trip-pcard__features li {
+            font-size: 0.8rem;
+            color: rgba(255,255,255,0.65);
+            padding: 0.28rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+        .trip-pcard__features li::before { content: '✓'; color: #86EFA9; font-weight: 700; flex-shrink: 0; }
+        .trip-pcard__cta {
+            width: 100%;
+            padding: 0.8rem;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.2s;
+            border: none;
+        }
+        .trip-pcard__cta.outline {
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.18);
+            color: #fff;
+        }
+        .trip-pcard__cta.outline:hover { border-color: #86EFA9; color: #86EFA9; }
+        .trip-pcard__cta.fill { background: #86EFA9; color: #060d07; }
+        .trip-pcard__cta.fill:hover { opacity: 0.88; }
+        .trip-pcard__deposit {
+            font-size: 0.68rem;
+            color: rgba(245,200,66,0.8);
+            margin-top: 0.6rem;
+        }
+        @media (max-width: 640px) {
+            .trip-pricing-grid { grid-template-columns: 1fr; max-width: 360px; }
         }
     </style>
     <script src="theme-init.js"></script>
@@ -502,13 +746,76 @@
             <div class="trip-hero__eyebrow">Makena Group Travel</div>
             <h1>Travel Together.<br><span>Party Better.</span></h1>
             <p>All-inclusive group experiences built around the things you love — boat parties, island adventures, group dinners, and unforgettable nights out. No stress, just vibes.</p>
-            <button class="btn btn-primary" id="openInterestModal">I'm Interested</button>
-            <a href="punta-cana-deck.html" class="btn btn-secondary" style="margin-top:.75rem;display:inline-block">▶ View Pitch Deck</a>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:0.75rem">
+                <a href="punta-cana-deck.html" class="btn btn-secondary">▶ View Pitch Deck</a>
+                <a href="https://chat.whatsapp.com/JNc6URa4lsh5qwROm2Inxn?mode=gi_t" target="_blank" rel="noopener" style="font-size:0.82rem;color:rgba(255,255,255,0.45);text-decoration:none;display:flex;align-items:center;gap:0.4rem;transition:color 0.2s" onmouseover="this.style.color='#86EFA9'" onmouseout="this.style.color='rgba(255,255,255,0.45)'">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                    Not ready? Join the WhatsApp group for updates
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing -->
+    <section class="trip-pricing-section">
+        <div class="container">
+            <div class="trip-section__header">
+                <h2>Choose Your Room</h2>
+                <p>Adults-only 5-star all-inclusive resort. Same activities for everyone — just pick your room setup.</p>
+            </div>
+            <div class="trip-pricing-grid">
+                <div class="trip-pcard">
+                    <div class="trip-pcard__tier">Triple Share</div>
+                    <div class="trip-pcard__price">$650 <span>/ person</span></div>
+                    <div class="trip-pcard__period">3 people · 1 room · 5 days</div>
+                    <ul class="trip-pcard__features">
+                        <li>Shared room with 2 others</li>
+                        <li>All 6 activities included</li>
+                        <li>All meals & drinks at resort</li>
+                        <li>Airport transfers</li>
+                    </ul>
+                    <button class="trip-pcard__cta outline" onclick="openBookingModal('triple')">Reserve My Spot</button>
+                    <div class="trip-pcard__deposit">$250 deposit × 3 = $750 due today</div>
+                </div>
+                <div class="trip-pcard featured">
+                    <div class="trip-pcard__badge">Most Popular</div>
+                    <div class="trip-pcard__tier">Double Share</div>
+                    <div class="trip-pcard__price">$799 <span>/ person</span></div>
+                    <div class="trip-pcard__period">2 people · 1 room · 5 days</div>
+                    <ul class="trip-pcard__features">
+                        <li>Shared room with 1 other</li>
+                        <li>All 6 activities included</li>
+                        <li>All meals & drinks at resort</li>
+                        <li>Makena welcome gift bag</li>
+                        <li>Airport transfers</li>
+                        <li>Priority activity booking</li>
+                    </ul>
+                    <button class="trip-pcard__cta fill" onclick="openBookingModal('double')">Reserve My Spot</button>
+                    <div class="trip-pcard__deposit">$250 deposit × 2 = $500 due today</div>
+                </div>
+                <div class="trip-pcard">
+                    <div class="trip-pcard__tier">Single Room</div>
+                    <div class="trip-pcard__price">$1,399 <span>/ person</span></div>
+                    <div class="trip-pcard__period">Solo · Private room · 5 days</div>
+                    <ul class="trip-pcard__features">
+                        <li>Private room — just for you</li>
+                        <li>All 6 activities included</li>
+                        <li>All meals & drinks at resort</li>
+                        <li>Makena welcome gift bag</li>
+                        <li>Airport transfers</li>
+                        <li>VIP table at All White Dinner</li>
+                        <li>Personal trip concierge</li>
+                    </ul>
+                    <button class="trip-pcard__cta outline" onclick="openBookingModal('single')">Reserve My Spot</button>
+                    <div class="trip-pcard__deposit">$250 deposit × 1 = $250 due today</div>
+                </div>
+            </div>
+            <p class="pricing-note" style="margin-top:1.5rem">Flights not included · Payment plans for balance available · Non-refundable $250 deposit per person required to secure your spot</p>
         </div>
     </section>
 
     <!-- Activities -->
-    <section class="trip-section">
+    <section class="trip-section trip-section--alt">
         <div class="container">
             <div class="trip-section__header">
                 <h2>What's In Every Trip</h2>
@@ -550,7 +857,7 @@
     </section>
 
     <!-- Itinerary -->
-    <section class="trip-section trip-section--alt">
+    <section class="trip-section">
         <div class="container">
             <div class="trip-section__header">
                 <h2>How the Week Looks</h2>
@@ -597,7 +904,7 @@
     </section>
 
     <!-- What's Included -->
-    <section class="trip-section">
+    <section class="trip-section trip-section--alt">
         <div class="container">
             <div class="trip-section__header">
                 <h2>Everything's Covered</h2>
@@ -626,107 +933,136 @@
                 </div>
             </div>
 
-            <p class="pricing-note" style="margin-top: 1.5rem;">Pricing will be released once we confirm destination and group size. Express your interest below and we'll be in touch.</p>
         </div>
     </section>
 
     <!-- CTA Band -->
     <section class="trip-cta-band">
         <div class="container">
-            <h2>Sound Like Your Kind of Trip?</h2>
-            <p>Drop your details and we'll reach out once we have enough interest. No commitment required — just let us know you're in.</p>
-            <button class="btn btn-primary" id="openInterestModal2">I'm Interested</button>
+            <h2>Not Ready to Book Just Yet?</h2>
+            <p>Join the official Makena Punta Cana group chat. Get updates, ask questions, and see what everyone's saying before you commit.</p>
+            <a href="https://chat.whatsapp.com/JNc6URa4lsh5qwROm2Inxn?mode=gi_t" target="_blank" rel="noopener" class="btn btn-primary" style="display:inline-flex;align-items:center;gap:0.5rem;text-decoration:none">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                Join the WhatsApp Group
+            </a>
         </div>
     </section>
 
-    <!-- Interest Modal -->
-    <div class="interest-modal__backdrop" id="interestModal" role="dialog" aria-modal="true" aria-labelledby="interestModalTitle">
-        <div class="interest-modal__card">
-            <button class="interest-modal__close" id="closeInterestModal" aria-label="Close">✕</button>
-
-            <div id="interestFormWrap">
-                <h3 id="interestModalTitle">Count Me In</h3>
-                <p>No commitment needed. We'll reach out with details once we have a sense of numbers.</p>
-
-                <form class="interest-form" id="interestForm" novalidate>
-                    <div class="interest-form__row">
-                        <div>
-                            <label for="tripFirstName">First Name *</label>
-                            <input type="text" id="tripFirstName" name="firstName" placeholder="First name" required>
-                        </div>
-                        <div>
-                            <label for="tripLastName">Last Name</label>
-                            <input type="text" id="tripLastName" name="lastName" placeholder="Last name">
-                        </div>
-                    </div>
-
-                    <div>
-                        <label for="tripEmail">Email Address *</label>
-                        <input type="email" id="tripEmail" name="email" placeholder="you@email.com" required>
-                    </div>
-
-                    <div>
-                        <label for="tripPhone">Phone Number *</label>
-                        <input type="tel" id="tripPhone" name="phone" placeholder="+1 555 000 0000" required>
-                    </div>
-
-                    <div>
-                        <label for="tripCountry">Country of Origin *</label>
-                        <select id="tripCountry" name="country" required>
-                            <option value="" disabled selected>Select your country</option>
-                            <option>United States</option>
-                            <option>United Kingdom</option>
-                            <option>Canada</option>
-                            <option>France</option>
-                            <option>Germany</option>
-                            <option>Nigeria</option>
-                            <option>Ghana</option>
-                            <option>Cameroon</option>
-                            <option>Ivory Coast</option>
-                            <option>Senegal</option>
-                            <option>South Africa</option>
-                            <option>Kenya</option>
-                            <option>Jamaica</option>
-                            <option>Trinidad and Tobago</option>
-                            <option>Barbados</option>
-                            <option>Dominican Republic</option>
-                            <option>Brazil</option>
-                            <option>Colombia</option>
-                            <option>Spain</option>
-                            <option>Portugal</option>
-                            <option>Netherlands</option>
-                            <option>Belgium</option>
-                            <option>Switzerland</option>
-                            <option>Italy</option>
-                            <option>Other</option>
-                        </select>
-                    </div>
-
-                    <div>
-                        <label for="tripGuests">How many people would you bring (including yourself)?</label>
-                        <select id="tripGuests" name="guests">
-                            <option value="1">Just me</option>
-                            <option value="2">2 people</option>
-                            <option value="3">3 people</option>
-                            <option value="4">4 people</option>
-                            <option value="5+">5 or more</option>
-                        </select>
-                    </div>
-
-                    <p class="interest-form__error" id="interestFormError">Something went wrong. Please try again.</p>
-
-                    <button type="submit" class="interest-form__submit" id="interestSubmitBtn">Send My Interest</button>
-                </form>
+    <!-- Booking Modal -->
+    <div class="booking-modal__backdrop" id="bookingModal" role="dialog" aria-modal="true">
+        <div class="booking-modal__card">
+            <button class="booking-modal__close" id="closeBookingModal">✕</button>
+            <div class="booking-steps" id="bookingStepDots">
+                <div class="booking-step-dot active"></div>
+                <div class="booking-step-dot"></div>
+                <div class="booking-step-dot"></div>
+                <div class="booking-step-dot"></div>
             </div>
 
-            <div class="interest-modal__success" id="interestSuccess">
-                <div class="tick">✅</div>
-                <h3>You're on the list!</h3>
-                <p>We've got your details. We'll be in touch as soon as we have enough interest to confirm dates and destination. Keep an eye on your inbox.</p>
+            <!-- Step 1: Room Selection -->
+            <div class="booking-step active" id="bStep1">
+                <h3 style="font-size:1.25rem;font-weight:800;color:#fff;margin-bottom:0.3rem">Choose Your Room</h3>
+                <p style="font-size:0.82rem;color:rgba(255,255,255,0.45);margin-bottom:0">Adults-only 5-star resort · November 2026 · Punta Cana</p>
+                <div class="room-cards">
+                    <div class="room-card" data-room="triple" onclick="selectRoom('triple')">
+                        <div class="room-card__left">
+                            <div class="room-card__type">Triple Share</div>
+                            <div class="room-card__name">3-Person Room</div>
+                            <div class="room-card__sub">Shared with 2 others</div>
+                        </div>
+                        <div class="room-card__right">
+                            <div class="room-card__price">$650 <span>/ person</span></div>
+                            <div class="room-card__deposit">$750 deposit today</div>
+                        </div>
+                    </div>
+                    <div class="room-card" data-room="double" onclick="selectRoom('double')">
+                        <div class="room-card__left">
+                            <div class="room-card__type">Double Share <span class="room-badge">Popular</span></div>
+                            <div class="room-card__name">2-Person Room</div>
+                            <div class="room-card__sub">Shared with 1 other</div>
+                        </div>
+                        <div class="room-card__right">
+                            <div class="room-card__price">$799 <span>/ person</span></div>
+                            <div class="room-card__deposit">$500 deposit today</div>
+                        </div>
+                    </div>
+                    <div class="room-card" data-room="single" onclick="selectRoom('single')">
+                        <div class="room-card__left">
+                            <div class="room-card__type">Single Room</div>
+                            <div class="room-card__name">Private Room</div>
+                            <div class="room-card__sub">Just for you</div>
+                        </div>
+                        <div class="room-card__right">
+                            <div class="room-card__price">$1,399 <span>/ person</span></div>
+                            <div class="room-card__deposit">$250 deposit today</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="booking-error" id="bErr1">Please select a room type.</div>
+                <div class="booking-nav">
+                    <button class="btn-next" id="bNext1" onclick="goToStep(2)">Continue →</button>
+                </div>
+            </div>
+
+            <!-- Step 2: Guest Details -->
+            <div class="booking-step" id="bStep2">
+                <h3 style="font-size:1.2rem;font-weight:800;color:#fff;margin-bottom:0.25rem" id="bStep2Title">Guest Details</h3>
+                <p style="font-size:0.8rem;color:rgba(255,255,255,0.4);margin-bottom:1.2rem" id="bStep2Sub"></p>
+                <div class="booking-form" id="bGuestForms"></div>
+                <div class="booking-error" id="bErr2">Please fill in all required fields.</div>
+                <div class="booking-nav">
+                    <button class="btn-back" onclick="goToStep(1)">← Back</button>
+                    <button class="btn-next" onclick="goToStep(3)">Review Booking →</button>
+                </div>
+            </div>
+
+            <!-- Step 3: Review + Legal -->
+            <div class="booking-step" id="bStep3">
+                <h3 style="font-size:1.2rem;font-weight:800;color:#fff;margin-bottom:1.2rem">Review & Confirm</h3>
+                <div class="review-summary" id="bReviewSummary"></div>
+                <div class="deposit-notice">
+                    <strong>⚠ $250 Non-Refundable Deposit Required</strong>
+                    A deposit of <strong style="color:#F5C842">$250 USD per person</strong> is required to secure your reservation. By proceeding, you acknowledge that: (i) this deposit constitutes partial payment toward the total trip cost; (ii) the deposit is strictly non-refundable and non-transferable under any circumstances, including cancellation, change of plans, inability to travel, or force majeure events; (iii) the remaining balance will be due by a date communicated by Makena Entertainment; (iv) failure to pay the balance by the stated deadline may result in forfeiture of your reservation. All reservations are subject to availability and written confirmation by Makena Entertainment.
+                </div>
+                <label class="legal-checkbox">
+                    <input type="checkbox" id="legalCheck">
+                    <span>I have read and agree to the deposit terms and cancellation policy above.</span>
+                </label>
+                <div class="booking-error" id="bErr3">Please accept the terms to continue.</div>
+                <div class="booking-nav">
+                    <button class="btn-back" onclick="goToStep(2)">← Back</button>
+                    <button class="btn-next" id="bPayBtn" onclick="startPayment()">Proceed to Payment →</button>
+                </div>
+            </div>
+
+            <!-- Step 4: Stripe Payment -->
+            <div class="booking-step" id="bStep4">
+                <h3 style="font-size:1.2rem;font-weight:800;color:#fff;margin-bottom:0.4rem">Secure Your Spot</h3>
+                <p style="font-size:0.8rem;color:rgba(255,255,255,0.4);margin-bottom:1.2rem" id="bPaySubtitle"></p>
+                <div id="trip-stripe-container"></div>
+                <div class="booking-error" id="bErr4"></div>
+            </div>
+
+            <!-- Step 5: Success -->
+            <div class="booking-step" id="bStep5">
+                <div class="booking-success">
+                    <div class="tick">🎉</div>
+                    <h3>You're locked in!</h3>
+                    <p>Your deposit was received. Your booking reference is:</p>
+                    <div class="booking-ref-badge" id="bSuccessRef"></div>
+                    <p>Next step — join the official group chat where all trip updates, coordination, and payment info will be shared.</p>
+                    <div class="whatsapp-cta">
+                        <a href="https://chat.whatsapp.com/JNc6URa4lsh5qwROm2Inxn?mode=gi_t" target="_blank" rel="noopener" class="whatsapp-btn">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                            Join the Group Chat
+                        </a>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
+    <!-- Interest Modal -->
     <footer class="footer">
         <div class="container">
             <div class="footer-bottom">
@@ -737,84 +1073,219 @@
 
     <script src="script.js"></script>
     <script>
-        (function () {
-            var modal = document.getElementById('interestModal');
-            var form = document.getElementById('interestForm');
-            var formWrap = document.getElementById('interestFormWrap');
-            var success = document.getElementById('interestSuccess');
-            var errorEl = document.getElementById('interestFormError');
-            var submitBtn = document.getElementById('interestSubmitBtn');
+    // ── Booking Modal ──────────────────────────────────────────────────────────
+    (function () {
+        var DEPOSIT_PP = 250;
+        var PROCESSING_FEE_PP = 7.77; // gross-up so we net $250 after Stripe's 2.9% + $0.30
+        var ROOM_CONFIG = {
+            triple: { label: 'Triple Share Room', guests: 3, pricePerPerson: 650,  depositTotal: 750,  chargedTotal: 773.31 },
+            double: { label: 'Double Share Room', guests: 2, pricePerPerson: 799,  depositTotal: 500,  chargedTotal: 515.54 },
+            single: { label: 'Single Private Room', guests: 1, pricePerPerson: 1399, depositTotal: 250, chargedTotal: 257.77 }
+        };
 
-            function openModal() {
-                modal.classList.add('is-open');
-                document.body.style.overflow = 'hidden';
-            }
+        var COUNTRIES = ['United States','United Kingdom','Canada','France','Germany','Nigeria','Ghana','Cameroon','Ivory Coast','Senegal','South Africa','Kenya','Jamaica','Trinidad and Tobago','Barbados','Dominican Republic','Brazil','Colombia','Spain','Portugal','Netherlands','Belgium','Switzerland','Italy','Other'];
 
-            function closeModal() {
+        var selectedRoom = null;
+        var currentStep = 1;
+        var stripeInstance = null;
+        var stripeElements = null;
+        var bookingRef = null;
+
+        var modal = document.getElementById('bookingModal');
+
+        window.openBookingModal = function (preselect) {
+            modal.classList.add('is-open');
+            document.body.style.overflow = 'hidden';
+            if (preselect) selectRoom(preselect);
+            showStep(1);
+        };
+
+        document.getElementById('closeBookingModal').addEventListener('click', function () {
+            modal.classList.remove('is-open');
+            document.body.style.overflow = '';
+        });
+
+        modal.addEventListener('click', function (e) {
+            if (e.target === modal) {
                 modal.classList.remove('is-open');
                 document.body.style.overflow = '';
             }
+        });
 
-            document.getElementById('openInterestModal').addEventListener('click', openModal);
-            document.getElementById('openInterestModal2').addEventListener('click', openModal);
-            document.getElementById('closeInterestModal').addEventListener('click', closeModal);
+        window.selectRoom = function (type) {
+            selectedRoom = type;
+            document.querySelectorAll('.room-card').forEach(function (c) { c.classList.remove('selected'); });
+            var card = document.querySelector('.room-card[data-room="' + type + '"]');
+            if (card) card.classList.add('selected');
+        };
 
-            modal.addEventListener('click', function (e) {
-                if (e.target === modal) closeModal();
+        window.goToStep = function (step) {
+            hideError('bErr1'); hideError('bErr2'); hideError('bErr3');
+
+            if (step === 2) {
+                if (!selectedRoom) { showError('bErr1', 'Please select a room type.'); return; }
+                buildGuestForms();
+            }
+
+            if (step === 3) {
+                var guests = collectGuests();
+                if (!guests) return;
+                buildReviewSummary(guests);
+            }
+
+            showStep(step);
+        };
+
+        window.startPayment = function () {
+            if (!document.getElementById('legalCheck').checked) {
+                showError('bErr3', 'Please accept the terms to continue.');
+                return;
+            }
+            var guests = collectGuests();
+            if (!guests) { showStep(2); return; }
+
+            var payBtn = document.getElementById('bPayBtn');
+            payBtn.disabled = true;
+            payBtn.textContent = 'Starting payment…';
+
+            var config = ROOM_CONFIG[selectedRoom];
+            document.getElementById('bPaySubtitle').textContent =
+                config.label + ' · $250 deposit + $' + PROCESSING_FEE_PP.toFixed(2) + ' fee × ' + config.guests + ' guest(s) = $' + config.chargedTotal.toFixed(2);
+
+            fetch('/.netlify/functions/trip-booking-checkout', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ roomType: selectedRoom, guests: guests })
+            })
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+                if (data.error) throw new Error(data.error);
+                bookingRef = data.bookingRef;
+                showStep(4);
+                mountStripe(data.publishableKey, data.clientSecret);
+            })
+            .catch(function (err) {
+                showError('bErr3', err.message || 'Unable to start payment. Please try again.');
+                payBtn.disabled = false;
+                payBtn.textContent = 'Proceed to Payment →';
             });
+        };
 
-            document.addEventListener('keydown', function (e) {
-                if (e.key === 'Escape') closeModal();
-            });
+        function mountStripe(pubKey, clientSecret) {
+            var container = document.getElementById('trip-stripe-container');
+            container.innerHTML = '<div style="text-align:center;padding:2rem;color:rgba(255,255,255,.4);font-size:.85rem">Loading payment form…</div>';
 
-            form.addEventListener('submit', async function (e) {
-                e.preventDefault();
-                errorEl.style.display = 'none';
-
-                var firstName = document.getElementById('tripFirstName').value.trim();
-                var email = document.getElementById('tripEmail').value.trim();
-                var phone = document.getElementById('tripPhone').value.trim();
-                var country = document.getElementById('tripCountry').value;
-
-                if (!firstName || !email || !phone || !country) {
-                    errorEl.textContent = 'Please fill in all required fields.';
-                    errorEl.style.display = 'block';
-                    return;
-                }
-
-                submitBtn.disabled = true;
-                submitBtn.textContent = 'Sending…';
-
-                try {
-                    var res = await fetch('/.netlify/functions/trip-interest', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            firstName,
-                            lastName: document.getElementById('tripLastName').value.trim(),
-                            email,
-                            phone,
-                            country,
-                            guests: document.getElementById('tripGuests').value
-                        })
+            function init() {
+                if (stripeElements) { stripeElements.destroy(); stripeElements = null; }
+                stripeInstance = window.Stripe(pubKey);
+                stripeInstance.initEmbeddedCheckout({ clientSecret: clientSecret })
+                    .then(function (checkout) {
+                        stripeElements = checkout;
+                        container.innerHTML = '';
+                        checkout.mount(container);
+                    })
+                    .catch(function (err) {
+                        showError('bErr4', err.message || 'Failed to load payment form. Please try again.');
+                        container.innerHTML = '';
                     });
+            }
 
-                    var data = await res.json();
+            if (!window.Stripe) {
+                var s = document.createElement('script');
+                s.src = 'https://js.stripe.com/v3/';
+                s.onload = init;
+                document.head.appendChild(s);
+            } else {
+                init();
+            }
+        }
 
-                    if (!res.ok) {
-                        throw new Error(data.error || 'Unable to submit.');
-                    }
+        function buildGuestForms() {
+            var config = ROOM_CONFIG[selectedRoom];
+            document.getElementById('bStep2Title').textContent = 'Guest Details — ' + config.label;
+            document.getElementById('bStep2Sub').textContent = 'Fill in details for all ' + config.guests + ' guest(s) in this room.';
 
-                    formWrap.style.display = 'none';
-                    success.style.display = 'block';
-                } catch (err) {
-                    errorEl.textContent = err.message || 'Something went wrong. Please try again.';
-                    errorEl.style.display = 'block';
-                    submitBtn.disabled = false;
-                    submitBtn.textContent = 'Send My Interest';
+            var html = '';
+            for (var i = 0; i < config.guests; i++) {
+                var isPrimary = i === 0;
+                html += '<div class="guest-section">';
+                html += '<div class="guest-section__header">Guest ' + (i + 1) + (isPrimary ? ' — Primary Contact' : '') + '</div>';
+                html += '<div class="booking-form__row">';
+                html += '<div><label>First Name *</label><input type="text" id="g' + i + '_fn" placeholder="First name" required></div>';
+                html += '<div><label>Last Name</label><input type="text" id="g' + i + '_ln" placeholder="Last name"></div>';
+                html += '</div>';
+                html += '<div class="booking-form__field"><label>Email *</label><input type="email" id="g' + i + '_em" placeholder="email@example.com" required></div>';
+                html += '<div class="booking-form__field"><label>Phone' + (isPrimary ? ' *' : '') + '</label><input type="tel" id="g' + i + '_ph" placeholder="+1 555 000 0000"' + (isPrimary ? ' required' : '') + '></div>';
+                if (isPrimary) {
+                    html += '<div class="booking-form__field"><label>Country *</label><select id="g0_co" required><option value="" disabled selected>Select country</option>';
+                    COUNTRIES.forEach(function (c) { html += '<option>' + c + '</option>'; });
+                    html += '</select></div>';
                 }
-            });
-        }());
+                html += '</div>';
+            }
+            document.getElementById('bGuestForms').innerHTML = html;
+        }
+
+        function collectGuests() {
+            var config = ROOM_CONFIG[selectedRoom];
+            var guests = [];
+            for (var i = 0; i < config.guests; i++) {
+                var fn = (document.getElementById('g' + i + '_fn') || {}).value || '';
+                var ln = (document.getElementById('g' + i + '_ln') || {}).value || '';
+                var em = (document.getElementById('g' + i + '_em') || {}).value || '';
+                var ph = (document.getElementById('g' + i + '_ph') || {}).value || '';
+                var co = i === 0 ? ((document.getElementById('g0_co') || {}).value || '') : '';
+                if (!fn.trim() || !em.trim()) { showError('bErr2', 'Please complete required fields for all guests (first name and email).'); return null; }
+                if (i === 0 && (!ph.trim() || !co)) { showError('bErr2', 'Primary guest phone and country are required.'); return null; }
+                guests.push({ firstName: fn.trim(), lastName: ln.trim(), email: em.trim(), phone: ph.trim(), country: co.trim() });
+            }
+            hideError('bErr2');
+            return guests;
+        }
+
+        function buildReviewSummary(guests) {
+            var config = ROOM_CONFIG[selectedRoom];
+            var guestChips = guests.map(function (g) {
+                return '<div class="review-guest-chip">👤 ' + g.firstName + (g.lastName ? ' ' + g.lastName : '') + '</div>';
+            }).join('');
+
+            document.getElementById('bReviewSummary').innerHTML =
+                '<div class="review-row"><span>Package</span><strong>' + config.label + '</strong></div>' +
+                '<div class="review-row"><span>Resort</span><strong>Adults-Only 5-Star All-Inclusive</strong></div>' +
+                '<div class="review-row"><span>Dates</span><strong>November 2026 · 5 Days</strong></div>' +
+                '<div class="review-row"><span>Price per person</span><strong>$' + config.pricePerPerson + '</strong></div>' +
+                '<div class="review-guests">' + guestChips + '</div>' +
+                '<div class="review-row total"><span>Deposit due today</span><span>$' + config.chargedTotal.toFixed(2) + '</span></div>' +
+                '<div style="font-size:0.68rem;color:rgba(255,255,255,0.28);text-align:right;margin-top:0.25rem">$' + DEPOSIT_PP + ' deposit + $' + PROCESSING_FEE_PP.toFixed(2) + ' processing fee per guest</div>';
+        }
+
+        function showStep(n) {
+            currentStep = n;
+            for (var i = 1; i <= 5; i++) {
+                var el = document.getElementById('bStep' + i);
+                if (el) el.classList.toggle('active', i === n);
+            }
+            var dots = document.querySelectorAll('.booking-step-dot');
+            var stepForDot = n > 4 ? 4 : n;
+            dots.forEach(function (d, idx) { d.classList.toggle('active', idx < stepForDot); });
+            var card = document.querySelector('.booking-modal__card');
+            if (card) card.scrollTop = 0;
+        }
+
+        function showError(id, msg) { var el = document.getElementById(id); if (el) { el.textContent = msg; el.style.display = 'block'; } }
+        function hideError(id) { var el = document.getElementById(id); if (el) { el.style.display = 'none'; } }
+
+        // Handle return from Stripe redirect
+        var params = new URLSearchParams(window.location.search);
+        if (params.get('booking') === 'success') {
+            var ref = params.get('ref') || params.get('booking_ref') || '';
+            openBookingModal(null);
+            showStep(5);
+            document.getElementById('bSuccessRef').textContent = ref || 'CONFIRMED';
+            window.history.replaceState({}, '', '/trips.html');
+        }
+    }());
     </script>
+
 </body>
 </html>

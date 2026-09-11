@@ -216,7 +216,7 @@ async function sendTripConfirmationEmail(supabase, metadata) {
       </tr>
       <tr style="border-bottom:1px solid #222">
         <td style="padding:10px 0;color:rgba(255,255,255,0.45);font-size:13px">Travel Dates</td>
-        <td style="padding:10px 0;color:#fff;font-size:13px;text-align:right;font-weight:600">November 2026 · 5 Days</td>
+        <td style="padding:10px 0;color:#fff;font-size:13px;text-align:right;font-weight:600">Nov 11–15, 2026 · 5 Days</td>
       </tr>
       <tr style="border-bottom:1px solid #222">
         <td style="padding:10px 0;color:rgba(255,255,255,0.45);font-size:13px">Deposit paid</td>

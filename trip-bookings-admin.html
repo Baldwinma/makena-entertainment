@@ -129,6 +129,43 @@ tr.expanded .expand-icon{transform:rotate(180deg)}
 .export-btn{background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:8px;padding:.45rem .9rem;font-size:.75rem;font-weight:600;color:rgba(255,255,255,.55);cursor:pointer;font-family:inherit;transition:all .2s}
 .export-btn:hover{border-color:var(--green);color:var(--green)}
 
+/* ── Email Blast ── */
+.blast-section{margin-top:2rem}
+.blast-card{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden}
+.blast-header{padding:1.2rem 1.4rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.75rem}
+.blast-header h2{font-size:.85rem;font-weight:700;color:#fff;display:flex;align-items:center;gap:.5rem}
+.blast-body{padding:1.4rem}
+.blast-contact-row{display:flex;align-items:center;gap:1rem;margin-bottom:1.4rem;flex-wrap:wrap}
+.blast-count{background:rgba(134,239,172,.1);border:1px solid rgba(134,239,172,.25);border-radius:10px;padding:.7rem 1.2rem;text-align:center;min-width:110px}
+.blast-count__num{font-size:1.8rem;font-weight:900;color:var(--green);line-height:1}
+.blast-count__label{font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(134,239,172,.65);margin-top:.2rem}
+.blast-desc{flex:1;min-width:180px}
+.blast-desc p{font-size:.82rem;color:rgba(255,255,255,.55);line-height:1.65}
+.blast-desc strong{color:rgba(255,255,255,.85)}
+.blast-btn{background:var(--green);color:#060d07;font-weight:800;font-size:.85rem;padding:.75rem 1.6rem;border:none;border-radius:10px;cursor:pointer;font-family:inherit;transition:opacity .2s;white-space:nowrap}
+.blast-btn:hover{opacity:.88}
+.blast-btn:disabled{opacity:.4;cursor:not-allowed}
+.blast-btn.danger{background:#f87171;color:#fff}
+.blast-result{margin-top:1.2rem;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;padding:1rem 1.2rem}
+.blast-result__title{font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--grey);margin-bottom:.75rem}
+.blast-result__stats{display:flex;gap:1.25rem;flex-wrap:wrap}
+.blast-result__stat{text-align:center}
+.blast-result__stat .num{font-size:1.4rem;font-weight:900;line-height:1}
+.blast-result__stat .lbl{font-size:.65rem;color:var(--grey);margin-top:.15rem}
+.blast-result__stat.ok .num{color:var(--green)}
+.blast-result__stat.err .num{color:#f87171}
+.blast-result__stat.tot .num{color:#fff}
+.blast-failed-list{margin-top:.85rem;font-size:.76rem;color:rgba(255,255,255,.5)}
+.blast-failed-list strong{color:#f87171;font-size:.7rem}
+.blast-contacts-preview{margin-top:1rem;overflow:hidden;max-height:0;transition:max-height .35s ease}
+.blast-contacts-preview.open{max-height:9999px}
+.preview-toggle{background:none;border:none;color:var(--green);font-size:.76rem;font-weight:700;cursor:pointer;padding:0;font-family:inherit;text-decoration:underline;text-underline-offset:3px}
+.contacts-mini-table{width:100%;border-collapse:collapse;margin-top:.75rem}
+.contacts-mini-table th{font-size:.6rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--grey);padding:.4rem .6rem;text-align:left;border-bottom:1px solid var(--border)}
+.contacts-mini-table td{font-size:.78rem;color:rgba(255,255,255,.7);padding:.45rem .6rem;border-bottom:1px solid rgba(255,255,255,.04)}
+.contacts-mini-table tr:last-child td{border-bottom:none}
+.blast-status{font-size:.8rem;color:rgba(255,255,255,.5);margin-top:.5rem;min-height:1.2rem}
+
 @media(max-width:768px){
   thead th:nth-child(4),thead th:nth-child(5),tbody td:nth-child(4),tbody td:nth-child(5){display:none}
   .stats-grid{grid-template-columns:1fr 1fr}
@@ -228,6 +265,33 @@ tr.expanded .expand-icon{transform:rotate(180deg)}
         <div class="loading-spinner">Loading bookings…</div>
       </div>
     </div>
+
+    <!-- Email Blast -->
+    <div class="blast-section">
+      <div class="blast-card">
+        <div class="blast-header">
+          <h2>✉ Interest List Email Blast</h2>
+          <button class="preview-toggle" id="previewToggleBtn" onclick="toggleContactsPreview()">Show contacts ▾</button>
+        </div>
+        <div class="blast-body">
+          <div class="blast-contact-row">
+            <div class="blast-count">
+              <div class="blast-count__num" id="blastCount">—</div>
+              <div class="blast-count__label">Contacts</div>
+            </div>
+            <div class="blast-desc">
+              <p>Send a personalized <strong>"We're Live"</strong> email to everyone in the interest list announcing that Punta Cana 2026 bookings are open. Each email includes the trip details, pricing, a link to the pitch deck, and the WhatsApp group.</p>
+            </div>
+            <button class="blast-btn" id="blastSendBtn" onclick="sendBlast()">Send Blast</button>
+          </div>
+          <div class="blast-status" id="blastStatus"></div>
+          <div id="blastResult"></div>
+          <div class="blast-contacts-preview" id="blastContactsPreview">
+            <div id="blastContactsTable"><div class="loading-spinner" style="padding:1rem">Loading contacts…</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -272,6 +336,7 @@ function showApp() {
   document.getElementById('loginScreen').style.display = 'none';
   document.getElementById('appScreen').style.display = 'block';
   loadBookings();
+  loadBlastContacts();
 }
 
 document.getElementById('logoutBtn').addEventListener('click', function(){
@@ -436,6 +501,109 @@ function expField(label, value) {
 
 function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 function capitalize(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : s; }
+
+// ── Email Blast ───────────────────────────────────────────────────────────────
+var blastContacts = [];
+var blastPreviewOpen = false;
+
+function loadBlastContacts() {
+  fetch('/.netlify/functions/admin-trip-blast', {
+    headers: { 'Authorization': 'Bearer ' + adminToken }
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(d){
+    if (d.error) throw new Error(d.error);
+    blastContacts = d.contacts || [];
+    document.getElementById('blastCount').textContent = blastContacts.length;
+    renderContactsTable();
+  })
+  .catch(function(e){
+    document.getElementById('blastCount').textContent = '!';
+    document.getElementById('blastStatus').textContent = 'Failed to load contacts: ' + (e.message || 'Unknown error');
+  });
+}
+
+function renderContactsTable() {
+  if (!blastContacts.length) {
+    document.getElementById('blastContactsTable').innerHTML = '<p style="color:rgba(255,255,255,.35);font-size:.8rem;padding:.5rem 0">No contacts found in interest list.</p>';
+    return;
+  }
+  var html = '<table class="contacts-mini-table"><thead><tr><th>#</th><th>Name</th><th>Email</th><th>Phone</th><th>Country</th><th>Guests</th><th>Submitted</th></tr></thead><tbody>';
+  blastContacts.forEach(function(c, i){
+    var date = c.submitted_at ? new Date(c.submitted_at).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) : '—';
+    html += '<tr>' +
+      '<td style="color:var(--grey)">' + (i+1) + '</td>' +
+      '<td style="font-weight:600">' + esc(c.first_name||'') + ' ' + esc(c.last_name||'') + '</td>' +
+      '<td>' + esc(c.email||'') + '</td>' +
+      '<td>' + esc(c.phone||'—') + '</td>' +
+      '<td>' + esc(c.country||'—') + '</td>' +
+      '<td>' + (c.guests||'—') + '</td>' +
+      '<td style="color:var(--grey);font-size:.72rem">' + date + '</td>' +
+      '</tr>';
+  });
+  html += '</tbody></table>';
+  document.getElementById('blastContactsTable').innerHTML = html;
+}
+
+function toggleContactsPreview() {
+  blastPreviewOpen = !blastPreviewOpen;
+  var panel = document.getElementById('blastContactsPreview');
+  var btn = document.getElementById('previewToggleBtn');
+  panel.classList.toggle('open', blastPreviewOpen);
+  btn.textContent = blastPreviewOpen ? 'Hide contacts ▴' : 'Show contacts ▾';
+}
+
+function sendBlast() {
+  if (!blastContacts.length) {
+    document.getElementById('blastStatus').textContent = 'No contacts to send to.';
+    return;
+  }
+  var confirmed = window.confirm(
+    'Send the "We\'re Live" email blast to ' + blastContacts.length + ' contacts?\n\n' +
+    'This cannot be undone — each person will receive the email immediately.'
+  );
+  if (!confirmed) return;
+
+  var btn = document.getElementById('blastSendBtn');
+  var statusEl = document.getElementById('blastStatus');
+  btn.disabled = true;
+  btn.textContent = 'Sending…';
+  statusEl.textContent = 'Sending blast to ' + blastContacts.length + ' contacts…';
+  document.getElementById('blastResult').innerHTML = '';
+
+  fetch('/.netlify/functions/admin-trip-blast', {
+    method: 'POST',
+    headers: { 'Authorization': 'Bearer ' + adminToken }
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(d){
+    if (d.error) throw new Error(d.error);
+    statusEl.textContent = '';
+    var html = '<div class="blast-result">' +
+      '<div class="blast-result__title">Blast Complete</div>' +
+      '<div class="blast-result__stats">' +
+        '<div class="blast-result__stat tot"><div class="num">' + d.total + '</div><div class="lbl">Total</div></div>' +
+        '<div class="blast-result__stat ok"><div class="num">' + d.sent + '</div><div class="lbl">Sent</div></div>' +
+        '<div class="blast-result__stat err"><div class="num">' + (d.failed ? d.failed.length : 0) + '</div><div class="lbl">Failed</div></div>' +
+      '</div>';
+    if (d.failed && d.failed.length) {
+      html += '<div class="blast-failed-list"><strong>Failed addresses:</strong><br>' +
+        d.failed.map(function(f){ return esc(f.email) + (f.error ? ' — ' + esc(f.error) : ''); }).join('<br>') +
+      '</div>';
+    }
+    html += '</div>';
+    document.getElementById('blastResult').innerHTML = html;
+    btn.textContent = 'Sent ✓';
+    btn.style.background = 'rgba(134,239,172,.15)';
+    btn.style.color = 'var(--green)';
+    btn.style.border = '1px solid rgba(134,239,172,.3)';
+  })
+  .catch(function(e){
+    statusEl.textContent = 'Error: ' + (e.message || 'Failed to send blast.');
+    btn.disabled = false;
+    btn.textContent = 'Retry Send';
+  });
+}
 
 // ── Export CSV ────────────────────────────────────────────────────────────────
 document.getElementById('exportCsvBtn').addEventListener('click', exportCsv);

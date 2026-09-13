@@ -13,6 +13,37 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;900&display=swap" rel="stylesheet">
     <style>
+        /* ── Always dark regardless of user theme setting ────────────────────── */
+        html[data-theme="light"],
+        html:not([data-theme="dark"]) {
+            --dark-bg: #0a0a0a;
+            --dark-bg-alt: #111111;
+            --dark-bg-card: #141414;
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255,255,255,0.75);
+            --text-muted: rgba(255,255,255,0.45);
+            --navbar-bg: rgba(10,10,10,0.95);
+            --navbar-bg-scrolled: rgba(10,10,10,0.98);
+            --mobile-nav-bg: rgba(10,10,10,0.98);
+        }
+        @media (prefers-color-scheme: light) {
+            html:not([data-theme]) {
+                --dark-bg: #0a0a0a;
+                --dark-bg-alt: #111111;
+                --dark-bg-card: #141414;
+                --text-primary: #ffffff;
+                --text-secondary: rgba(255,255,255,0.75);
+                --text-muted: rgba(255,255,255,0.45);
+                --navbar-bg: rgba(10,10,10,0.95);
+                --navbar-bg-scrolled: rgba(10,10,10,0.98);
+                --mobile-nav-bg: rgba(10,10,10,0.98);
+            }
+        }
+        body { background-color: #0a0a0a !important; color: #ffffff !important; }
+        .nav-links a { color: rgba(255,255,255,0.85) !important; }
+        .nav-links a:hover, .nav-links a.active { color: #86EFA9 !important; }
+        .not-included-item { color: rgba(255,255,255,0.45) !important; }
+
         /* ── Trip page specific ───────────────────────────────────────────────── */
         .trip-hero {
             position: relative;
@@ -718,6 +749,7 @@
         }
     </style>
     <script src="theme-init.js"></script>
+    <script>document.documentElement.setAttribute('data-theme','dark');</script>
 </head>
 <body>
     <nav class="navbar" id="navbar">
@@ -804,7 +836,7 @@
                         <li>All meals & drinks at resort</li>
                         <li>Makena welcome gift bag</li>
                         <li>Airport transfers</li>
-                        <li>VIP table at All White Dinner</li>
+                        <li>Access to all 3 themed pool parties</li>
                         <li>Personal trip concierge</li>
                     </ul>
                     <button class="trip-pcard__cta outline" onclick="openBookingModal('single')">Reserve My Spot</button>
@@ -825,28 +857,28 @@
             <div class="activities-grid">
                 <div class="activity-card">
                     <span class="activity-card__icon">⛵</span>
-                    <h4>Private Catamaran</h4>
-                    <p>Open bar, DJ on deck, snorkeling, and a sandbar stop. This is the day everyone talks about.</p>
+                    <h4>Boat Party</h4>
+                    <p>Open bar, DJ, music and vibes all day on the water. This is the day everyone talks about.</p>
                 </div>
                 <div class="activity-card">
-                    <span class="activity-card__icon">🏝️</span>
-                    <h4>Island Day Trip</h4>
-                    <p>Speedboat to a stunning island. Beach lunch, open bar, crystal clear water, and all the group photos.</p>
+                    <span class="activity-card__icon">🤍</span>
+                    <h4>All White Pool Party</h4>
+                    <p>Night one. Dress code: all white. Pool party energy, open bar, and a welcome night you'll never forget.</p>
+                </div>
+                <div class="activity-card">
+                    <span class="activity-card__icon">🩷</span>
+                    <h4>Pink Pool Party</h4>
+                    <p>Daytime vibes, pink everything, pool games, drinks flowing. Pure good energy from start to finish.</p>
+                </div>
+                <div class="activity-card">
+                    <span class="activity-card__icon">🌈</span>
+                    <h4>Neon Pool Party</h4>
+                    <p>Glow in the dark, neon everything — the ultimate way to close out the trip on Saturday night.</p>
                 </div>
                 <div class="activity-card">
                     <span class="activity-card__icon">🏍️</span>
                     <h4>Adventure Day</h4>
-                    <p>Dune buggies, ATV rides, zip-lines, or waterfall hikes — your choice of adrenaline.</p>
-                </div>
-                <div class="activity-card">
-                    <span class="activity-card__icon">🎉</span>
-                    <h4>Makena Night Party</h4>
-                    <p>One night, the whole group. DJ, themed dress code, and that Makena energy you already know.</p>
-                </div>
-                <div class="activity-card">
-                    <span class="activity-card__icon">🍽️</span>
-                    <h4>Group Dinners</h4>
-                    <p>Private dinner setups, curated menus, drinks included. No splitting bills, no headaches.</p>
+                    <p>Dune buggies and zip-lines through the DR jungle. Morning adrenaline before the neon party.</p>
                 </div>
                 <div class="activity-card">
                     <span class="activity-card__icon">🏨</span>
@@ -868,36 +900,36 @@
                 <li>
                     <div class="itin-day"><span>Day</span><span>1</span></div>
                     <div class="itin-info">
-                        <h4>Arrival & Welcome Mixer</h4>
-                        <p>Private airport transfers, hotel check-in, welcome gift bag, and the first drinks together as a group.</p>
+                        <h4>Arrival + Welcome Mixer + All White Pool Party</h4>
+                        <p>Private airport transfers, hotel check-in, welcome gift bag, welcome drinks — then kick the trip off right with an all white pool party.</p>
                     </div>
                 </li>
                 <li>
                     <div class="itin-day"><span>Day</span><span>2</span></div>
                     <div class="itin-info">
-                        <h4>Private Catamaran Boat Party</h4>
-                        <p>Full-day private catamaran — open bar, DJ, snorkeling stop, lunch on board, and a sandbar sunset.</p>
+                        <h4>Boat Party + Group Dinner</h4>
+                        <p>Full-day boat party — open bar, DJ, music and vibes on the water. Evening: private group dinner with fun activities.</p>
                     </div>
                 </li>
                 <li>
                     <div class="itin-day"><span>Day</span><span>3</span></div>
                     <div class="itin-info">
-                        <h4>Island Day Trip</h4>
-                        <p>Speedboat to a picture-perfect island. Natural pools, beach lunch with open bar, free beach time.</p>
+                        <h4>Pink Pool Party + Interactive Games</h4>
+                        <p>Daytime pink pool party with drinks and good energy. Evening: fun interactive group games and activities.</p>
                     </div>
                 </li>
                 <li>
                     <div class="itin-day"><span>Day</span><span>4</span></div>
                     <div class="itin-info">
-                        <h4>Adventure Day + Makena Night Party</h4>
-                        <p>Morning adrenaline — buggies, ATV or zip-line. Evening: private group dinner. Night: All White Makena party.</p>
+                        <h4>Adventure Day + Neon Pool Party</h4>
+                        <p>Morning adrenaline — dune buggies and zip-lining through the DR. Finish it all off with a neon pool party at night.</p>
                     </div>
                 </li>
                 <li>
                     <div class="itin-day"><span>Day</span><span>5</span></div>
                     <div class="itin-info">
-                        <h4>Farewell & Departure</h4>
-                        <p>Last morning on the beach, group photo, then private transfers back to the airport.</p>
+                        <h4>Group Breakfast + Goodbye Drinks</h4>
+                        <p>One last morning together — group breakfast, goodbye drinks, group photo, then private transfers back to the airport.</p>
                     </div>
                 </li>
             </ul>
@@ -914,12 +946,12 @@
             <div class="includes-cols">
                 <div class="check-item">4-Night All-Inclusive Resort</div>
                 <div class="check-item">Round-Trip Airport Transfers</div>
-                <div class="check-item">Private Catamaran (open bar)</div>
-                <div class="check-item">Island Day Trip</div>
-                <div class="check-item">Adventure Day Activity</div>
-                <div class="check-item">Club Night Entry + Drinks</div>
+                <div class="check-item">Boat Party (Open Bar + DJ)</div>
+                <div class="check-item">All White Pool Party</div>
+                <div class="check-item">Pink Pool Party</div>
+                <div class="check-item">Neon Pool Party</div>
+                <div class="check-item">Adventure Day (Buggies + Zip-line)</div>
                 <div class="check-item">Makena Group Dinner</div>
-                <div class="check-item">All White Night Party</div>
                 <div class="check-item">All Meals & Drinks at Resort</div>
                 <div class="check-item">Welcome Gift Bag</div>
             </div>

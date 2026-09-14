@@ -41,12 +41,15 @@ exports.handler = async function (event) {
         return json(400, { error: 'Invalid request body.' });
     }
 
-    const { roomType, guests } = payload;
+    const { roomType, guests, needsRoommate } = payload;
     const roomConfig = ROOM_CONFIG[roomType];
     if (!roomConfig) return json(400, { error: 'Invalid room type. Must be triple, double, or single.' });
 
-    if (!Array.isArray(guests) || guests.length !== roomConfig.guestCount) {
-        return json(400, { error: `${roomConfig.guestCount} guest(s) required for ${roomType} room.` });
+    // Roommate requests only need the single person booking themselves
+    const effectiveGuestCount = needsRoommate ? 1 : roomConfig.guestCount;
+
+    if (!Array.isArray(guests) || guests.length !== effectiveGuestCount) {
+        return json(400, { error: `${effectiveGuestCount} guest(s) required for this booking.` });
     }
 
     for (const [i, g] of guests.entries()) {
@@ -58,8 +61,8 @@ exports.handler = async function (event) {
     if (!String(primaryGuest.phone || '').trim()) return json(400, { error: 'Primary guest phone is required.' });
     if (!String(primaryGuest.country || '').trim()) return json(400, { error: 'Primary guest country is required.' });
 
-    const depositTotal = DEPOSIT_PER_PERSON * roomConfig.guestCount;
-    const processingFeeTotal = PROCESSING_FEE_PER_PERSON * roomConfig.guestCount;
+    const depositTotal = DEPOSIT_PER_PERSON * effectiveGuestCount;
+    const processingFeeTotal = PROCESSING_FEE_PER_PERSON * effectiveGuestCount;
     const chargedTotal = depositTotal + processingFeeTotal;
     const bookingRef = 'PC2026-' + Date.now().toString(36).toUpperCase().slice(-6);
 
@@ -69,9 +72,10 @@ exports.handler = async function (event) {
             booking_ref: bookingRef,
             room_type: roomType,
             price_per_person: roomConfig.pricePerPerson,
-            guest_count: roomConfig.guestCount,
+            guest_count: effectiveGuestCount,
             deposit_per_person: DEPOSIT_PER_PERSON,
             deposit_total: depositTotal,
+            needs_roommate: needsRoommate ? true : false,
             payment_status: 'pending',
             primary_first_name: String(primaryGuest.firstName).trim(),
             primary_last_name: String(primaryGuest.lastName || '').trim() || null,
@@ -122,7 +126,7 @@ exports.handler = async function (event) {
                         },
                         unit_amount: DEPOSIT_PER_PERSON
                     },
-                    quantity: roomConfig.guestCount
+                    quantity: effectiveGuestCount
                 },
                 {
                     price_data: {
@@ -133,7 +137,7 @@ exports.handler = async function (event) {
                         },
                         unit_amount: PROCESSING_FEE_PER_PERSON
                     },
-                    quantity: roomConfig.guestCount
+                    quantity: effectiveGuestCount
                 }
             ],
             return_url: `${baseUrl}/trips.html?booking=success&ref=${bookingRef}&session_id={CHECKOUT_SESSION_ID}`,
@@ -142,7 +146,8 @@ exports.handler = async function (event) {
                 booking_id: booking.id,
                 booking_ref: bookingRef,
                 room_type: roomType,
-                guest_count: String(roomConfig.guestCount)
+                guest_count: String(effectiveGuestCount),
+                needs_roommate: needsRoommate ? 'true' : 'false'
             }
         });
 

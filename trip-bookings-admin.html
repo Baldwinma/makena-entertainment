@@ -266,6 +266,19 @@ tr.expanded .expand-icon{transform:rotate(180deg)}
       </div>
     </div>
 
+    <!-- Roommate Matching -->
+    <div class="blast-section" id="roommateSection" style="display:none">
+      <div class="blast-card">
+        <div class="blast-header">
+          <h2>🤝 Roommate Matching</h2>
+          <span class="count-badge" id="roommateCount"></span>
+        </div>
+        <div class="blast-body" id="roommateBody">
+          <div class="loading-spinner" style="padding:1.5rem">Loading…</div>
+        </div>
+      </div>
+    </div>
+
     <!-- Email Blast -->
     <div class="blast-section">
       <div class="blast-card">
@@ -362,10 +375,58 @@ function loadBookings() {
     allBookings = d.bookings || [];
     updateStats();
     renderTable();
+    renderRoommateSection();
   })
   .catch(function(e){
     document.getElementById('tableBody').innerHTML = '<div class="empty-state"><div class="icon">⚠️</div><p>' + (e.message || 'Failed to load bookings.') + '</p></div>';
   });
+}
+
+// ── Roommate Matching ─────────────────────────────────────────────────────────
+function renderRoommateSection() {
+  var matches = allBookings.filter(function(b){ return b.needs_roommate && b.payment_status === 'paid'; });
+  var section = document.getElementById('roommateSection');
+  var countEl = document.getElementById('roommateCount');
+  var body = document.getElementById('roommateBody');
+
+  if (!matches.length) { section.style.display = 'none'; return; }
+  section.style.display = 'block';
+  countEl.textContent = matches.length + ' person' + (matches.length !== 1 ? 's' : '') + ' need a roommate';
+
+  var grouped = { triple: [], double: [] };
+  matches.forEach(function(b){ if (grouped[b.room_type]) grouped[b.room_type].push(b); });
+
+  var html = '';
+  ['double','triple'].forEach(function(type) {
+    var list = grouped[type];
+    if (!list.length) return;
+    var typeLabel = type === 'double' ? 'Double Share (need 1 more)' : 'Triple Share (need 2 more)';
+    var needed = type === 'double' ? 2 : 3;
+    var matchable = Math.floor(list.length / (needed - (needed - 1)));
+
+    html += '<div style="margin-bottom:1.5rem">';
+    html += '<div style="font-size:.65rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--green);margin-bottom:.85rem">' + typeLabel + ' — ' + list.length + ' person' + (list.length !== 1 ? 's' : '') + '</div>';
+    html += '<table style="width:100%;border-collapse:collapse">';
+    html += '<thead><tr>';
+    html += '<th style="font-size:.6rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--grey);padding:.4rem .6rem;text-align:left;border-bottom:1px solid var(--border)">Name</th>';
+    html += '<th style="font-size:.6rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--grey);padding:.4rem .6rem;text-align:left;border-bottom:1px solid var(--border)">Email</th>';
+    html += '<th style="font-size:.6rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--grey);padding:.4rem .6rem;text-align:left;border-bottom:1px solid var(--border)">Phone</th>';
+    html += '<th style="font-size:.6rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--grey);padding:.4rem .6rem;text-align:left;border-bottom:1px solid var(--border)">Country</th>';
+    html += '<th style="font-size:.6rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--grey);padding:.4rem .6rem;text-align:left;border-bottom:1px solid var(--border)">Ref</th>';
+    html += '</tr></thead><tbody>';
+    list.forEach(function(b){
+      html += '<tr style="border-bottom:1px solid rgba(255,255,255,.04)">';
+      html += '<td style="padding:.55rem .6rem;font-size:.82rem;font-weight:600;color:#fff">' + esc(b.primary_first_name) + ' ' + esc(b.primary_last_name||'') + '</td>';
+      html += '<td style="padding:.55rem .6rem;font-size:.8rem;color:rgba(255,255,255,.65)">' + esc(b.primary_email) + '</td>';
+      html += '<td style="padding:.55rem .6rem;font-size:.8rem;color:rgba(255,255,255,.65)">' + esc(b.primary_phone||'—') + '</td>';
+      html += '<td style="padding:.55rem .6rem;font-size:.8rem;color:rgba(255,255,255,.65)">' + esc(b.primary_country||'—') + '</td>';
+      html += '<td style="padding:.55rem .6rem;font-family:monospace;font-size:.75rem;color:var(--green)">' + esc(b.booking_ref||'') + '</td>';
+      html += '</tr>';
+    });
+    html += '</tbody></table></div>';
+  });
+
+  body.innerHTML = html;
 }
 
 // ── Stats ─────────────────────────────────────────────────────────────────────
@@ -545,6 +606,45 @@ function renderContactsTable() {
   document.getElementById('blastContactsTable').innerHTML = html;
 }
 
+function retryFailed(emails) {
+  var statusEl = document.getElementById('blastStatus');
+  var btn = document.getElementById('blastSendBtn');
+  statusEl.textContent = 'Retrying ' + emails.length + ' failed address' + (emails.length !== 1 ? 'es' : '') + '…';
+  document.getElementById('blastResult').innerHTML = '';
+
+  fetch('/.netlify/functions/admin-trip-blast', {
+    method: 'POST',
+    headers: {
+      'Authorization': 'Bearer ' + adminToken,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ emails: emails })
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(d){
+    if (d.error) throw new Error(d.error);
+    statusEl.textContent = '';
+    var html = '<div class="blast-result">' +
+      '<div class="blast-result__title">Retry Complete</div>' +
+      '<div class="blast-result__stats">' +
+        '<div class="blast-result__stat tot"><div class="num">' + d.total + '</div><div class="lbl">Attempted</div></div>' +
+        '<div class="blast-result__stat ok"><div class="num">' + d.sent + '</div><div class="lbl">Sent</div></div>' +
+        '<div class="blast-result__stat err"><div class="num">' + (d.failed ? d.failed.length : 0) + '</div><div class="lbl">Failed</div></div>' +
+      '</div>';
+    if (d.failed && d.failed.length) {
+      html += '<div class="blast-failed-list"><strong>Still failing:</strong><br>' +
+        d.failed.map(function(f){ return esc(f.email) + (f.error ? ' — ' + esc(f.error) : ''); }).join('<br>') +
+      '</div>';
+      html += '<button onclick="retryFailed(' + JSON.stringify(d.failed.map(function(f){return f.email;})) + ')" style="margin-top:1rem;background:#f87171;color:#fff;font-weight:800;font-size:.78rem;padding:.55rem 1.2rem;border:none;border-radius:8px;cursor:pointer;font-family:inherit">↺ Retry Again (' + d.failed.length + ')</button>';
+    }
+    html += '</div>';
+    document.getElementById('blastResult').innerHTML = html;
+  })
+  .catch(function(e){
+    statusEl.textContent = 'Retry error: ' + (e.message || 'Unknown error');
+  });
+}
+
 function toggleContactsPreview() {
   blastPreviewOpen = !blastPreviewOpen;
   var panel = document.getElementById('blastContactsPreview');
@@ -590,6 +690,9 @@ function sendBlast() {
       html += '<div class="blast-failed-list"><strong>Failed addresses:</strong><br>' +
         d.failed.map(function(f){ return esc(f.email) + (f.error ? ' — ' + esc(f.error) : ''); }).join('<br>') +
       '</div>';
+    }
+    if (d.failed && d.failed.length) {
+      html += '<button onclick="retryFailed(' + JSON.stringify(d.failed.map(function(f){return f.email;})) + ')" style="margin-top:1rem;background:#f87171;color:#fff;font-weight:800;font-size:.78rem;padding:.55rem 1.2rem;border:none;border-radius:8px;cursor:pointer;font-family:inherit">↺ Retry Failed (' + d.failed.length + ')</button>';
     }
     html += '</div>';
     document.getElementById('blastResult').innerHTML = html;

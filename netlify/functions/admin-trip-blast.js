@@ -191,13 +191,34 @@ exports.handler = async function (event) {
 
         const siteUrl = (process.env.SITE_URL || 'https://makenaevents.com').replace(/\/$/, '');
 
-        const { data: contacts, error } = await supabase
+        // If specific emails are provided in the body, only send to those
+        let targetEmails = null;
+        try {
+            const body = event.body ? JSON.parse(event.body) : {};
+            if (Array.isArray(body.emails) && body.emails.length > 0) {
+                targetEmails = body.emails.map(e => e.toLowerCase().trim());
+            }
+        } catch (_) {}
+
+        const { data: allContacts, error } = await supabase
             .from('trip_interests')
             .select('first_name, last_name, email')
             .order('submitted_at', { ascending: false });
 
         if (error) return json(500, { error: 'Unable to load contacts.' });
-        if (!contacts || contacts.length === 0) return json(200, { sent: 0, message: 'No contacts found.' });
+        if (!allContacts || allContacts.length === 0) return json(200, { sent: 0, message: 'No contacts found.' });
+
+        let contacts;
+        if (targetEmails) {
+            // Match from DB where possible, fall back to bare email for any not in the list
+            const dbMap = {};
+            allContacts.forEach(c => { dbMap[c.email.toLowerCase().trim()] = c; });
+            contacts = targetEmails.map(e => dbMap[e.toLowerCase().trim()] || { first_name: null, last_name: null, email: e });
+        } else {
+            contacts = allContacts;
+        }
+
+        const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 
         const results = [];
         for (const contact of contacts) {
@@ -221,6 +242,8 @@ exports.handler = async function (event) {
             } catch (err) {
                 results.push({ email: contact.email, ok: false, error: err.message });
             }
+            // Stay well under Resend's 10 req/sec rate limit
+            await sleep(150);
         }
 
         const sent = results.filter(r => r.ok).length;

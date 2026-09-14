@@ -739,6 +739,14 @@
         .trip-pcard__cta.outline:hover { border-color: #86EFA9; color: #86EFA9; }
         .trip-pcard__cta.fill { background: #86EFA9; color: #060d07; }
         .trip-pcard__cta.fill:hover { opacity: 0.88; }
+        .trip-pcard__cta.roommate {
+            background: transparent;
+            border: 1px solid rgba(134,239,172,0.2);
+            color: rgba(134,239,172,0.7);
+            font-size: 0.78rem;
+            margin-top: 0.5rem;
+        }
+        .trip-pcard__cta.roommate:hover { border-color: #86EFA9; color: #86EFA9; }
         .trip-pcard__deposit {
             font-size: 0.68rem;
             color: rgba(245,200,66,0.8);
@@ -808,6 +816,7 @@
                         <li>Airport transfers</li>
                     </ul>
                     <button class="trip-pcard__cta outline" onclick="openBookingModal('triple')">Reserve My Spot</button>
+                    <button class="trip-pcard__cta roommate" onclick="openRoommateModal('triple')">🤝 Need a Roommate?</button>
                     <div class="trip-pcard__deposit">$250 deposit × 3 = $750 due today</div>
                 </div>
                 <div class="trip-pcard featured">
@@ -824,6 +833,7 @@
                         <li>Priority activity booking</li>
                     </ul>
                     <button class="trip-pcard__cta fill" onclick="openBookingModal('double')">Reserve My Spot</button>
+                    <button class="trip-pcard__cta roommate" onclick="openRoommateModal('double')">🤝 Need a Roommate?</button>
                     <div class="trip-pcard__deposit">$250 deposit × 2 = $500 due today</div>
                 </div>
                 <div class="trip-pcard">
@@ -994,8 +1004,11 @@
 
             <!-- Step 1: Room Selection -->
             <div class="booking-step active" id="bStep1">
-                <h3 style="font-size:1.25rem;font-weight:800;color:#fff;margin-bottom:0.3rem">Choose Your Room</h3>
+                <h3 style="font-size:1.25rem;font-weight:800;color:#fff;margin-bottom:0.3rem" id="bStep1Title">Choose Your Room</h3>
                 <p style="font-size:0.82rem;color:rgba(255,255,255,0.45);margin-bottom:0">Adults-only 5-star resort · Nov 11–15, 2026 · Punta Cana</p>
+                <div id="roommateNotice" style="display:none;background:rgba(134,239,172,0.08);border:1px solid rgba(134,239,172,0.22);border-radius:10px;padding:12px 14px;margin-top:1rem;font-size:0.78rem;color:rgba(255,255,255,0.6);line-height:1.6">
+                    🤝 <strong style="color:#86EFA9">Roommate Matching</strong> — You'll only pay the deposit for yourself ($257.77). Makena will personally match you with compatible roommate(s). You'll be introduced before the trip.
+                </div>
                 <div class="room-cards">
                     <div class="room-card" data-room="triple" onclick="selectRoom('triple')">
                         <div class="room-card__left">
@@ -1123,10 +1136,24 @@
         var stripeInstance = null;
         var stripeElements = null;
         var bookingRef = null;
+        var needsRoommate = false;
 
         var modal = document.getElementById('bookingModal');
 
         window.openBookingModal = function (preselect) {
+            needsRoommate = false;
+            document.getElementById('roommateNotice').style.display = 'none';
+            document.getElementById('bStep1Title').textContent = 'Choose Your Room';
+            modal.classList.add('is-open');
+            document.body.style.overflow = 'hidden';
+            if (preselect) selectRoom(preselect);
+            showStep(1);
+        };
+
+        window.openRoommateModal = function (preselect) {
+            needsRoommate = true;
+            document.getElementById('roommateNotice').style.display = 'block';
+            document.getElementById('bStep1Title').textContent = 'Choose Your Room Type';
             modal.classList.add('is-open');
             document.body.style.overflow = 'hidden';
             if (preselect) selectRoom(preselect);
@@ -1182,13 +1209,15 @@
             payBtn.textContent = 'Starting payment…';
 
             var config = ROOM_CONFIG[selectedRoom];
-            document.getElementById('bPaySubtitle').textContent =
-                config.label + ' · $250 deposit + $' + PROCESSING_FEE_PP.toFixed(2) + ' fee × ' + config.guests + ' guest(s) = $' + config.chargedTotal.toFixed(2);
+            var singleCharged = (DEPOSIT_PP + PROCESSING_FEE_PP).toFixed(2);
+            document.getElementById('bPaySubtitle').textContent = needsRoommate
+                ? config.label + ' (Roommate Matching) · $250 deposit + $' + PROCESSING_FEE_PP.toFixed(2) + ' fee = $' + singleCharged + ' for you'
+                : config.label + ' · $250 deposit + $' + PROCESSING_FEE_PP.toFixed(2) + ' fee × ' + config.guests + ' guest(s) = $' + config.chargedTotal.toFixed(2);
 
             fetch('/.netlify/functions/trip-booking-checkout', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ roomType: selectedRoom, guests: guests })
+                body: JSON.stringify({ roomType: selectedRoom, guests: guests, needsRoommate: needsRoommate })
             })
             .then(function (r) { return r.json(); })
             .then(function (data) {
@@ -1235,11 +1264,14 @@
 
         function buildGuestForms() {
             var config = ROOM_CONFIG[selectedRoom];
-            document.getElementById('bStep2Title').textContent = 'Guest Details — ' + config.label;
-            document.getElementById('bStep2Sub').textContent = 'Fill in details for all ' + config.guests + ' guest(s) in this room.';
+            var guestCount = needsRoommate ? 1 : config.guests;
+            document.getElementById('bStep2Title').textContent = needsRoommate ? 'Your Details' : 'Guest Details — ' + config.label;
+            document.getElementById('bStep2Sub').textContent = needsRoommate
+                ? 'Just your info. We\'ll personally match you with compatible roommate(s) for your ' + config.label.toLowerCase() + '.'
+                : 'Fill in details for all ' + config.guests + ' guest(s) in this room.';
 
             var html = '';
-            for (var i = 0; i < config.guests; i++) {
+            for (var i = 0; i < guestCount; i++) {
                 var isPrimary = i === 0;
                 html += '<div class="guest-section">';
                 html += '<div class="guest-section__header">Guest ' + (i + 1) + (isPrimary ? ' — Primary Contact' : '') + '</div>';
@@ -1261,8 +1293,9 @@
 
         function collectGuests() {
             var config = ROOM_CONFIG[selectedRoom];
+            var guestCount = needsRoommate ? 1 : config.guests;
             var guests = [];
-            for (var i = 0; i < config.guests; i++) {
+            for (var i = 0; i < guestCount; i++) {
                 var fn = (document.getElementById('g' + i + '_fn') || {}).value || '';
                 var ln = (document.getElementById('g' + i + '_ln') || {}).value || '';
                 var em = (document.getElementById('g' + i + '_em') || {}).value || '';
@@ -1278,18 +1311,27 @@
 
         function buildReviewSummary(guests) {
             var config = ROOM_CONFIG[selectedRoom];
+            var singleCharged = (DEPOSIT_PP + PROCESSING_FEE_PP).toFixed(2);
+            var depositDisplay = needsRoommate ? singleCharged : config.chargedTotal.toFixed(2);
+            var packageLabel = needsRoommate ? config.label + ' — Roommate Matching' : config.label;
+
             var guestChips = guests.map(function (g) {
                 return '<div class="review-guest-chip">👤 ' + g.firstName + (g.lastName ? ' ' + g.lastName : '') + '</div>';
             }).join('');
 
+            var roommateNote = needsRoommate
+                ? '<div style="background:rgba(134,239,172,0.07);border:1px solid rgba(134,239,172,0.18);border-radius:8px;padding:10px 12px;margin-top:0.75rem;font-size:0.75rem;color:rgba(255,255,255,0.55);line-height:1.6">🤝 Makena will match you with compatible roommate(s) for your ' + config.label.toLowerCase() + '. You\'ll be introduced to them before the trip.</div>'
+                : '';
+
             document.getElementById('bReviewSummary').innerHTML =
-                '<div class="review-row"><span>Package</span><strong>' + config.label + '</strong></div>' +
+                '<div class="review-row"><span>Package</span><strong>' + packageLabel + '</strong></div>' +
                 '<div class="review-row"><span>Resort</span><strong>Adults-Only 5-Star All-Inclusive</strong></div>' +
                 '<div class="review-row"><span>Dates</span><strong>Nov 11–15, 2026 · 5 Days</strong></div>' +
                 '<div class="review-row"><span>Price per person</span><strong>$' + config.pricePerPerson + '</strong></div>' +
                 '<div class="review-guests">' + guestChips + '</div>' +
-                '<div class="review-row total"><span>Deposit due today</span><span>$' + config.chargedTotal.toFixed(2) + '</span></div>' +
-                '<div style="font-size:0.68rem;color:rgba(255,255,255,0.28);text-align:right;margin-top:0.25rem">$' + DEPOSIT_PP + ' deposit + $' + PROCESSING_FEE_PP.toFixed(2) + ' processing fee per guest</div>';
+                '<div class="review-row total"><span>Deposit due today</span><span>$' + depositDisplay + '</span></div>' +
+                '<div style="font-size:0.68rem;color:rgba(255,255,255,0.28);text-align:right;margin-top:0.25rem">$' + DEPOSIT_PP + ' deposit + $' + PROCESSING_FEE_PP.toFixed(2) + ' processing fee' + (needsRoommate ? ' (you only)' : ' per guest') + '</div>' +
+                roommateNote;
         }
 
         function showStep(n) {
@@ -1301,6 +1343,15 @@
             var dots = document.querySelectorAll('.booking-step-dot');
             var stepForDot = n > 4 ? 4 : n;
             dots.forEach(function (d, idx) { d.classList.toggle('active', idx < stepForDot); });
+            if (n === 5 && needsRoommate) {
+                var s5 = document.getElementById('bStep5');
+                if (s5) {
+                    s5.querySelector('h3').textContent = "You're on the list!";
+                    var ps = s5.querySelectorAll('p');
+                    if (ps[0]) ps[0].textContent = "Your deposit is confirmed. Your booking reference is:";
+                    if (ps[1]) ps[1].textContent = "Makena will personally reach out to match you with compatible roommate(s). Keep an eye on the WhatsApp group for updates.";
+                }
+            }
             var card = document.querySelector('.booking-modal__card');
             if (card) card.scrollTop = 0;
         }

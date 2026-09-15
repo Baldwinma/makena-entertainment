@@ -16,8 +16,26 @@ function buildEmail(firstName, siteUrl) {
 
     return `<!DOCTYPE html>
 <html lang="en">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
-<body style="margin:0;padding:0;background:#0a0a0a;font-family:'Helvetica Neue',Arial,sans-serif">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta name="supported-color-schemes" content="light dark">
+  <style>
+    :root { color-scheme: light dark; }
+    body { background-color: #0a0a0a !important; color: #ffffff !important; }
+    @media (prefers-color-scheme: dark) {
+      body { background-color: #0a0a0a !important; color: #ffffff !important; }
+      .email-outer { background-color: #0a0a0a !important; }
+    }
+    @media (prefers-color-scheme: light) {
+      body { background-color: #0a0a0a !important; color: #ffffff !important; }
+      .email-outer { background-color: #0a0a0a !important; }
+    }
+  </style>
+</head>
+<body bgcolor="#0a0a0a" style="margin:0;padding:0;background:#0a0a0a;background-color:#0a0a0a;font-family:'Helvetica Neue',Arial,sans-serif">
+<div class="email-outer" style="background-color:#0a0a0a">
 <div style="max-width:580px;margin:0 auto;padding:32px 16px 48px">
 
   <!-- Brand -->
@@ -161,6 +179,7 @@ function buildEmail(firstName, siteUrl) {
     <p style="margin:4px 0 0">You're receiving this because you expressed interest in a Makena group trip.</p>
   </div>
 
+</div>
 </div>
 </body>
 </html>`;

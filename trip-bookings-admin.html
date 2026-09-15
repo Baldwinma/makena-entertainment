@@ -129,6 +129,22 @@ tr.expanded .expand-icon{transform:rotate(180deg)}
 .export-btn{background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:8px;padding:.45rem .9rem;font-size:.75rem;font-weight:600;color:rgba(255,255,255,.55);cursor:pointer;font-family:inherit;transition:all .2s}
 .export-btn:hover{border-color:var(--green);color:var(--green)}
 
+/* ── Abandoned Bookings ── */
+.abandoned-card{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:2rem}
+.abandoned-header{padding:1.2rem 1.4rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.75rem}
+.abandoned-header h2{font-size:.85rem;font-weight:700;color:#fff}
+.abandoned-body{padding:1.4rem}
+.send-all-btn{background:#f87171;color:#fff;font-weight:800;font-size:.78rem;padding:.55rem 1.1rem;border:none;border-radius:8px;cursor:pointer;font-family:inherit;transition:opacity .2s}
+.send-all-btn:hover{opacity:.85}
+.send-all-btn:disabled{opacity:.4;cursor:not-allowed}
+.remind-btn{background:rgba(248,113,113,.12);color:#f87171;border:1px solid rgba(248,113,113,.3);font-size:.7rem;font-weight:700;padding:.3rem .75rem;border-radius:6px;cursor:pointer;font-family:inherit;transition:all .2s;white-space:nowrap}
+.remind-btn:hover{background:rgba(248,113,113,.2)}
+.remind-btn:disabled{opacity:.4;cursor:not-allowed}
+.remind-btn.sent{background:rgba(134,239,172,.1);color:var(--green);border-color:rgba(134,239,172,.3)}
+.resend-btn{background:rgba(134,239,172,.08);color:var(--green);border:1px solid rgba(134,239,172,.2);font-size:.68rem;font-weight:700;padding:.28rem .7rem;border-radius:6px;cursor:pointer;font-family:inherit;transition:all .2s;white-space:nowrap}
+.resend-btn:hover{background:rgba(134,239,172,.15)}
+.resend-btn:disabled{opacity:.4;cursor:not-allowed}
+
 /* ── Email Blast ── */
 .blast-section{margin-top:2rem}
 .blast-card{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden}
@@ -266,6 +282,22 @@ tr.expanded .expand-icon{transform:rotate(180deg)}
       </div>
     </div>
 
+    <!-- Abandoned Bookings -->
+    <div style="margin-top:2rem">
+      <div class="abandoned-card">
+        <div class="abandoned-header">
+          <h2>⏳ Incomplete Bookings</h2>
+          <div style="display:flex;align-items:center;gap:.75rem;flex-wrap:wrap">
+            <span class="count-badge" id="abandonedCount"></span>
+            <button class="send-all-btn" id="sendAllRemindersBtn" onclick="sendAllReminders()" style="display:none">Send All Reminders</button>
+          </div>
+        </div>
+        <div class="abandoned-body" id="abandonedBody">
+          <div class="loading-spinner" style="padding:1.5rem">Loading…</div>
+        </div>
+      </div>
+    </div>
+
     <!-- Roommate Matching -->
     <div class="blast-section" id="roommateSection" style="display:none">
       <div class="blast-card">
@@ -350,6 +382,7 @@ function showApp() {
   document.getElementById('appScreen').style.display = 'block';
   loadBookings();
   loadBlastContacts();
+  loadAbandoned();
 }
 
 document.getElementById('logoutBtn').addEventListener('click', function(){
@@ -523,7 +556,8 @@ function renderTable() {
         expField('Payment Status', capitalize(b.payment_status||'')) +
         (b.paid_at ? expField('Paid At', new Date(b.paid_at).toLocaleString()) : '') +
         (b.stripe_session_id ? expField('Stripe Session', '<span style="font-size:.7rem;font-family:monospace;color:rgba(255,255,255,.4)">' + b.stripe_session_id + '</span>') : '') +
-      '</div>';
+      '</div>' +
+      (b.payment_status === 'paid' ? '<div style="margin-bottom:1rem"><button class="resend-btn" onclick="resendConfirmation(\'' + b.id + '\', this)">✉ Resend Confirmation Email</button></div>' : '');
 
     if (b.guests && b.guests.length) {
       html += '<div class="guests-section-label">All Guests in This Room</div>';
@@ -705,6 +739,146 @@ function sendBlast() {
     statusEl.textContent = 'Error: ' + (e.message || 'Failed to send blast.');
     btn.disabled = false;
     btn.textContent = 'Retry Send';
+  });
+}
+
+// ── Abandoned Bookings ────────────────────────────────────────────────────────
+var abandonedBookings = [];
+
+function loadAbandoned() {
+  fetch('/.netlify/functions/admin-send-reminder', {
+    headers: { 'Authorization': 'Bearer ' + adminToken }
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(d){
+    if (d.error) throw new Error(d.error);
+    abandonedBookings = d.bookings || [];
+    renderAbandoned();
+  })
+  .catch(function(e){
+    document.getElementById('abandonedBody').innerHTML = '<div class="empty-state"><p>Failed to load: ' + esc(e.message) + '</p></div>';
+  });
+}
+
+function renderAbandoned() {
+  var countEl = document.getElementById('abandonedCount');
+  var body = document.getElementById('abandonedBody');
+  var sendAllBtn = document.getElementById('sendAllRemindersBtn');
+
+  if (!abandonedBookings.length) {
+    countEl.textContent = '0 pending';
+    sendAllBtn.style.display = 'none';
+    body.innerHTML = '<div class="empty-state" style="padding:2rem"><div class="icon">✅</div><p>No incomplete bookings — everyone who started a booking has paid.</p></div>';
+    return;
+  }
+
+  var oneHourAgo = Date.now() - 60 * 60 * 1000;
+  var eligible = abandonedBookings.filter(function(b){ return !b.reminder_sent_at && new Date(b.created_at).getTime() < oneHourAgo; });
+  countEl.textContent = abandonedBookings.length + ' pending · ' + eligible.length + ' not yet reminded';
+  sendAllBtn.style.display = eligible.length ? 'inline-block' : 'none';
+
+  var html = '<table style="width:100%;border-collapse:collapse">';
+  html += '<thead><tr>';
+  ['Name','Email','Room','Started','Reminder'].forEach(function(h){
+    html += '<th style="font-size:.6rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--grey);padding:.4rem .6rem;text-align:left;border-bottom:1px solid var(--border)">' + h + '</th>';
+  });
+  html += '<th style="border-bottom:1px solid var(--border)"></th></tr></thead><tbody>';
+
+  abandonedBookings.forEach(function(b){
+    var started = b.created_at ? new Date(b.created_at).toLocaleDateString('en-GB',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}) : '—';
+    var reminderLabel = b.reminder_sent_at
+      ? '<span style="color:var(--green);font-size:.72rem">Sent ' + new Date(b.reminder_sent_at).toLocaleDateString('en-GB',{day:'2-digit',month:'short'}) + '</span>'
+      : '<span style="color:rgba(255,255,255,.3);font-size:.72rem">Not sent</span>';
+    var btnDisabled = b.reminder_sent_at ? 'disabled class="remind-btn sent"' : 'class="remind-btn"';
+    var btnLabel = b.reminder_sent_at ? 'Sent ✓' : 'Send Reminder';
+    html += '<tr style="border-bottom:1px solid rgba(255,255,255,.04)">';
+    html += '<td style="padding:.55rem .6rem;font-size:.82rem;font-weight:600;color:#fff">' + esc(b.primary_first_name||'') + ' ' + esc(b.primary_last_name||'') + '</td>';
+    html += '<td style="padding:.55rem .6rem;font-size:.78rem;color:rgba(255,255,255,.6)">' + esc(b.primary_email||'') + '</td>';
+    html += '<td style="padding:.55rem .6rem"><span class="room-tag ' + (b.room_type||'') + '">' + (b.room_type||'—') + '</span></td>';
+    html += '<td style="padding:.55rem .6rem;font-size:.76rem;color:rgba(255,255,255,.4)">' + started + '</td>';
+    html += '<td style="padding:.55rem .6rem">' + reminderLabel + '</td>';
+    html += '<td style="padding:.55rem .6rem;text-align:right"><button ' + btnDisabled + ' onclick="sendSingleReminder(\'' + b.id + '\', this)">' + btnLabel + '</button></td>';
+    html += '</tr>';
+  });
+  html += '</tbody></table>';
+  body.innerHTML = html;
+}
+
+function sendSingleReminder(bookingId, btn) {
+  btn.disabled = true;
+  btn.textContent = 'Sending…';
+  fetch('/.netlify/functions/admin-send-reminder', {
+    method: 'POST',
+    headers: { 'Authorization': 'Bearer ' + adminToken, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ bookingIds: [bookingId] })
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(d){
+    if (d.error) throw new Error(d.error);
+    if (d.sent > 0) {
+      btn.textContent = 'Sent ✓';
+      btn.className = 'remind-btn sent';
+      var booking = abandonedBookings.find(function(b){ return b.id === bookingId; });
+      if (booking) booking.reminder_sent_at = new Date().toISOString();
+      document.getElementById('abandonedCount').textContent = document.getElementById('abandonedCount').textContent;
+      renderAbandoned();
+    } else {
+      btn.textContent = 'Failed';
+      btn.disabled = false;
+    }
+  })
+  .catch(function(e){
+    btn.textContent = 'Error';
+    btn.disabled = false;
+    alert('Failed to send: ' + e.message);
+  });
+}
+
+function sendAllReminders() {
+  var btn = document.getElementById('sendAllRemindersBtn');
+  var oneHourAgo = Date.now() - 60 * 60 * 1000;
+  var eligible = abandonedBookings.filter(function(b){ return !b.reminder_sent_at && new Date(b.created_at).getTime() < oneHourAgo; });
+  if (!eligible.length) return;
+  if (!confirm('Send reminder emails to ' + eligible.length + ' person(s) who have incomplete bookings?')) return;
+  btn.disabled = true;
+  btn.textContent = 'Sending…';
+  fetch('/.netlify/functions/admin-send-reminder', {
+    method: 'POST',
+    headers: { 'Authorization': 'Bearer ' + adminToken, 'Content-Type': 'application/json' },
+    body: JSON.stringify({})
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(d){
+    if (d.error) throw new Error(d.error);
+    btn.textContent = 'Sent ' + d.sent + ' ✓';
+    loadAbandoned();
+  })
+  .catch(function(e){
+    btn.disabled = false;
+    btn.textContent = 'Send All Reminders';
+    alert('Error: ' + e.message);
+  });
+}
+
+// ── Resend Confirmation Email ──────────────────────────────────────────────────
+function resendConfirmation(bookingId, btn) {
+  btn.disabled = true;
+  btn.textContent = 'Sending…';
+  fetch('/.netlify/functions/admin-resend-confirmation', {
+    method: 'POST',
+    headers: { 'Authorization': 'Bearer ' + adminToken, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ bookingId: bookingId })
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(d){
+    if (d.error) throw new Error(d.error);
+    btn.textContent = 'Sent ✓';
+    btn.className = 'resend-btn sent';
+  })
+  .catch(function(e){
+    btn.textContent = 'Failed';
+    btn.disabled = false;
+    alert('Could not resend: ' + e.message);
   });
 }
 

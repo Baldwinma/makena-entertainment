@@ -82,10 +82,11 @@ exports.handler = async function(event) {
                 console.error('stripe-webhook: trip booking update error:', tripUpdateError);
             } else {
                 console.log('stripe-webhook: trip booking confirmed:', session.metadata.booking_ref);
-                // Send confirmation email (fire and forget — don't block webhook response)
-                sendTripConfirmationEmail(supabase, session.metadata.booking_id).catch(err =>
-                    console.error('stripe-webhook: trip confirmation email error:', err)
-                );
+                try {
+                    await sendTripConfirmationEmail(supabase, session.metadata.booking_id);
+                } catch (err) {
+                    console.error('stripe-webhook: trip confirmation email error:', err);
+                }
             }
         }
         return { statusCode: 200, body: JSON.stringify({ received: true }) };

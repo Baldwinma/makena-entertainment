@@ -177,21 +177,35 @@ async function sendTripConfirmationEmail(supabase, bookingId) {
         ? `🤝 You're on the List — Punta Cana 2026 · ${bookingRef}`
         : `🎉 Deposit Confirmed — Punta Cana 2026 · ${bookingRef}`;
 
-    await fetch('https://api.resend.com/emails', {
-        method: 'POST',
-        headers: {
-            'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            from: process.env.TICKET_FROM_EMAIL,
-            to: booking.primary_email,
-            subject,
-            html
-        })
-    });
+    // Collect all unique guest emails so every person in the group gets a copy
+    const allEmails = [...new Set(
+        [booking.primary_email, ...(guests || []).map(g => g.email)]
+            .filter(Boolean)
+            .map(e => e.toLowerCase().trim())
+    )];
 
-    console.log('trip-emails: trip confirmation email sent to', booking.primary_email);
+    for (const recipientEmail of allEmails) {
+        const res = await fetch('https://api.resend.com/emails', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                from: process.env.TICKET_FROM_EMAIL,
+                to: recipientEmail,
+                subject,
+                html
+            })
+        });
+
+        if (!res.ok) {
+            const errBody = await res.text().catch(() => '');
+            throw new Error(`Resend API error ${res.status} (${recipientEmail}): ${errBody}`);
+        }
+    }
+
+    console.log('trip-emails: trip confirmation email sent to', allEmails.join(', '));
 }
 
 async function sendAbandonedBookingEmail(booking) {
@@ -310,7 +324,7 @@ async function sendAbandonedBookingEmail(booking) {
 
     const subject = `${firstName}, your Punta Cana 2026 spot isn't reserved yet ✈`;
 
-    await fetch('https://api.resend.com/emails', {
+    const res = await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: {
             'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
@@ -323,6 +337,11 @@ async function sendAbandonedBookingEmail(booking) {
             html
         })
     });
+
+    if (!res.ok) {
+        const errBody = await res.text().catch(() => '');
+        throw new Error(`Resend API error ${res.status}: ${errBody}`);
+    }
 
     console.log('trip-emails: abandoned booking reminder sent to', booking.primary_email);
 }

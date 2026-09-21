@@ -559,6 +559,8 @@ function renderTable() {
       '</div>' +
       (b.payment_status === 'paid' ? '<div style="margin-bottom:1rem"><button class="resend-btn" onclick="resendConfirmation(\'' + b.id + '\', this)">✉ Resend Confirmation Email</button></div>' : '');
 
+    html += b.payment_status === 'paid' ? balanceRequestHtml(b) : deletePendingHtml(b);
+
     if (b.guests && b.guests.length) {
       html += '<div class="guests-section-label">All Guests in This Room</div>';
       html += '<table class="guests-table"><thead><tr><th>#</th><th>Name</th><th>Email</th><th>Phone</th><th>Country</th></tr></thead><tbody>';
@@ -797,7 +799,10 @@ function renderAbandoned() {
     html += '<td style="padding:.55rem .6rem"><span class="room-tag ' + (b.room_type||'') + '">' + (b.room_type||'—') + '</span></td>';
     html += '<td style="padding:.55rem .6rem;font-size:.76rem;color:rgba(255,255,255,.4)">' + started + '</td>';
     html += '<td style="padding:.55rem .6rem">' + reminderLabel + '</td>';
-    html += '<td style="padding:.55rem .6rem;text-align:right"><button ' + btnDisabled + ' onclick="sendSingleReminder(\'' + b.id + '\', this)">' + btnLabel + '</button></td>';
+    html += '<td style="padding:.55rem .6rem;text-align:right;white-space:nowrap">' +
+      '<button ' + btnDisabled + ' onclick="sendSingleReminder(\'' + b.id + '\', this)" style="margin-right:.4rem">' + btnLabel + '</button>' +
+      '<button onclick="deleteBooking(\'' + b.id + '\',\'' + esc(b.booking_ref||'') + '\',\'' + esc(b.primary_first_name||'') + '\',this)" style="background:rgba(248,113,113,.12);color:#f87171;border:1px solid rgba(248,113,113,.3);font-size:.7rem;font-weight:700;padding:.3rem .75rem;border-radius:6px;cursor:pointer;font-family:inherit">Delete</button>' +
+    '</td>';
     html += '</tr>';
   });
   html += '</tbody></table>';
@@ -880,6 +885,110 @@ function resendConfirmation(bookingId, btn) {
     btn.disabled = false;
     alert('Could not resend: ' + e.message);
   });
+}
+
+// ── Balance Request ───────────────────────────────────────────────────────────
+function balanceRequestHtml(b) {
+  var balTotal = (b.price_per_person * b.guest_count) - b.deposit_total;
+  var balDefault = (balTotal / 100).toFixed(2);
+  return '<div style="margin-top:.25rem;margin-bottom:1.25rem;padding-top:.75rem;border-top:1px solid rgba(255,255,255,.06)">' +
+    '<div style="font-size:.65rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--green);margin-bottom:.65rem">Request Balance Payment</div>' +
+    '<div style="display:flex;gap:.75rem;align-items:flex-end;flex-wrap:wrap">' +
+      '<div>' +
+        '<label style="font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--grey);display:block;margin-bottom:.3rem">Amount (USD $)</label>' +
+        '<input type="number" id="bal-' + b.id + '" value="' + balDefault + '" min="1" step="0.01" ' +
+          'style="padding:.5rem .75rem;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);border-radius:8px;color:#fff;font-size:.85rem;font-family:inherit;width:150px">' +
+      '</div>' +
+      '<button onclick="generateBalanceLink(\'' + b.id + '\',\'' + esc(b.booking_ref) + '\',this)" ' +
+        'style="padding:.5rem 1.1rem;background:var(--green);color:#060d07;font-weight:800;font-size:.78rem;border:none;border-radius:8px;cursor:pointer;font-family:inherit;white-space:nowrap">' +
+        'Generate Payment Link' +
+      '</button>' +
+    '</div>' +
+    '<div id="bal-result-' + b.id + '" style="margin-top:.65rem"></div>' +
+  '</div>';
+}
+
+function deletePendingHtml(b) {
+  return '<div style="margin-top:.25rem;margin-bottom:.75rem">' +
+    '<button onclick="deleteBooking(\'' + b.id + '\',\'' + esc(b.booking_ref||'') + '\',\'' + esc(b.primary_first_name||'') + '\',this)" ' +
+      'style="padding:.45rem 1rem;background:rgba(248,113,113,.12);color:#f87171;border:1px solid rgba(248,113,113,.3);font-size:.75rem;font-weight:700;border-radius:8px;cursor:pointer;font-family:inherit">' +
+      '🗑 Delete Booking' +
+    '</button>' +
+  '</div>';
+}
+
+async function generateBalanceLink(bookingId, bookingRef, btn) {
+  var input = document.getElementById('bal-' + bookingId);
+  var resultEl = document.getElementById('bal-result-' + bookingId);
+  var amount = parseFloat(input ? input.value : 0);
+  if (isNaN(amount) || amount <= 0) {
+    resultEl.innerHTML = '<span style="color:#f87171;font-size:.78rem">Enter a valid amount greater than $0.</span>';
+    return;
+  }
+  btn.disabled = true;
+  btn.textContent = 'Generating…';
+  resultEl.innerHTML = '';
+  try {
+    var r = await fetch('/.netlify/functions/admin-trip-balance-request', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + adminToken, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ bookingRef: bookingRef, customAmount: amount })
+    });
+    if (r.status === 401) { sessionStorage.removeItem('makena_admin_token'); window.location.reload(); return; }
+    var d = await r.json();
+    btn.disabled = false;
+    btn.textContent = 'Generate Payment Link';
+    if (!r.ok) {
+      resultEl.innerHTML = '<span style="color:#f87171;font-size:.78rem">' + esc(d.error || 'Failed to generate link.') + '</span>';
+      return;
+    }
+    resultEl.innerHTML =
+      '<div style="background:rgba(134,239,172,.08);border:1px solid rgba(134,239,172,.22);border-radius:8px;padding:.75rem">' +
+        '<div style="font-size:.6rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--green);margin-bottom:.5rem">Link generated — ' + esc(d.balanceTotalFormatted) + '</div>' +
+        '<div style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap">' +
+          '<input value="' + esc(d.checkoutUrl) + '" readonly ' +
+            'style="flex:1;min-width:0;padding:.45rem .7rem;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:6px;color:rgba(255,255,255,.7);font-size:.75rem;font-family:inherit;cursor:text">' +
+          '<button onclick="copyBalanceLink(this,\'' + esc(d.checkoutUrl) + '\')" ' +
+            'style="padding:.45rem .9rem;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:6px;color:rgba(255,255,255,.7);font-size:.75rem;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap">Copy</button>' +
+        '</div>' +
+      '</div>';
+  } catch(e) {
+    btn.disabled = false;
+    btn.textContent = 'Generate Payment Link';
+    resultEl.innerHTML = '<span style="color:#f87171;font-size:.78rem">' + esc(e.message || 'Network error.') + '</span>';
+  }
+}
+
+async function copyBalanceLink(btn, url) {
+  try { await navigator.clipboard.writeText(url); }
+  catch { var inp = btn.previousElementSibling; if (inp) { inp.select(); document.execCommand('copy'); } }
+  btn.textContent = 'Copied!';
+  setTimeout(function() { btn.textContent = 'Copy'; }, 2000);
+}
+
+async function deleteBooking(bookingId, bookingRef, name, btn) {
+  if (!confirm('Delete pending booking ' + bookingRef + ' for ' + name + '?\n\nThis cannot be undone.')) return;
+  btn.disabled = true;
+  btn.textContent = 'Deleting…';
+  try {
+    var r = await fetch('/.netlify/functions/admin-delete-trip-booking', {
+      method: 'DELETE',
+      headers: { 'Authorization': 'Bearer ' + adminToken, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ bookingId: bookingId })
+    });
+    if (r.status === 401) { sessionStorage.removeItem('makena_admin_token'); window.location.reload(); return; }
+    var d = await r.json();
+    if (!r.ok) { btn.disabled = false; btn.textContent = 'Delete'; alert(d.error || 'Failed to delete.'); return; }
+    allBookings = allBookings.filter(function(b) { return b.id !== bookingId; });
+    abandonedBookings = abandonedBookings.filter(function(b) { return b.id !== bookingId; });
+    updateStats();
+    renderTable();
+    renderAbandoned();
+  } catch(e) {
+    btn.disabled = false;
+    btn.textContent = 'Delete';
+    alert(e.message || 'Network error.');
+  }
 }
 
 // ── Export CSV ────────────────────────────────────────────────────────────────

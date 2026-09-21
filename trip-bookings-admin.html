@@ -230,7 +230,12 @@ tr.expanded .expand-icon{transform:rotate(180deg)}
       <div class="stat-card gold">
         <div class="stat-card__label">Deposits Collected</div>
         <div class="stat-card__value" id="statRevenue">—</div>
-        <div class="stat-card__sub">Paid only</div>
+        <div class="stat-card__sub">Deposits only</div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-card__label">Total Collected</div>
+        <div class="stat-card__value" id="statTotalCollected">—</div>
+        <div class="stat-card__sub">Deposits + balances</div>
       </div>
       <div class="stat-card">
         <div class="stat-card__label">Paid</div>
@@ -470,12 +475,17 @@ function updateStats() {
   var double_ = allBookings.filter(function(b){ return b.room_type === 'double'; });
   var single = allBookings.filter(function(b){ return b.room_type === 'single'; });
   var totalRevenue = paid.reduce(function(s,b){ return s + (b.deposit_total || 0); }, 0);
+  var totalCollected = paid.reduce(function(s,b){
+    var balPaid = b.balance_paid_total || (b.balance_payment_status === 'paid' ? (b.balance_total || 0) : 0);
+    return s + (b.deposit_total || 0) + balPaid;
+  }, 0);
   var tripleGuests = triple.reduce(function(s,b){ return s + (b.guest_count||0); }, 0);
   var doubleGuests = double_.reduce(function(s,b){ return s + (b.guest_count||0); }, 0);
   var singleGuests = single.reduce(function(s,b){ return s + (b.guest_count||0); }, 0);
 
   document.getElementById('statTotal').textContent = allBookings.length;
   document.getElementById('statRevenue').textContent = '$' + (totalRevenue/100).toLocaleString();
+  document.getElementById('statTotalCollected').textContent = '$' + (totalCollected/100).toLocaleString();
   document.getElementById('statPaid').textContent = paid.length;
   document.getElementById('statPending').textContent = pending.length;
   document.getElementById('statTriple').textContent = triple.length;

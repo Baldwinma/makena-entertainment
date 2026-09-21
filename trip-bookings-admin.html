@@ -183,7 +183,7 @@ tr.expanded .expand-icon{transform:rotate(180deg)}
 .blast-status{font-size:.8rem;color:rgba(255,255,255,.5);margin-top:.5rem;min-height:1.2rem}
 
 @media(max-width:768px){
-  thead th:nth-child(4),thead th:nth-child(5),thead th:nth-child(8),tbody td:nth-child(4),tbody td:nth-child(5),tbody td:nth-child(8){display:none}
+  thead th:nth-child(4),thead th:nth-child(5),thead th:nth-child(9),tbody td:nth-child(4),tbody td:nth-child(5),tbody td:nth-child(9){display:none}
   .stats-grid{grid-template-columns:1fr 1fr}
   .main{padding:1rem}
   .topbar{padding:.75rem 1rem}
@@ -525,15 +525,21 @@ function renderTable() {
 
   var html = '<table><thead><tr>' +
     '<th></th><th>Ref</th><th>Primary Guest</th><th>Room</th><th>Guests</th>' +
-    '<th>Deposit</th><th>Deposit Status</th><th>Balance</th><th>Date</th>' +
+    '<th>Deposit Status</th><th>Total Paid</th><th>Remaining</th><th>Date</th>' +
     '</tr></thead><tbody>';
 
   filtered.forEach(function(b){
     var date = b.created_at ? new Date(b.created_at).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) : '—';
-    var deposit = b.deposit_total ? '$' + (b.deposit_total/100).toLocaleString() : '—';
-    var balStatus = b.balance_payment_status === 'paid'
-      ? '<span class="status-badge paid">paid</span>'
-      : '<span class="status-badge pending">unpaid</span>';
+    var totalTripCost = (b.price_per_person || 0) * (b.guest_count || 1);
+    var balancePaidSoFar = b.balance_paid_total || (b.balance_payment_status === 'paid' ? (b.balance_total || 0) : 0);
+    var totalPaid = (b.deposit_total || 0) + balancePaidSoFar;
+    var remaining = totalTripCost - totalPaid;
+    var totalPaidFmt = b.payment_status === 'paid' ? '$' + (totalPaid/100).toLocaleString() : '—';
+    var remainingCell = b.payment_status !== 'paid'
+      ? '<span style="color:rgba(255,255,255,.35);font-size:.8rem">—</span>'
+      : remaining <= 0
+        ? '<span class="status-badge paid">Fully Paid</span>'
+        : '<span style="color:#f87171;font-weight:700;font-size:.85rem">$' + (remaining/100).toLocaleString() + '</span>';
     html += '<tr onclick="toggleExpand(\'' + b.id + '\')" id="row-' + b.id + '">' +
       '<td><span class="expand-icon">▾</span></td>' +
       '<td class="mono">' + (b.booking_ref || '—') + '</td>' +
@@ -541,9 +547,9 @@ function renderTable() {
           '<div style="font-size:.74rem;color:rgba(255,255,255,.4)">' + esc(b.primary_email) + '</div></td>' +
       '<td><span class="room-tag ' + b.room_type + '">' + b.room_type + '</span></td>' +
       '<td>' + (b.guest_count||'—') + '</td>' +
-      '<td>' + deposit + '</td>' +
       '<td><span class="status-badge ' + b.payment_status + '">' + b.payment_status + '</span></td>' +
-      '<td>' + balStatus + '</td>' +
+      '<td style="font-weight:600">' + totalPaidFmt + '</td>' +
+      '<td>' + remainingCell + '</td>' +
       '<td style="font-size:.76rem;color:rgba(255,255,255,.5)">' + date + '</td>' +
       '</tr>';
 
@@ -554,9 +560,12 @@ function renderTable() {
         expField('Phone', b.primary_phone) +
         expField('Country', b.primary_country) +
         expField('Room Type', capitalize(b.room_type) + ' Share') +
-        expField('Price / Person', b.price_per_person ? '$' + (b.price_per_person/100).toFixed(0) : '—') +
-        expField('Deposit / Person', b.deposit_per_person ? '$' + (b.deposit_per_person/100).toFixed(0) : '—') +
-        expField('Total Deposit', deposit) +
+        expField('Price / Person', b.price_per_person ? '$' + (b.price_per_person/100).toLocaleString() : '—') +
+        expField('Trip Total', totalTripCost ? '$' + (totalTripCost/100).toLocaleString() : '—') +
+        expField('Deposit Paid', b.deposit_total ? '$' + (b.deposit_total/100).toLocaleString() : '—') +
+        (b.payment_status === 'paid' ? expField('Balance Paid', '$' + (balancePaidSoFar/100).toLocaleString()) : '') +
+        (b.payment_status === 'paid' ? expField('Total Paid', '<strong style="color:var(--green)">' + '$' + (totalPaid/100).toLocaleString() + '</strong>') : '') +
+        (b.payment_status === 'paid' ? expField('Remaining', remaining > 0 ? '<span style="color:#f87171;font-weight:700">$' + (remaining/100).toLocaleString() + '</span>' : '<span class="status-badge paid">Fully Paid</span>') : '') +
         expField('Payment Status', capitalize(b.payment_status||'')) +
         (b.paid_at ? expField('Deposit Paid At', new Date(b.paid_at).toLocaleString()) : '') +
         expField('Balance Status', b.balance_payment_status === 'paid'
@@ -568,7 +577,7 @@ function renderTable() {
       (b.payment_status === 'paid' ? '<div style="margin-bottom:1rem"><button class="resend-btn" onclick="resendConfirmation(\'' + b.id + '\', this)">✉ Resend Deposit Confirmation</button></div>' : '') +
       (b.balance_payment_status === 'paid' ? '<div style="margin-bottom:1rem"><button class="resend-btn" onclick="resendBalanceConfirmation(\'' + b.id + '\', this)">🎊 Resend Balance Confirmation</button></div>' : '');
 
-    html += b.payment_status === 'paid' ? balanceRequestHtml(b) : deletePendingHtml(b);
+    html += b.payment_status === 'paid' ? balanceRequestHtml(b, remaining) : deletePendingHtml(b);
 
     if (b.guests && b.guests.length) {
       html += '<div class="guests-section-label">All Guests in This Room</div>';
@@ -919,14 +928,23 @@ function resendBalanceConfirmation(bookingId, btn) {
 }
 
 // ── Balance Request ───────────────────────────────────────────────────────────
-function balanceRequestHtml(b) {
-  var balTotal = (b.price_per_person * b.guest_count) - b.deposit_total;
-  var balDefault = (balTotal / 100).toFixed(2);
+function balanceRequestHtml(b, remaining) {
+  var totalTripCost = (b.price_per_person || 0) * (b.guest_count || 1);
+  var balancePaidSoFar = b.balance_paid_total || (b.balance_payment_status === 'paid' ? (b.balance_total || 0) : 0);
+  var rem = (remaining !== undefined) ? remaining : (totalTripCost - (b.deposit_total || 0) - balancePaidSoFar);
+
+  if (rem <= 0) {
+    return '<div style="margin-top:.25rem;margin-bottom:1.25rem;padding-top:.75rem;border-top:1px solid rgba(255,255,255,.06)">' +
+      '<span style="color:var(--green);font-size:.82rem;font-weight:700">✓ Fully Paid — no balance outstanding</span>' +
+    '</div>';
+  }
+
+  var balDefault = (rem / 100).toFixed(2);
   return '<div style="margin-top:.25rem;margin-bottom:1.25rem;padding-top:.75rem;border-top:1px solid rgba(255,255,255,.06)">' +
     '<div style="font-size:.65rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--green);margin-bottom:.65rem">Request Balance Payment</div>' +
     '<div style="display:flex;gap:.75rem;align-items:flex-end;flex-wrap:wrap">' +
       '<div>' +
-        '<label style="font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--grey);display:block;margin-bottom:.3rem">Amount (USD $)</label>' +
+        '<label style="font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--grey);display:block;margin-bottom:.3rem">Amount (USD $) — Remaining: $' + (rem/100).toLocaleString() + '</label>' +
         '<input type="number" id="bal-' + b.id + '" value="' + balDefault + '" min="1" step="0.01" ' +
           'style="padding:.5rem .75rem;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);border-radius:8px;color:#fff;font-size:.85rem;font-family:inherit;width:150px">' +
       '</div>' +

@@ -66,26 +66,45 @@ exports.handler = async function(event) {
     if (session.metadata && session.metadata.booking_type === 'trip_balance') {
         const supabase = require('./lib/supabase').getSupabase();
         if (supabase && session.metadata.booking_id) {
+            const { data: booking } = await supabase
+                .from('trip_bookings')
+                .select('price_per_person, guest_count, deposit_total, balance_paid_total')
+                .eq('id', session.metadata.booking_id)
+                .single();
+
+            const amountPaid = session.amount_total || 0;
+            const newBalancePaidTotal = (booking?.balance_paid_total || 0) + amountPaid;
+            const totalTripCost = booking ? (booking.price_per_person * booking.guest_count) : 0;
+            const isFullyPaid = booking && newBalancePaidTotal >= (totalTripCost - (booking.deposit_total || 0));
+
+            const updatePayload = {
+                balance_paid_total: newBalancePaidTotal,
+                balance_stripe_payment_intent_id: typeof session.payment_intent === 'object'
+                    ? session.payment_intent?.id
+                    : session.payment_intent,
+                updated_at: new Date().toISOString()
+            };
+
+            if (isFullyPaid) {
+                updatePayload.balance_payment_status = 'paid';
+                updatePayload.balance_paid_at = new Date().toISOString();
+            }
+
             const { error: balanceUpdateError } = await supabase
                 .from('trip_bookings')
-                .update({
-                    balance_payment_status: 'paid',
-                    balance_stripe_payment_intent_id: typeof session.payment_intent === 'object'
-                        ? session.payment_intent?.id
-                        : session.payment_intent,
-                    balance_paid_at: new Date().toISOString(),
-                    updated_at: new Date().toISOString()
-                })
+                .update(updatePayload)
                 .eq('id', session.metadata.booking_id);
 
             if (balanceUpdateError) {
                 console.error('stripe-webhook: trip balance update error:', balanceUpdateError);
             } else {
-                console.log('stripe-webhook: trip balance paid:', session.metadata.booking_ref);
-                try {
-                    await sendBalanceConfirmationEmail(supabase, session.metadata.booking_id);
-                } catch (err) {
-                    console.error('stripe-webhook: balance confirmation email error:', err);
+                console.log('stripe-webhook: trip balance payment recorded:', session.metadata.booking_ref, `$${(amountPaid/100).toFixed(2)}`);
+                if (isFullyPaid) {
+                    try {
+                        await sendBalanceConfirmationEmail(supabase, session.metadata.booking_id);
+                    } catch (err) {
+                        console.error('stripe-webhook: balance confirmation email error:', err);
+                    }
                 }
             }
         }

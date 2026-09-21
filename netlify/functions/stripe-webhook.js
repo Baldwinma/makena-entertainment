@@ -62,6 +62,31 @@ exports.handler = async function(event) {
 
     const lineItems = session.line_items.data;
 
+    // Handle trip balance payments
+    if (session.metadata && session.metadata.booking_type === 'trip_balance') {
+        const supabase = require('./lib/supabase').getSupabase();
+        if (supabase && session.metadata.booking_id) {
+            const { error: balanceUpdateError } = await supabase
+                .from('trip_bookings')
+                .update({
+                    balance_payment_status: 'paid',
+                    balance_stripe_payment_intent_id: typeof session.payment_intent === 'object'
+                        ? session.payment_intent?.id
+                        : session.payment_intent,
+                    balance_paid_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString()
+                })
+                .eq('id', session.metadata.booking_id);
+
+            if (balanceUpdateError) {
+                console.error('stripe-webhook: trip balance update error:', balanceUpdateError);
+            } else {
+                console.log('stripe-webhook: trip balance paid:', session.metadata.booking_ref);
+            }
+        }
+        return { statusCode: 200, body: JSON.stringify({ received: true }) };
+    }
+
     // Handle trip deposit payments
     if (session.metadata && session.metadata.booking_type === 'trip') {
         const supabase = require('./lib/supabase').getSupabase();

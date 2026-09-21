@@ -155,6 +155,13 @@ create table if not exists public.trip_booking_guests (
     created_at timestamptz not null default now()
 );
 
+alter table public.trip_bookings
+    add column if not exists balance_payment_status text default 'unpaid',
+    add column if not exists balance_total integer,
+    add column if not exists balance_stripe_session_id text unique,
+    add column if not exists balance_stripe_payment_intent_id text,
+    add column if not exists balance_paid_at timestamptz;
+
 create index if not exists trip_bookings_status_idx on public.trip_bookings (payment_status);
 create index if not exists trip_bookings_room_type_idx on public.trip_bookings (room_type);
 create index if not exists trip_booking_guests_booking_idx on public.trip_booking_guests (booking_id);

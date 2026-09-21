@@ -71,6 +71,7 @@
                     <button class="admin-tab" data-tab="content">Event Details</button>
                     <button class="admin-tab" data-tab="ambassadors">Ambassadors</button>
                     <button class="admin-tab" data-tab="blast">Email Blast</button>
+                    <button class="admin-tab" data-tab="trips">Trip Bookings</button>
                 </div>
 
                 <div id="adminCheckinContent">
@@ -259,6 +260,25 @@
                     </div>
                     <div id="ambassadorStatus"></div>
                     <div id="ambassadorList"></div>
+                </div>
+
+                <div id="adminTripBookingsPanel" hidden>
+                    <div class="section-header" style="margin-bottom:1.5rem">
+                        <h2 class="section-title" style="font-size:1.8rem">Trip Bookings</h2>
+                        <div class="title-underline"></div>
+                        <p class="section-description">Manage Punta Cana 2026 bookings. Filter by status, expand a booking, and generate a payment request link for any amount.</p>
+                    </div>
+                    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.75rem;margin-bottom:1rem">
+                        <div class="audience-filters" id="tripBookingFilters" style="margin-bottom:0">
+                            <button class="audience-filter-btn audience-filter-btn--active" data-tbfilter="all">All</button>
+                            <button class="audience-filter-btn" data-tbfilter="paid">Deposit Paid</button>
+                            <button class="audience-filter-btn" data-tbfilter="balance_paid">Fully Paid</button>
+                            <button class="audience-filter-btn" data-tbfilter="pending">Pending</button>
+                        </div>
+                        <button class="btn btn-secondary" id="tripBookingsRefreshBtn" style="font-size:0.82rem;padding:0.4rem 0.8rem">Refresh</button>
+                    </div>
+                    <div id="tripBookingsStatus"></div>
+                    <div id="tripBookingsList"></div>
                 </div>
             </div>
         </div>
@@ -931,6 +951,10 @@
             document.getElementById('adminEventContentPanel').hidden = tabName !== 'content';
             document.getElementById('adminAmbassadorsPanel').hidden = tabName !== 'ambassadors';
             document.getElementById('adminBlastPanel').hidden = tabName !== 'blast';
+            document.getElementById('adminTripBookingsPanel').hidden = tabName !== 'trips';
+            if (tabName === 'trips' && !tripBookingsLoaded) {
+                loadTripBookings();
+            }
             if (tabName === 'tickets') {
                 loadGlobalSettings();
                 if (!ticketConfigLoaded) {
@@ -957,6 +981,10 @@
             ticketConfigLoaded = false;
             eventContentLoaded = false;
             ambassadorsLoaded = false;
+            tripBookingsLoaded = false;
+            allTripBookings = [];
+            expandedTripBookings.clear();
+            tripBookingLinks = {};
         });
 
         // ── Global settings ──────────────────────────────────────────────────
@@ -1785,6 +1813,246 @@
             }
             showResult(document.getElementById('blastSendResult'), data.failed && data.failed.length ? 'warning' : 'success', 'Done', msg);
         });
+
+        // ── Trip Bookings ─────────────────────────────────────────────────────
+        let allTripBookings = [];
+        let tripBookingsFilter = 'all';
+        let tripBookingsLoaded = false;
+        let expandedTripBookings = new Set();
+        let tripBookingLinks = {};
+
+        async function loadTripBookings() {
+            const statusEl = document.getElementById('tripBookingsStatus');
+            const listEl = document.getElementById('tripBookingsList');
+            statusEl.innerHTML = '<p style="color:var(--text-muted);font-size:0.85rem;margin:0 0 1rem">Loading bookings...</p>';
+            listEl.innerHTML = '';
+
+            const response = await authedFetch('/.netlify/functions/admin-trip-bookings');
+            if (response.status === 401) { localStorage.removeItem(tokenKey); setLoggedInState(false); return; }
+
+            const data = await response.json();
+            if (!response.ok) {
+                statusEl.innerHTML = `<p style="color:#f87171;font-size:0.85rem;margin:0 0 1rem">${escapeHtml(data.error || 'Failed to load bookings.')}</p>`;
+                return;
+            }
+
+            allTripBookings = data.bookings || [];
+            tripBookingsLoaded = true;
+            statusEl.innerHTML = '';
+            renderTripBookings();
+        }
+
+        function getFilteredTripBookings() {
+            switch (tripBookingsFilter) {
+                case 'paid':         return allTripBookings.filter(b => b.payment_status === 'paid' && b.balance_payment_status !== 'paid');
+                case 'balance_paid': return allTripBookings.filter(b => b.balance_payment_status === 'paid');
+                case 'pending':      return allTripBookings.filter(b => b.payment_status !== 'paid');
+                default:             return allTripBookings;
+            }
+        }
+
+        function renderTripBookings() {
+            const listEl = document.getElementById('tripBookingsList');
+            const filtered = getFilteredTripBookings();
+            if (!filtered.length) {
+                listEl.innerHTML = '<p style="color:var(--text-muted);font-size:0.85rem;margin:0">No bookings found.</p>';
+                return;
+            }
+            listEl.innerHTML = filtered.map(b => renderTripBookingCard(b)).join('');
+        }
+
+        function renderTripBookingCard(booking) {
+            const ROOM_LABELS = { triple: 'Triple Share', double: 'Double Share', single: 'Single Private' };
+            const guestName = [booking.primary_first_name, booking.primary_last_name].filter(Boolean).join(' ');
+            const roomLabel = ROOM_LABELS[booking.room_type] || booking.room_type;
+            const totalCost = booking.price_per_person * booking.guest_count;
+            const fullBalance = totalCost - (booking.deposit_total || 0);
+            const defaultAmount = (fullBalance / 100).toFixed(2);
+            const isExpanded = expandedTripBookings.has(booking.id);
+            const savedLink = tripBookingLinks[booking.id];
+
+            const depositBadge = booking.payment_status === 'paid'
+                ? '<span style="background:rgba(134,239,172,0.15);color:#86EFA9;border:1px solid rgba(134,239,172,0.3);padding:2px 8px;border-radius:4px;font-size:0.75rem;font-weight:600;white-space:nowrap">Deposit Paid</span>'
+                : '<span style="background:rgba(251,191,36,0.12);color:#fbbf24;border:1px solid rgba(251,191,36,0.3);padding:2px 8px;border-radius:4px;font-size:0.75rem;font-weight:600;white-space:nowrap">Deposit Pending</span>';
+
+            const balanceBadge = booking.balance_payment_status === 'paid'
+                ? '<span style="background:rgba(134,239,172,0.15);color:#86EFA9;border:1px solid rgba(134,239,172,0.3);padding:2px 8px;border-radius:4px;font-size:0.75rem;font-weight:600;white-space:nowrap">Balance Paid</span>'
+                : '<span style="background:rgba(248,113,113,0.12);color:#f87171;border:1px solid rgba(248,113,113,0.3);padding:2px 8px;border-radius:4px;font-size:0.75rem;font-weight:600;white-space:nowrap">Balance Owed</span>';
+
+            const guestList = (booking.guests || []).map(g =>
+                escapeHtml([g.first_name, g.last_name].filter(Boolean).join(' '))
+            ).join(' &middot; ');
+
+            const savedLinkHtml = savedLink ? `
+                <div style="background:rgba(134,239,172,0.08);border:1px solid rgba(134,239,172,0.25);border-radius:8px;padding:12px;margin-top:0.75rem">
+                    <div style="font-size:0.75rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#86EFA9;margin-bottom:8px">Link Generated &mdash; ${escapeHtml(savedLink.amount)}</div>
+                    <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap">
+                        <input class="tc-input" value="${escapeHtml(savedLink.url)}" readonly style="flex:1;font-size:0.78rem;min-width:0;cursor:text">
+                        <button class="btn btn-secondary tb-copy-btn" data-id="${booking.id}" style="font-size:0.8rem;padding:0.4rem 0.8rem;white-space:nowrap">Copy Link</button>
+                    </div>
+                </div>` : '';
+
+            const detailHtml = isExpanded ? `
+                <div style="padding:1.25rem;border-top:1px solid rgba(255,255,255,0.08)">
+                    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:0.6rem 1.5rem;margin-bottom:1rem;font-size:0.85rem;line-height:1.5">
+                        <div><span style="color:var(--text-muted)">Ref</span><br><strong>${escapeHtml(booking.booking_ref)}</strong></div>
+                        <div><span style="color:var(--text-muted)">Room</span><br><strong>${escapeHtml(roomLabel)}${booking.needs_roommate ? ' (Match)' : ''}</strong></div>
+                        <div><span style="color:var(--text-muted)">Guests</span><br><strong>${booking.guest_count}</strong></div>
+                        <div><span style="color:var(--text-muted)">Price / person</span><br><strong>$${(booking.price_per_person / 100).toLocaleString()}</strong></div>
+                        <div><span style="color:var(--text-muted)">Deposit paid</span><br><strong style="color:#86EFA9">$${(booking.deposit_total / 100).toLocaleString()}</strong></div>
+                        <div><span style="color:var(--text-muted)">Balance remaining</span><br><strong style="color:#f87171">$${(fullBalance / 100).toLocaleString()}</strong></div>
+                    </div>
+                    ${guestList ? `<div style="font-size:0.82rem;color:var(--text-muted);margin-bottom:1rem">${guestList}</div>` : ''}
+                    ${booking.payment_status === 'paid' ? `
+                    <div style="background:#141414;border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:1rem">
+                        <div style="font-size:0.75rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted);margin-bottom:0.75rem">Request Payment</div>
+                        <div style="display:flex;gap:0.75rem;align-items:flex-end;flex-wrap:wrap">
+                            <div class="tc-input-group" style="flex:1;min-width:130px">
+                                <label style="font-size:0.8rem">Amount (USD $)</label>
+                                <input type="number" id="tb-amount-${booking.id}" class="tc-input" value="${defaultAmount}" min="1" step="0.01" placeholder="0.00">
+                            </div>
+                            <button class="btn btn-primary tb-gen-btn" data-id="${booking.id}" data-ref="${escapeHtml(booking.booking_ref)}" style="white-space:nowrap">Generate Link</button>
+                        </div>
+                        <div id="tb-result-${booking.id}" style="margin-top:0.5rem"></div>
+                        ${savedLinkHtml}
+                    </div>` : `<p style="font-size:0.85rem;color:var(--text-muted);margin:0">Deposit not yet paid — cannot request balance payment.</p>`}
+                </div>` : '';
+
+            return `
+                <div class="tc-ticket" style="margin-bottom:0.75rem" id="tb-card-${booking.id}">
+                    <div class="tc-ticket__header tb-toggle-btn" data-id="${booking.id}"
+                         style="cursor:pointer;display:flex;align-items:center;flex-wrap:wrap;gap:0.75rem;user-select:none">
+                        <div style="flex:1;min-width:180px">
+                            <div style="font-weight:700;font-size:0.95rem">${escapeHtml(guestName)}</div>
+                            <div style="font-size:0.8rem;color:var(--text-muted);margin-top:2px">${escapeHtml(booking.primary_email)}</div>
+                            <div style="font-size:0.78rem;color:var(--text-muted);margin-top:2px">${escapeHtml(roomLabel)} &middot; ${booking.guest_count} guest(s)</div>
+                        </div>
+                        <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap">
+                            ${depositBadge}
+                            ${balanceBadge}
+                            ${booking.payment_status !== 'paid' ? `<button class="btn tb-delete-btn" data-id="${booking.id}" data-ref="${escapeHtml(booking.booking_ref)}" data-name="${escapeHtml(guestName)}" style="font-size:0.75rem;padding:2px 10px;background:rgba(248,113,113,0.12);color:#f87171;border:1px solid rgba(248,113,113,0.3);border-radius:4px;white-space:nowrap">Delete</button>` : ''}
+                            <span style="color:var(--text-muted);font-size:0.85rem;margin-left:0.25rem">${isExpanded ? '&#9650;' : '&#9660;'}</span>
+                        </div>
+                    </div>
+                    ${detailHtml}
+                </div>`;
+        }
+
+        async function generateTripPaymentLink(bookingId, bookingRef) {
+            const amountInput = document.getElementById(`tb-amount-${bookingId}`);
+            const resultEl = document.getElementById(`tb-result-${bookingId}`);
+            const genBtn = document.querySelector(`.tb-gen-btn[data-id="${bookingId}"]`);
+
+            const amountVal = parseFloat(amountInput ? amountInput.value : 0);
+            if (isNaN(amountVal) || amountVal <= 0) {
+                if (resultEl) resultEl.innerHTML = '<p style="color:#f87171;font-size:0.82rem;margin:0">Enter a valid amount greater than $0.</p>';
+                return;
+            }
+
+            if (genBtn) { genBtn.disabled = true; genBtn.textContent = 'Generating...'; }
+            if (resultEl) resultEl.innerHTML = '';
+
+            const response = await authedFetch('/.netlify/functions/admin-trip-balance-request', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ bookingRef, customAmount: amountVal })
+            });
+
+            const data = await response.json();
+            if (genBtn) { genBtn.disabled = false; genBtn.textContent = 'Generate Link'; }
+            if (response.status === 401) { localStorage.removeItem(tokenKey); setLoggedInState(false); return; }
+
+            if (!response.ok) {
+                if (resultEl) resultEl.innerHTML = `<p style="color:#f87171;font-size:0.82rem;margin:0">${escapeHtml(data.error || 'Failed to generate link.')}</p>`;
+                return;
+            }
+
+            tripBookingLinks[bookingId] = { url: data.checkoutUrl, amount: data.balanceTotalFormatted };
+            const booking = allTripBookings.find(b => b.id === bookingId);
+            if (booking) {
+                const cardEl = document.getElementById(`tb-card-${bookingId}`);
+                if (cardEl) cardEl.outerHTML = renderTripBookingCard(booking);
+            }
+        }
+
+        document.getElementById('tripBookingsList').addEventListener('click', async function(e) {
+            const deleteBtn = e.target.closest('.tb-delete-btn');
+            if (deleteBtn) {
+                const { id, ref, name } = deleteBtn.dataset;
+                if (!confirm(`Delete pending booking ${ref} for ${name}?\n\nThis cannot be undone.`)) return;
+                deleteBtn.disabled = true;
+                deleteBtn.textContent = 'Deleting...';
+                const response = await authedFetch('/.netlify/functions/admin-delete-trip-booking', {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ bookingId: id })
+                });
+                if (response.status === 401) { localStorage.removeItem(tokenKey); setLoggedInState(false); return; }
+                const data = await response.json();
+                if (!response.ok) {
+                    deleteBtn.disabled = false;
+                    deleteBtn.textContent = 'Delete';
+                    alert(data.error || 'Failed to delete booking.');
+                    return;
+                }
+                allTripBookings = allTripBookings.filter(b => b.id !== id);
+                expandedTripBookings.delete(id);
+                delete tripBookingLinks[id];
+                renderTripBookings();
+                return;
+            }
+
+            const toggleBtn = e.target.closest('.tb-toggle-btn');
+            if (toggleBtn && !e.target.closest('.tb-gen-btn') && !e.target.closest('.tb-copy-btn') && !e.target.closest('input') && !e.target.closest('.tb-delete-btn')) {
+                const id = toggleBtn.dataset.id;
+                if (expandedTripBookings.has(id)) {
+                    expandedTripBookings.delete(id);
+                } else {
+                    expandedTripBookings.add(id);
+                }
+                renderTripBookings();
+                return;
+            }
+
+            const genBtn = e.target.closest('.tb-gen-btn');
+            if (genBtn) {
+                await generateTripPaymentLink(genBtn.dataset.id, genBtn.dataset.ref);
+                return;
+            }
+
+            const copyBtn = e.target.closest('.tb-copy-btn');
+            if (copyBtn) {
+                const link = tripBookingLinks[copyBtn.dataset.id];
+                if (link) {
+                    try {
+                        await navigator.clipboard.writeText(link.url);
+                    } catch {
+                        const inp = copyBtn.previousElementSibling;
+                        if (inp) { inp.select(); document.execCommand('copy'); }
+                    }
+                    copyBtn.textContent = 'Copied!';
+                    setTimeout(() => { copyBtn.textContent = 'Copy Link'; }, 2000);
+                }
+            }
+        });
+
+        document.getElementById('tripBookingFilters').addEventListener('click', function(e) {
+            const btn = e.target.closest('[data-tbfilter]');
+            if (!btn) return;
+            tripBookingsFilter = btn.dataset.tbfilter;
+            document.querySelectorAll('#tripBookingFilters [data-tbfilter]').forEach(b => {
+                b.classList.toggle('audience-filter-btn--active', b.dataset.tbfilter === tripBookingsFilter);
+            });
+            renderTripBookings();
+        });
+
+        document.getElementById('tripBookingsRefreshBtn').addEventListener('click', function() {
+            tripBookingsLoaded = false;
+            expandedTripBookings.clear();
+            tripBookingLinks = {};
+            loadTripBookings();
+        });
+
     </script>
 </body>
 </html>

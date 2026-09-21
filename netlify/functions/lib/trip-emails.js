@@ -346,7 +346,185 @@ async function sendAbandonedBookingEmail(booking) {
     console.log('trip-emails: abandoned booking reminder sent to', booking.primary_email);
 }
 
+async function sendBalanceConfirmationEmail(supabase, bookingId) {
+    if (!process.env.RESEND_API_KEY || !process.env.TICKET_FROM_EMAIL) return;
+
+    const { data: booking } = await supabase
+        .from('trip_bookings')
+        .select('*')
+        .eq('id', bookingId)
+        .single();
+
+    if (!booking) return;
+
+    const { data: guests } = await supabase
+        .from('trip_booking_guests')
+        .select('*')
+        .eq('booking_id', bookingId)
+        .order('guest_number');
+
+    const ROOM_LABELS = {
+        triple: 'Triple Share Room (3 guests)',
+        double: 'Double Share Room (2 guests)',
+        single: 'Single Private Room'
+    };
+    const roomLabel = ROOM_LABELS[booking.room_type] || booking.room_type;
+    const totalPaid = (booking.price_per_person * booking.guest_count) / 100;
+    const bookingRef = booking.booking_ref;
+
+    const guestRows = (guests || []).map((g, i) =>
+        `<tr style="border-bottom:1px solid #2a2a2a">
+            <td style="padding:10px 12px;color:#aaa;font-size:13px">Guest ${i + 1}${i === 0 ? ' (You)' : ''}</td>
+            <td style="padding:10px 12px;color:#fff;font-size:13px">${g.first_name}${g.last_name ? ' ' + g.last_name : ''}</td>
+            <td style="padding:10px 12px;color:#aaa;font-size:13px">${g.email}</td>
+        </tr>`
+    ).join('');
+
+    const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <style>
+    :root { color-scheme: light dark; }
+    body { background-color: #0a0a0a !important; color: #ffffff !important; }
+    @media (prefers-color-scheme: dark) {
+      body { background-color: #0a0a0a !important; }
+      .email-outer { background-color: #0a0a0a !important; }
+    }
+    @media (prefers-color-scheme: light) {
+      body { background-color: #0a0a0a !important; }
+      .email-outer { background-color: #0a0a0a !important; }
+    }
+  </style>
+</head>
+<body bgcolor="#0a0a0a" style="margin:0;padding:0;background:#0a0a0a;font-family:'Helvetica Neue',Arial,sans-serif">
+<div class="email-outer" style="background-color:#0a0a0a">
+<div style="max-width:580px;margin:0 auto;padding:32px 16px 48px">
+
+  <!-- Logo -->
+  <div style="text-align:center;margin-bottom:32px">
+    <span style="font-size:22px;font-weight:900;color:#86EFA9;letter-spacing:-0.5px">MAKENA</span>
+    <span style="font-size:22px;font-weight:300;color:#fff;letter-spacing:-0.5px"> ENTERTAINMENT</span>
+  </div>
+
+  <!-- Hero -->
+  <div style="background:linear-gradient(135deg,#0b2a1a,#0a1612);border:1px solid rgba(134,239,172,0.25);border-radius:16px;padding:32px 28px;text-align:center;margin-bottom:24px">
+    <div style="font-size:40px;margin-bottom:12px">🎊</div>
+    <h1 style="color:#86EFA9;font-size:24px;font-weight:900;margin:0 0 10px;letter-spacing:-0.5px">You're Fully Paid!</h1>
+    <p style="color:rgba(255,255,255,0.65);font-size:14px;margin:0 0 22px;line-height:1.65">
+      Your payment is complete — you are <strong style="color:#fff">100% confirmed</strong> for<br>
+      <strong style="color:#fff">Punta Cana 2026</strong>. We can't wait to see you there.
+    </p>
+    <div style="display:inline-block;background:rgba(134,239,172,0.1);border:1px solid rgba(134,239,172,0.3);border-radius:10px;padding:10px 24px">
+      <div style="font-size:10px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:rgba(134,239,172,0.7);margin-bottom:4px">Booking Reference</div>
+      <div style="font-size:20px;font-weight:900;color:#86EFA9;letter-spacing:0.08em">${bookingRef}</div>
+    </div>
+  </div>
+
+  <!-- Booking summary -->
+  <div style="background:#141414;border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:24px 24px 8px;margin-bottom:16px">
+    <div style="font-size:10px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:#86EFA9;margin-bottom:16px">Booking Summary</div>
+    <table style="width:100%;border-collapse:collapse">
+      <tr style="border-bottom:1px solid #222">
+        <td style="padding:10px 0;color:rgba(255,255,255,0.45);font-size:13px">Room Type</td>
+        <td style="padding:10px 0;color:#fff;font-size:13px;text-align:right;font-weight:600">${roomLabel}</td>
+      </tr>
+      <tr style="border-bottom:1px solid #222">
+        <td style="padding:10px 0;color:rgba(255,255,255,0.45);font-size:13px">Destination</td>
+        <td style="padding:10px 0;color:#fff;font-size:13px;text-align:right;font-weight:600">Punta Cana, Dominican Republic</td>
+      </tr>
+      <tr style="border-bottom:1px solid #222">
+        <td style="padding:10px 0;color:rgba(255,255,255,0.45);font-size:13px">Travel Dates</td>
+        <td style="padding:10px 0;color:#fff;font-size:13px;text-align:right;font-weight:600">Nov 11–15, 2026 · 5 Days</td>
+      </tr>
+      <tr>
+        <td style="padding:10px 0;color:rgba(255,255,255,0.45);font-size:13px">Total Paid</td>
+        <td style="padding:10px 0;color:#86EFA9;font-size:14px;text-align:right;font-weight:900">$${totalPaid.toLocaleString()}</td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- Guest list -->
+  <div style="background:#141414;border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:24px 24px 8px;margin-bottom:16px">
+    <div style="font-size:10px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:#86EFA9;margin-bottom:16px">Your Group</div>
+    <table style="width:100%;border-collapse:collapse">
+      <thead>
+        <tr style="border-bottom:1px solid #2a2a2a">
+          <th style="padding:6px 12px 10px;color:rgba(255,255,255,0.35);font-size:11px;font-weight:600;text-align:left">Role</th>
+          <th style="padding:6px 12px 10px;color:rgba(255,255,255,0.35);font-size:11px;font-weight:600;text-align:left">Name</th>
+          <th style="padding:6px 12px 10px;color:rgba(255,255,255,0.35);font-size:11px;font-weight:600;text-align:left">Email</th>
+        </tr>
+      </thead>
+      <tbody>${guestRows}</tbody>
+    </table>
+  </div>
+
+  <!-- WhatsApp CTA -->
+  <div style="background:linear-gradient(135deg,#0b2a1a,#0a1612);border:1px solid rgba(134,239,172,0.2);border-radius:14px;padding:24px;text-align:center;margin-bottom:16px">
+    <div style="font-size:10px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:#86EFA9;margin-bottom:10px">Stay Connected</div>
+    <p style="color:rgba(255,255,255,0.65);font-size:13px;margin:0 0 18px;line-height:1.65">All trip updates, itinerary details, and logistics will be shared in the WhatsApp group. Make sure you're in there.</p>
+    <a href="https://chat.whatsapp.com/JNc6URa4lsh5qwROm2Inxn?mode=gi_t"
+       style="display:inline-block;background:#86EFA9;color:#060d07;font-size:14px;font-weight:800;padding:13px 28px;border-radius:10px;text-decoration:none">
+      Join the WhatsApp Group
+    </a>
+  </div>
+
+  <!-- Thank you note -->
+  <div style="background:rgba(134,239,172,0.05);border:1px solid rgba(134,239,172,0.15);border-radius:10px;padding:18px 20px;margin-bottom:24px;text-align:center">
+    <p style="color:rgba(255,255,255,0.7);font-size:13px;line-height:1.75;margin:0">
+      Thank you for trusting Makena Entertainment to curate this experience.<br>
+      We've put everything into making this trip unforgettable — and it's going to be exactly that.<br>
+      <strong style="color:#86EFA9">See you in Punta Cana. 🌴</strong>
+    </p>
+  </div>
+
+  <!-- Footer -->
+  <div style="text-align:center;color:rgba(255,255,255,0.2);font-size:11px;line-height:1.8">
+    <p style="margin:0">© 2026 Makena Entertainment · makenaevents.com</p>
+    <p style="margin:4px 0 0">Questions? Message us on WhatsApp or reply to this email.</p>
+  </div>
+
+</div>
+</div>
+</body>
+</html>`;
+
+    const subject = `🎊 You're Fully Paid — Punta Cana 2026 · ${bookingRef}`;
+
+    const allEmails = [...new Set(
+        [booking.primary_email, ...(guests || []).map(g => g.email)]
+            .filter(Boolean)
+            .map(e => e.toLowerCase().trim())
+    )];
+
+    for (const recipientEmail of allEmails) {
+        const res = await fetch('https://api.resend.com/emails', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                from: process.env.TICKET_FROM_EMAIL,
+                to: recipientEmail,
+                subject,
+                html
+            })
+        });
+
+        if (!res.ok) {
+            const errBody = await res.text().catch(() => '');
+            throw new Error(`Resend API error ${res.status} (${recipientEmail}): ${errBody}`);
+        }
+    }
+
+    console.log('trip-emails: balance confirmation email sent to', allEmails.join(', '));
+}
+
 module.exports = {
     sendTripConfirmationEmail,
-    sendAbandonedBookingEmail
+    sendAbandonedBookingEmail,
+    sendBalanceConfirmationEmail
 };

@@ -5,7 +5,7 @@ const {
     sendTicketsAutomatically,
     recordAmbassadorSale
 } = require('./lib/process-checkout-session');
-const { sendTripConfirmationEmail } = require('./lib/trip-emails');
+const { sendTripConfirmationEmail, sendBalanceConfirmationEmail } = require('./lib/trip-emails');
 
 exports.handler = async function(event) {
     if (event.httpMethod !== 'POST') {
@@ -82,6 +82,11 @@ exports.handler = async function(event) {
                 console.error('stripe-webhook: trip balance update error:', balanceUpdateError);
             } else {
                 console.log('stripe-webhook: trip balance paid:', session.metadata.booking_ref);
+                try {
+                    await sendBalanceConfirmationEmail(supabase, session.metadata.booking_id);
+                } catch (err) {
+                    console.error('stripe-webhook: balance confirmation email error:', err);
+                }
             }
         }
         return { statusCode: 200, body: JSON.stringify({ received: true }) };

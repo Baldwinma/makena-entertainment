@@ -565,7 +565,8 @@ function renderTable() {
         (b.balance_paid_at ? expField('Balance Paid At', new Date(b.balance_paid_at).toLocaleString()) : '') +
         (b.stripe_session_id ? expField('Stripe Session', '<span style="font-size:.7rem;font-family:monospace;color:rgba(255,255,255,.4)">' + b.stripe_session_id + '</span>') : '') +
       '</div>' +
-      (b.payment_status === 'paid' ? '<div style="margin-bottom:1rem"><button class="resend-btn" onclick="resendConfirmation(\'' + b.id + '\', this)">✉ Resend Confirmation Email</button></div>' : '');
+      (b.payment_status === 'paid' ? '<div style="margin-bottom:1rem"><button class="resend-btn" onclick="resendConfirmation(\'' + b.id + '\', this)">✉ Resend Deposit Confirmation</button></div>' : '') +
+      (b.balance_payment_status === 'paid' ? '<div style="margin-bottom:1rem"><button class="resend-btn" onclick="resendBalanceConfirmation(\'' + b.id + '\', this)">🎊 Resend Balance Confirmation</button></div>' : '');
 
     html += b.payment_status === 'paid' ? balanceRequestHtml(b) : deletePendingHtml(b);
 
@@ -892,6 +893,28 @@ function resendConfirmation(bookingId, btn) {
     btn.textContent = 'Failed';
     btn.disabled = false;
     alert('Could not resend: ' + e.message);
+  });
+}
+
+// ── Resend Balance Confirmation ───────────────────────────────────────────────
+function resendBalanceConfirmation(bookingId, btn) {
+  btn.disabled = true;
+  btn.textContent = 'Sending…';
+  fetch('/.netlify/functions/admin-resend-balance-confirmation', {
+    method: 'POST',
+    headers: { 'Authorization': 'Bearer ' + adminToken, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ bookingId: bookingId })
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(d){
+    if (d.error) throw new Error(d.error);
+    btn.textContent = 'Sent ✓';
+    btn.className = 'resend-btn sent';
+  })
+  .catch(function(e){
+    btn.disabled = false;
+    btn.textContent = '🎊 Resend Balance Confirmation';
+    alert('Could not send: ' + e.message);
   });
 }
 

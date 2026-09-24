@@ -349,6 +349,31 @@
             font-size: 0.8rem;
         }
 
+        .payment-toggle {
+            display: flex;
+            gap: 0.6rem;
+            margin: 1rem 0;
+        }
+        .payment-toggle__opt {
+            flex: 1;
+            background: rgba(255,255,255,0.04);
+            border: 1.5px solid rgba(255,255,255,0.12);
+            border-radius: 10px;
+            padding: 0.85rem 0.75rem;
+            cursor: pointer;
+            text-align: center;
+            transition: border-color .15s, background .15s;
+            display: flex;
+            flex-direction: column;
+            gap: 0.15rem;
+        }
+        .payment-toggle__opt:hover { border-color: rgba(134,239,172,0.4); background: rgba(134,239,172,0.05); }
+        .payment-toggle__opt.active { border-color: #86EFA9; background: rgba(134,239,172,0.08); }
+        .payment-toggle__name { font-size: 0.68rem; font-weight: 700; color: rgba(255,255,255,0.45); text-transform: uppercase; letter-spacing: 0.05em; }
+        .payment-toggle__opt.active .payment-toggle__name { color: #86EFA9; }
+        .payment-toggle__price { font-size: 1.15rem; font-weight: 900; color: #fff; }
+        .payment-toggle__sub { font-size: 0.65rem; color: rgba(255,255,255,0.28); }
+
         .whatsapp-cta {
             display: flex;
             flex-direction: column;
@@ -1066,13 +1091,25 @@
             <div class="booking-step" id="bStep3">
                 <h3 style="font-size:1.2rem;font-weight:800;color:#fff;margin-bottom:1.2rem">Review & Confirm</h3>
                 <div class="review-summary" id="bReviewSummary"></div>
-                <div class="deposit-notice">
+                <div class="payment-toggle" id="paymentToggle">
+                    <button class="payment-toggle__opt active" id="payOptDeposit" onclick="setPaymentType('deposit')">
+                        <span class="payment-toggle__name">Deposit Only</span>
+                        <span class="payment-toggle__price" id="ptDepositPrice"></span>
+                        <span class="payment-toggle__sub">Pay balance later</span>
+                    </button>
+                    <button class="payment-toggle__opt" id="payOptFull" onclick="setPaymentType('full')">
+                        <span class="payment-toggle__name">Pay in Full</span>
+                        <span class="payment-toggle__price" id="ptFullPrice"></span>
+                        <span class="payment-toggle__sub">No balance due</span>
+                    </button>
+                </div>
+                <div class="deposit-notice" id="payNotice">
                     <strong>⚠ $250 Non-Refundable Deposit Required</strong>
                     A deposit of <strong style="color:#F5C842">$250 USD per person</strong> is required to secure your reservation. By proceeding, you acknowledge that: (i) this deposit constitutes partial payment toward the total trip cost; (ii) the deposit is strictly non-refundable and non-transferable under any circumstances, including cancellation, change of plans, inability to travel, or force majeure events; (iii) the remaining balance will be due by a date communicated by Makena Entertainment; (iv) failure to pay the balance by the stated deadline may result in forfeiture of your reservation. All reservations are subject to availability and written confirmation by Makena Entertainment.
                 </div>
                 <label class="legal-checkbox">
                     <input type="checkbox" id="legalCheck">
-                    <span>I have read and agree to the deposit terms and cancellation policy above.</span>
+                    <span id="legalText">I have read and agree to the deposit terms and cancellation policy above.</span>
                 </label>
                 <div class="booking-error" id="bErr3">Please accept the terms to continue.</div>
                 <div class="booking-nav">
@@ -1124,10 +1161,15 @@
         var DEPOSIT_PP = 250;
         var PROCESSING_FEE_PP = 7.77; // gross-up so we net $250 after Stripe's 2.9% + $0.30
         var ROOM_CONFIG = {
-            triple: { label: 'Triple Share Room', guests: 3, pricePerPerson: 650,  depositTotal: 750,  chargedTotal: 773.31 },
-            double: { label: 'Double Share Room', guests: 2, pricePerPerson: 799,  depositTotal: 500,  chargedTotal: 515.54 },
-            single: { label: 'Single Private Room', guests: 1, pricePerPerson: 1399, depositTotal: 250, chargedTotal: 257.77 }
+            // fullFee: gross-up fee per person so we net the full price after Stripe 2.9% + $0.30
+            // fullChargedTotal: (pricePerPerson + fullFee) × guests
+            triple: { label: 'Triple Share Room', guests: 3, pricePerPerson: 650,  depositTotal: 750,  chargedTotal: 773.31, fullFee: 19.73, fullChargedTotal: 2009.19 },
+            double: { label: 'Double Share Room', guests: 2, pricePerPerson: 799,  depositTotal: 500,  chargedTotal: 515.54, fullFee: 24.18, fullChargedTotal: 1646.36 },
+            single: { label: 'Single Private Room', guests: 1, pricePerPerson: 1399, depositTotal: 250, chargedTotal: 257.77, fullFee: 42.09, fullChargedTotal: 1441.09 }
         };
+
+        var paymentType = 'deposit';
+        var cachedGuests = null;
 
         var COUNTRIES = ['United States','United Kingdom','Canada','France','Germany','Nigeria','Ghana','Cameroon','Ivory Coast','Senegal','South Africa','Kenya','Jamaica','Trinidad and Tobago','Barbados','Dominican Republic','Brazil','Colombia','Spain','Portugal','Netherlands','Belgium','Switzerland','Italy','Other'];
 
@@ -1142,6 +1184,8 @@
 
         window.openBookingModal = function (preselect) {
             needsRoommate = false;
+            paymentType = 'deposit';
+            cachedGuests = null;
             document.getElementById('roommateNotice').style.display = 'none';
             document.getElementById('bStep1Title').textContent = 'Choose Your Room';
             modal.classList.add('is-open');
@@ -1152,6 +1196,8 @@
 
         window.openRoommateModal = function (preselect) {
             needsRoommate = true;
+            paymentType = 'deposit';
+            cachedGuests = null;
             document.getElementById('roommateNotice').style.display = 'block';
             document.getElementById('bStep1Title').textContent = 'Choose Your Room Type';
             modal.classList.add('is-open');
@@ -1190,6 +1236,8 @@
             if (step === 3) {
                 var guests = collectGuests();
                 if (!guests) return;
+                cachedGuests = guests;
+                updatePaymentToggle();
                 buildReviewSummary(guests);
             }
 
@@ -1210,14 +1258,21 @@
 
             var config = ROOM_CONFIG[selectedRoom];
             var singleCharged = (DEPOSIT_PP + PROCESSING_FEE_PP).toFixed(2);
-            document.getElementById('bPaySubtitle').textContent = needsRoommate
-                ? config.label + ' (Roommate Matching) · $250 deposit + $' + PROCESSING_FEE_PP.toFixed(2) + ' fee = $' + singleCharged + ' for you'
-                : config.label + ' · $250 deposit + $' + PROCESSING_FEE_PP.toFixed(2) + ' fee × ' + config.guests + ' guest(s) = $' + config.chargedTotal.toFixed(2);
+            if (paymentType === 'full') {
+                var singleFullCharged = needsRoommate ? (config.pricePerPerson + config.fullFee).toFixed(2) : null;
+                document.getElementById('bPaySubtitle').textContent = needsRoommate
+                    ? config.label + ' (Roommate Matching) · Full price $' + config.pricePerPerson + ' + $' + config.fullFee.toFixed(2) + ' fee = $' + singleFullCharged + ' for you'
+                    : config.label + ' · Full price $' + config.pricePerPerson + ' + $' + config.fullFee.toFixed(2) + ' fee × ' + config.guests + ' guest(s) = $' + config.fullChargedTotal.toFixed(2);
+            } else {
+                document.getElementById('bPaySubtitle').textContent = needsRoommate
+                    ? config.label + ' (Roommate Matching) · $250 deposit + $' + PROCESSING_FEE_PP.toFixed(2) + ' fee = $' + singleCharged + ' for you'
+                    : config.label + ' · $250 deposit + $' + PROCESSING_FEE_PP.toFixed(2) + ' fee × ' + config.guests + ' guest(s) = $' + config.chargedTotal.toFixed(2);
+            }
 
             fetch('/.netlify/functions/trip-booking-checkout', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ roomType: selectedRoom, guests: guests, needsRoommate: needsRoommate })
+                body: JSON.stringify({ roomType: selectedRoom, guests: guests, needsRoommate: needsRoommate, paymentType: paymentType })
             })
             .then(function (r) { return r.json(); })
             .then(function (data) {
@@ -1261,6 +1316,55 @@
                 init();
             }
         }
+
+        function updatePaymentToggle() {
+            var config = ROOM_CONFIG[selectedRoom];
+            var toggle = document.getElementById('paymentToggle');
+            // Hide toggle for roommate bookings — always deposit-only
+            if (toggle) toggle.style.display = needsRoommate ? 'none' : 'flex';
+
+            var singleFullCharged = (config.pricePerPerson + config.fullFee).toFixed(2);
+            var depositEl = document.getElementById('ptDepositPrice');
+            var fullEl = document.getElementById('ptFullPrice');
+            if (depositEl) depositEl.textContent = needsRoommate ? '$' + (DEPOSIT_PP + PROCESSING_FEE_PP).toFixed(2) : '$' + config.chargedTotal.toFixed(2);
+            if (fullEl) fullEl.textContent = needsRoommate ? '$' + singleFullCharged : '$' + config.fullChargedTotal.toFixed(2);
+
+            // Keep toggle visual state in sync
+            var optDeposit = document.getElementById('payOptDeposit');
+            var optFull = document.getElementById('payOptFull');
+            if (optDeposit) optDeposit.classList.toggle('active', paymentType === 'deposit');
+            if (optFull) optFull.classList.toggle('active', paymentType === 'full');
+        }
+
+        window.setPaymentType = function (type) {
+            paymentType = type;
+            var optDeposit = document.getElementById('payOptDeposit');
+            var optFull = document.getElementById('payOptFull');
+            if (optDeposit) optDeposit.classList.toggle('active', type === 'deposit');
+            if (optFull) optFull.classList.toggle('active', type === 'full');
+
+            var notice = document.getElementById('payNotice');
+            var legalText = document.getElementById('legalText');
+            if (document.getElementById('legalCheck')) document.getElementById('legalCheck').checked = false;
+
+            if (type === 'full') {
+                if (notice) {
+                    notice.style.borderColor = 'rgba(134,239,172,.25)';
+                    notice.style.background = 'rgba(134,239,172,.06)';
+                    notice.innerHTML = '<strong style="color:#86EFA9;display:block;margin-bottom:.35rem;font-size:.8rem">✓ Paying in Full — No Balance Due Later</strong>You are paying the complete trip cost today. This covers your entire stay at the resort. Your booking is confirmed as fully paid once payment processes. Note: this booking is still non-refundable and non-transferable under any circumstances, including cancellation, change of plans, or inability to travel.';
+                }
+                if (legalText) legalText.textContent = 'I have read and agree to the full payment terms and cancellation policy above.';
+            } else {
+                if (notice) {
+                    notice.style.borderColor = 'rgba(245,200,66,.25)';
+                    notice.style.background = 'rgba(245,200,66,.06)';
+                    notice.innerHTML = '<strong>⚠ $250 Non-Refundable Deposit Required</strong>A deposit of <strong style="color:#F5C842">$250 USD per person</strong> is required to secure your reservation. By proceeding, you acknowledge that: (i) this deposit constitutes partial payment toward the total trip cost; (ii) the deposit is strictly non-refundable and non-transferable under any circumstances, including cancellation, change of plans, inability to travel, or force majeure events; (iii) the remaining balance will be due by a date communicated by Makena Entertainment; (iv) failure to pay the balance by the stated deadline may result in forfeiture of your reservation. All reservations are subject to availability and written confirmation by Makena Entertainment.';
+                }
+                if (legalText) legalText.textContent = 'I have read and agree to the deposit terms and cancellation policy above.';
+            }
+
+            if (cachedGuests) buildReviewSummary(cachedGuests);
+        };
 
         function buildGuestForms() {
             var config = ROOM_CONFIG[selectedRoom];
@@ -1312,7 +1416,6 @@
         function buildReviewSummary(guests) {
             var config = ROOM_CONFIG[selectedRoom];
             var singleCharged = (DEPOSIT_PP + PROCESSING_FEE_PP).toFixed(2);
-            var depositDisplay = needsRoommate ? singleCharged : config.chargedTotal.toFixed(2);
             var packageLabel = needsRoommate ? config.label + ' — Roommate Matching' : config.label;
 
             var guestChips = guests.map(function (g) {
@@ -1323,14 +1426,27 @@
                 ? '<div style="background:rgba(134,239,172,0.07);border:1px solid rgba(134,239,172,0.18);border-radius:8px;padding:10px 12px;margin-top:0.75rem;font-size:0.75rem;color:rgba(255,255,255,0.55);line-height:1.6">🤝 Makena will match you with compatible roommate(s) for your ' + config.label.toLowerCase() + '. You\'ll be introduced to them before the trip.</div>'
                 : '';
 
+            var amountRow, amountNote;
+            if (paymentType === 'full' && !needsRoommate) {
+                amountRow = '<div class="review-row total"><span>Total due today</span><span>$' + config.fullChargedTotal.toFixed(2) + '</span></div>';
+                amountNote = '<div style="font-size:0.68rem;color:rgba(255,255,255,0.28);text-align:right;margin-top:0.25rem">$' + config.pricePerPerson + ' full price + $' + config.fullFee.toFixed(2) + ' processing fee per guest · No balance due</div>';
+            } else if (paymentType === 'full' && needsRoommate) {
+                var singleFullCharged = (config.pricePerPerson + config.fullFee).toFixed(2);
+                amountRow = '<div class="review-row total"><span>Total due today</span><span>$' + singleFullCharged + '</span></div>';
+                amountNote = '<div style="font-size:0.68rem;color:rgba(255,255,255,0.28);text-align:right;margin-top:0.25rem">$' + config.pricePerPerson + ' full price + $' + config.fullFee.toFixed(2) + ' processing fee (you only) · No balance due</div>';
+            } else {
+                var depositDisplay = needsRoommate ? singleCharged : config.chargedTotal.toFixed(2);
+                amountRow = '<div class="review-row total"><span>Deposit due today</span><span>$' + depositDisplay + '</span></div>';
+                amountNote = '<div style="font-size:0.68rem;color:rgba(255,255,255,0.28);text-align:right;margin-top:0.25rem">$' + DEPOSIT_PP + ' deposit + $' + PROCESSING_FEE_PP.toFixed(2) + ' processing fee' + (needsRoommate ? ' (you only)' : ' per guest') + '</div>';
+            }
+
             document.getElementById('bReviewSummary').innerHTML =
                 '<div class="review-row"><span>Package</span><strong>' + packageLabel + '</strong></div>' +
                 '<div class="review-row"><span>Resort</span><strong>Adults-Only 5-Star All-Inclusive</strong></div>' +
                 '<div class="review-row"><span>Dates</span><strong>Nov 11–15, 2026 · 5 Days</strong></div>' +
                 '<div class="review-row"><span>Price per person</span><strong>$' + config.pricePerPerson + '</strong></div>' +
                 '<div class="review-guests">' + guestChips + '</div>' +
-                '<div class="review-row total"><span>Deposit due today</span><span>$' + depositDisplay + '</span></div>' +
-                '<div style="font-size:0.68rem;color:rgba(255,255,255,0.28);text-align:right;margin-top:0.25rem">$' + DEPOSIT_PP + ' deposit + $' + PROCESSING_FEE_PP.toFixed(2) + ' processing fee' + (needsRoommate ? ' (you only)' : ' per guest') + '</div>' +
+                amountRow + amountNote +
                 roommateNote;
         }
 
@@ -1343,13 +1459,21 @@
             var dots = document.querySelectorAll('.booking-step-dot');
             var stepForDot = n > 4 ? 4 : n;
             dots.forEach(function (d, idx) { d.classList.toggle('active', idx < stepForDot); });
-            if (n === 5 && needsRoommate) {
+            if (n === 5) {
                 var s5 = document.getElementById('bStep5');
                 if (s5) {
-                    s5.querySelector('h3').textContent = "You're on the list!";
                     var ps = s5.querySelectorAll('p');
-                    if (ps[0]) ps[0].textContent = "Your deposit is confirmed. Your booking reference is:";
-                    if (ps[1]) ps[1].textContent = "Makena will personally reach out to match you with compatible roommate(s). Keep an eye on the WhatsApp group for updates.";
+                    if (needsRoommate) {
+                        s5.querySelector('h3').textContent = "You're on the list!";
+                        if (ps[0]) ps[0].textContent = "Your deposit is confirmed. Your booking reference is:";
+                        if (ps[1]) ps[1].textContent = "Makena will personally reach out to match you with compatible roommate(s). Keep an eye on the WhatsApp group for updates.";
+                    } else if (paymentType === 'full') {
+                        s5.querySelector('h3').textContent = "You're fully paid & locked in!";
+                        if (ps[0]) ps[0].textContent = "Your full payment was received. Your booking reference is:";
+                    } else {
+                        s5.querySelector('h3').textContent = "You're locked in!";
+                        if (ps[0]) ps[0].textContent = "Your deposit was received. Your booking reference is:";
+                    }
                 }
             }
             var card = document.querySelector('.booking-modal__card');

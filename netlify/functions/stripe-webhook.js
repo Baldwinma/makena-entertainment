@@ -111,20 +111,28 @@ exports.handler = async function(event) {
         return { statusCode: 200, body: JSON.stringify({ received: true }) };
     }
 
-    // Handle trip deposit payments
+    // Handle trip payments (deposit or full)
     if (session.metadata && session.metadata.booking_type === 'trip') {
         const supabase = require('./lib/supabase').getSupabase();
         if (supabase && session.metadata.booking_id) {
+            const isFullPayment = session.metadata.payment_type === 'full';
+            const updatePayload = {
+                payment_status: 'paid',
+                stripe_payment_intent_id: typeof session.payment_intent === 'object'
+                    ? session.payment_intent?.id
+                    : session.payment_intent,
+                paid_at: new Date().toISOString(),
+                updated_at: new Date().toISOString()
+            };
+            if (isFullPayment) {
+                // Mark balance as paid too — no separate balance collection needed
+                updatePayload.balance_payment_status = 'paid';
+                updatePayload.balance_paid_total = session.amount_total || 0;
+                updatePayload.balance_paid_at = new Date().toISOString();
+            }
             const { error: tripUpdateError } = await supabase
                 .from('trip_bookings')
-                .update({
-                    payment_status: 'paid',
-                    stripe_payment_intent_id: typeof session.payment_intent === 'object'
-                        ? session.payment_intent?.id
-                        : session.payment_intent,
-                    paid_at: new Date().toISOString(),
-                    updated_at: new Date().toISOString()
-                })
+                .update(updatePayload)
                 .eq('id', session.metadata.booking_id);
 
             if (tripUpdateError) {

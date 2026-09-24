@@ -41,7 +41,8 @@ exports.handler = async function (event) {
         return json(400, { error: 'Invalid request body.' });
     }
 
-    const { roomType, guests, needsRoommate } = payload;
+    const { roomType, guests, needsRoommate, paymentType } = payload;
+    const isFullPayment = paymentType === 'full';
     const roomConfig = ROOM_CONFIG[roomType];
     if (!roomConfig) return json(400, { error: 'Invalid room type. Must be triple, double, or single.' });
 
@@ -62,8 +63,12 @@ exports.handler = async function (event) {
     if (!String(primaryGuest.country || '').trim()) return json(400, { error: 'Primary guest country is required.' });
 
     const depositTotal = DEPOSIT_PER_PERSON * effectiveGuestCount;
-    const processingFeeTotal = PROCESSING_FEE_PER_PERSON * effectiveGuestCount;
-    const chargedTotal = depositTotal + processingFeeTotal;
+
+    // For full payment: gross-up processing fee per person so we net the full price
+    const fullProcessingFeePerPerson = isFullPayment
+        ? Math.ceil((roomConfig.pricePerPerson + 30) / (1 - 0.029)) - roomConfig.pricePerPerson
+        : 0;
+
     const bookingRef = 'PC2026-' + Date.now().toString(36).toUpperCase().slice(-6);
 
     const { data: booking, error: bookingError } = await supabase
@@ -76,6 +81,7 @@ exports.handler = async function (event) {
             deposit_per_person: DEPOSIT_PER_PERSON,
             deposit_total: depositTotal,
             needs_roommate: needsRoommate ? true : false,
+            payment_type: isFullPayment ? 'full' : 'deposit',
             payment_status: 'pending',
             primary_first_name: String(primaryGuest.firstName).trim(),
             primary_last_name: String(primaryGuest.lastName || '').trim() || null,
@@ -113,10 +119,32 @@ exports.handler = async function (event) {
     const baseUrl = getBaseUrl(event);
 
     try {
-        const session = await stripe.checkout.sessions.create({
-            mode: 'payment',
-            ui_mode: 'embedded',
-            line_items: [
+        const lineItems = isFullPayment
+            ? [
+                {
+                    price_data: {
+                        currency: 'usd',
+                        product_data: {
+                            name: `Punta Cana 2026 — ${roomConfig.label}`,
+                            description: `Full trip cost per person. No balance due after this payment.`
+                        },
+                        unit_amount: roomConfig.pricePerPerson
+                    },
+                    quantity: effectiveGuestCount
+                },
+                {
+                    price_data: {
+                        currency: 'usd',
+                        product_data: {
+                            name: 'Processing fee',
+                            description: 'Card processing fee (2.9% + $0.30 per person)'
+                        },
+                        unit_amount: fullProcessingFeePerPerson
+                    },
+                    quantity: effectiveGuestCount
+                }
+            ]
+            : [
                 {
                     price_data: {
                         currency: 'usd',
@@ -139,7 +167,12 @@ exports.handler = async function (event) {
                     },
                     quantity: effectiveGuestCount
                 }
-            ],
+            ];
+
+        const session = await stripe.checkout.sessions.create({
+            mode: 'payment',
+            ui_mode: 'embedded',
+            line_items: lineItems,
             return_url: `${baseUrl}/trips.html?booking=success&ref=${bookingRef}&session_id={CHECKOUT_SESSION_ID}`,
             metadata: {
                 booking_type: 'trip',
@@ -147,7 +180,8 @@ exports.handler = async function (event) {
                 booking_ref: bookingRef,
                 room_type: roomType,
                 guest_count: String(effectiveGuestCount),
-                needs_roommate: needsRoommate ? 'true' : 'false'
+                needs_roommate: needsRoommate ? 'true' : 'false',
+                payment_type: isFullPayment ? 'full' : 'deposit'
             }
         });
 

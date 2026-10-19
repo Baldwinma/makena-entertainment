@@ -333,7 +333,7 @@
             </div>
 
             <div style="max-width:680px; margin:0 auto; text-align:center;">
-                <button class="btn-next" id="seBookBtn" onclick="openBookingModal()" disabled style="padding: 1rem 2.5rem; font-size:1rem; border-radius:12px; min-width:280px;" id="seBookBtn">
+                <button class="btn-next" id="seBookBtn" onclick="openBookingModal()" disabled style="padding: 1rem 2.5rem; font-size:1rem; border-radius:12px; min-width:280px;">
                     Reserve My Spot →
                 </button>
                 <p style="font-size:0.72rem; opacity:0.35; margin-top:0.6rem;">21+ · Non-refundable deposit · Limited spots</p>
@@ -480,21 +480,6 @@
         var seBookingRef = null;
 
         var modal = document.getElementById('seBookingModal');
-
-        // Auto-select room from URL param (?room=shared or ?room=private)
-        var urlParams = new URLSearchParams(window.location.search);
-        var urlRoom = urlParams.get('room');
-        if (urlRoom === 'shared' || urlRoom === 'private') {
-            selectRoom(urlRoom);
-        }
-
-        // Check for success redirect
-        if (urlParams.get('booking') === 'success' && urlParams.get('ref')) {
-            document.getElementById('seSuccessRef').textContent = urlParams.get('ref');
-            activateSeStep(5);
-            modal.classList.add('is-open');
-            document.body.style.overflow = 'hidden';
-        }
 
         window.selectRoom = function(type) {
             selectedRoom = type;
@@ -788,6 +773,21 @@
         }
 
         function showSeStep(step) { activateSeStep(step); }
+
+        // Auto-select room from URL param — runs after all functions are defined
+        var urlParams = new URLSearchParams(window.location.search);
+        var urlRoom = urlParams.get('room');
+        if (urlRoom === 'shared' || urlRoom === 'private') {
+            selectRoom(urlRoom);
+        }
+
+        // Check for success redirect
+        if (urlParams.get('booking') === 'success' && urlParams.get('ref')) {
+            document.getElementById('seSuccessRef').textContent = urlParams.get('ref');
+            activateSeStep(5);
+            modal.classList.add('is-open');
+            document.body.style.overflow = 'hidden';
+        }
 
     })();
     </script>

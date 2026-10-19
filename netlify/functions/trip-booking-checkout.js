@@ -34,16 +34,12 @@ const TRIP_CONFIGS = {
         returnPage: 'afriskii-snow-escape.html',
         productName: 'Makena Snow Escape 2027',
         rooms: {
-            shared:  { label: 'Stay & Slay — Shared King Room',  guestCount: null, pricePerPerson: 80000 },
-            private: { label: 'Stay & Slay Solo — Private Room', guestCount: 1,    pricePerPerson: 120000 }
+            shared:  { label: 'Stay Slay — Shared King Room',        guestCount: null, pricePerPerson: 85000 },
+            private: { label: 'Makena Snow Escape — Private Room', guestCount: 1,    pricePerPerson: 120000 }
         }
     }
 };
 
-// Legacy alias kept for backwards compat with existing PC2026 bookings
-const ROOM_CONFIG = TRIP_CONFIGS.PC2026.rooms;
-const DEPOSIT_PER_PERSON = 25000;
-const PROCESSING_FEE_PER_PERSON = Math.ceil((DEPOSIT_PER_PERSON + 30) / (1 - 0.029)) - DEPOSIT_PER_PERSON;
 
 exports.handler = async function (event) {
     if (event.httpMethod !== 'POST') return json(405, { error: 'Method not allowed' });

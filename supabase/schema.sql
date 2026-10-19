@@ -167,8 +167,13 @@ alter table public.trip_bookings
     add column if not exists payment_type text default 'deposit',
     add column if not exists needs_roommate boolean default false;
 
+-- trip_id distinguishes which trip a booking belongs to (e.g. 'PC2026' = Punta Cana, 'AS2027' = Afriskii Snow Escape)
+alter table public.trip_bookings
+    add column if not exists trip_id text default 'PC2026';
+
 create index if not exists trip_bookings_status_idx on public.trip_bookings (payment_status);
 create index if not exists trip_bookings_room_type_idx on public.trip_bookings (room_type);
+create index if not exists trip_bookings_trip_id_idx on public.trip_bookings (trip_id);
 create index if not exists trip_booking_guests_booking_idx on public.trip_booking_guests (booking_id);
 
 alter table public.trip_bookings enable row level security;

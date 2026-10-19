@@ -840,6 +840,49 @@ const ticketCatalog = {
         time: '11 PM - 3:30 AM',
         location: '10601 Baltimore Ave, Beltsville, MD 20705',
         tiers: dcNightPartyTiers
+    },
+    afriskii_all_white_affair: {
+        name: 'Afriskii x Makena — All White Affair',
+        description: 'The signature All White Affair at Afriskii Fest. All white dress code required. Camelback Resort, Tannersville, Pennsylvania.',
+        amount: 2500,
+        currency: 'usd',
+        date: 'February 7, 2027',
+        time: '10 PM',
+        location: 'Camelback Resort, Tannersville, PA',
+        tiers: [
+            { id: 'tier_1', name: 'Tier 1', amount: 2500, capacity: 10, lowInventoryThreshold: 3 },
+            { id: 'tier_2', name: 'Tier 2', amount: 3500, capacity: 20, lowInventoryThreshold: 5 },
+            { id: 'tier_3', name: 'Tier 3', amount: 4500, capacity: 20, lowInventoryThreshold: 5 },
+            { id: 'tier_4', name: 'Final Tier', amount: 5500, capacity: null, lowInventoryThreshold: 10 }
+        ]
+    },
+    afriskii_all_access_pass: {
+        name: 'Afriskii x Makena — All Access Pass',
+        description: 'Full access to all Makena & Afriskii events at Afriskii Fest 2027. Includes our signature All White Affair (Makena), Indoor Pool Party, Bonfire Party, Après Ski parties Fri & Sat — all hosted by Afriskii — plus the full Makena atmosphere. February 4–7, 2027.',
+        amount: 25500,
+        currency: 'usd',
+        date: 'February 4, 2027',
+        time: 'February 4 – 7, 2027',
+        location: 'Camelback Resort, Tannersville, PA',
+        tiers: [
+            { id: 'tier_1', name: 'Tier 1', amount: 25500, capacity: 20, lowInventoryThreshold: 5 },
+            { id: 'tier_2', name: 'Tier 2', amount: 30500, capacity: 20, lowInventoryThreshold: 5 },
+            { id: 'tier_3', name: 'Tier 3', amount: 35500, capacity: 20, lowInventoryThreshold: 5 },
+            { id: 'tier_4', name: 'Final Tier', amount: 40500, capacity: null, lowInventoryThreshold: 10 }
+        ],
+        includedEventIds: ['afriskii_all_white_affair']
+    },
+    afriskii_ski_pass: {
+        name: 'Afriskii x Makena — Ski & Snowboard Day Pass',
+        description: 'One full day of skiing or snowboarding at Camelback Resort. Includes equipment rental, lift ticket, and a private lesson. Optional add-on — available with any package.',
+        amount: 27500,
+        currency: 'usd',
+        date: 'February 4, 2027',
+        time: 'February 4 – 7, 2027',
+        location: 'Camelback Resort, Tannersville, PA',
+        tiers: [
+            { id: 'tier_1', name: 'Ski / Snowboard Day Pass', amount: 27500, capacity: null, lowInventoryThreshold: 10 }
+        ]
     }
 };
 

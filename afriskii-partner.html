@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Afriskii x Makena — Partner Sales Dashboard</title>
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    <script src="theme-init.js"></script>
+    <style>
+        .partner-wrap {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem 5rem;
+        }
+        .partner-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+            padding: 5rem 0 2rem;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            margin-bottom: 2rem;
+        }
+        .partner-header h1 {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin: 0;
+        }
+        .partner-header p {
+            font-size: 0.8rem;
+            opacity: 0.5;
+            margin: 0.25rem 0 0;
+        }
+        .partner-login {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .partner-login__box {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px;
+            padding: 2.5rem 2rem;
+            width: 100%;
+            max-width: 380px;
+            text-align: center;
+        }
+        .partner-login__box h2 {
+            font-size: 1.25rem;
+            margin: 0 0 0.5rem;
+        }
+        .partner-login__box p {
+            font-size: 0.85rem;
+            opacity: 0.6;
+            margin: 0 0 1.5rem;
+        }
+        .partner-login__input {
+            width: 100%;
+            padding: 0.85rem 1rem;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.15);
+            background: rgba(255,255,255,0.05);
+            color: inherit;
+            font-family: inherit;
+            font-size: 0.95rem;
+            text-align: center;
+            letter-spacing: 0.1em;
+            margin-bottom: 1rem;
+            box-sizing: border-box;
+        }
+        .partner-login__error {
+            color: #f87171;
+            font-size: 0.8rem;
+            margin-top: 0.75rem;
+            display: none;
+        }
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2.5rem;
+        }
+        .stat-card {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px;
+            padding: 1.25rem;
+        }
+        .stat-card__label {
+            font-size: 0.65rem;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            opacity: 0.45;
+            margin-bottom: 0.5rem;
+        }
+        .stat-card__value {
+            font-size: 2rem;
+            font-weight: 800;
+            line-height: 1;
+        }
+        .stat-card__sub {
+            font-size: 0.75rem;
+            opacity: 0.5;
+            margin-top: 0.3rem;
+        }
+        .partner-section {
+            margin-bottom: 2.5rem;
+        }
+        .partner-section h3 {
+            font-size: 0.7rem;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            opacity: 0.45;
+            margin: 0 0 1rem;
+        }
+        .partner-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+        .partner-table th {
+            text-align: left;
+            font-size: 0.7rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            opacity: 0.4;
+            padding: 0.5rem 0.75rem;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+        .partner-table td {
+            padding: 0.7rem 0.75rem;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            vertical-align: middle;
+        }
+        .partner-table tr:last-child td {
+            border-bottom: none;
+        }
+        .badge {
+            display: inline-block;
+            font-size: 0.65rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            padding: 0.2rem 0.6rem;
+            border-radius: 100px;
+        }
+        .badge--green { background: rgba(74,222,128,0.15); color: #4ade80; }
+        .badge--yellow { background: rgba(250,204,21,0.15); color: #facc15; }
+        .badge--gray { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.5); }
+        .breakdown-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 10px;
+            padding: 1rem 1.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            margin-bottom: 0.75rem;
+        }
+        .breakdown-card__name { font-size: 0.9rem; font-weight: 600; }
+        .breakdown-card__meta { font-size: 0.75rem; opacity: 0.5; margin-top: 0.15rem; }
+        .breakdown-card__right { text-align: right; flex-shrink: 0; }
+        .breakdown-card__revenue { font-size: 1.1rem; font-weight: 800; }
+        .breakdown-card__count { font-size: 0.75rem; opacity: 0.5; margin-top: 0.1rem; }
+        .generated-at {
+            font-size: 0.75rem;
+            opacity: 0.35;
+            text-align: right;
+            margin-top: 0.5rem;
+        }
+        #partner-loading {
+            text-align: center;
+            padding: 3rem;
+            opacity: 0.5;
+            font-size: 0.9rem;
+        }
+        #partner-dashboard { display: none; }
+        .empty-state {
+            text-align: center;
+            padding: 2rem;
+            opacity: 0.4;
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- LOGIN SCREEN -->
+    <div class="partner-login" id="partnerLogin">
+        <div class="partner-login__box">
+            <div style="font-size:1.5rem; margin-bottom:1rem;">&#127935;</div>
+            <h2>Afriskii x Makena</h2>
+            <p>Partner Sales Dashboard — enter your access code to view transaction data.</p>
+            <input
+                type="password"
+                class="partner-login__input"
+                id="partnerTokenInput"
+                placeholder="Access code"
+                autocomplete="off"
+            >
+            <button class="btn btn-primary" style="width:100%;" id="partnerLoginBtn">View Dashboard</button>
+            <p class="partner-login__error" id="partnerLoginError">Incorrect access code. Try again.</p>
+        </div>
+    </div>
+
+    <!-- DASHBOARD (hidden until auth) -->
+    <div class="partner-wrap" id="partnerDashboard" style="display:none;">
+        <div class="partner-header">
+            <div>
+                <h1>Afriskii x Makena — Sales Dashboard</h1>
+                <p>Pennsylvania Snow Weekend · February 4–7, 2027 · Camelback Resort</p>
+            </div>
+            <div style="display:flex; gap:0.75rem; align-items:center;">
+                <button class="btn btn-secondary btn-small" id="refreshBtn">Refresh</button>
+                <button class="btn btn-secondary btn-small" id="exportCsvBtn">Export CSV</button>
+            </div>
+        </div>
+
+        <div id="partner-loading">Loading sales data...</div>
+
+        <div id="partner-dashboard">
+
+            <!-- STATS ROW -->
+            <div class="stat-grid" id="statGrid"></div>
+
+            <!-- BY TICKET TYPE -->
+            <div class="partner-section">
+                <h3>Revenue by Ticket Type</h3>
+                <div id="byTypeList"></div>
+            </div>
+
+            <!-- ORDER TABLE -->
+            <div class="partner-section">
+                <h3>All Ticket Sales</h3>
+                <div style="overflow-x:auto;">
+                    <table class="partner-table" id="ordersTable">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Customer</th>
+                                <th>Email</th>
+                                <th>Ticket Type</th>
+                                <th>Qty</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ordersBody"></tbody>
+                    </table>
+                </div>
+                <div class="empty-state" id="ordersEmpty" style="display:none;">No ticket sales yet.</div>
+            </div>
+
+            <!-- SNOW ESCAPE BOOKINGS (if any) -->
+            <div class="partner-section" id="snowSection" style="display:none;">
+                <h3>Snow Escape Bookings</h3>
+                <div style="overflow-x:auto;">
+                    <table class="partner-table" id="snowTable">
+                        <thead>
+                            <tr>
+                                <th>Ref</th>
+                                <th>Guest</th>
+                                <th>Email</th>
+                                <th>Room</th>
+                                <th>Guests</th>
+                                <th>Deposit</th>
+                                <th>Balance</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="snowBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <p class="generated-at" id="generatedAt"></p>
+        </div>
+    </div>
+
+    <script>
+        const loginScreen = document.getElementById('partnerLogin');
+        const dashWrap = document.getElementById('partnerDashboard');
+        const loadingEl = document.getElementById('partner-loading');
+        const dashEl = document.getElementById('partner-dashboard');
+        const loginBtn = document.getElementById('partnerLoginBtn');
+        const refreshBtn = document.getElementById('refreshBtn');
+        const exportBtn = document.getElementById('exportCsvBtn');
+        const tokenInput = document.getElementById('partnerTokenInput');
+        const loginErr = document.getElementById('partnerLoginError');
+
+        let activeToken = null;
+        let lastData = null;
+
+        // Check for token in URL (e.g. /afriskii-partner?t=xxxx)
+        const urlToken = new URLSearchParams(window.location.search).get('t');
+        if (urlToken) {
+            activeToken = urlToken;
+            loginScreen.style.display = 'none';
+            dashWrap.style.display = 'block';
+            loadDashboard();
+        }
+
+        loginBtn.addEventListener('click', attemptLogin);
+        tokenInput.addEventListener('keydown', e => { if (e.key === 'Enter') attemptLogin(); });
+
+        async function attemptLogin() {
+            const token = tokenInput.value.trim();
+            if (!token) return;
+            loginBtn.disabled = true;
+            loginBtn.textContent = 'Checking...';
+            loginErr.style.display = 'none';
+
+            const ok = await fetchData(token);
+            if (ok) {
+                activeToken = token;
+                loginScreen.style.display = 'none';
+                dashWrap.style.display = 'block';
+            } else {
+                loginErr.style.display = 'block';
+            }
+            loginBtn.disabled = false;
+            loginBtn.textContent = 'View Dashboard';
+        }
+
+        async function loadDashboard() {
+            loadingEl.style.display = 'block';
+            dashEl.style.display = 'none';
+            await fetchData(activeToken);
+        }
+
+        refreshBtn.addEventListener('click', loadDashboard);
+
+        async function fetchData(token) {
+            try {
+                const res = await fetch(`/.netlify/functions/admin-afriskii-orders?token=${encodeURIComponent(token)}`);
+                if (!res.ok) return false;
+                const data = await res.json();
+                lastData = data;
+                renderDashboard(data);
+                return true;
+            } catch {
+                return false;
+            }
+        }
+
+        function fmt(cents) {
+            return '$' + (cents / 100).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        function fmtDate(iso) {
+            if (!iso) return '—';
+            return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' });
+        }
+
+        function renderDashboard(data) {
+            loadingEl.style.display = 'none';
+            dashEl.style.display = 'block';
+
+            const s = data.summary;
+
+            // Stats
+            document.getElementById('statGrid').innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-card__label">Ticket Orders</div>
+                    <div class="stat-card__value">${s.totalEventOrders}</div>
+                    <div class="stat-card__sub">${s.totalTicketsSold} tickets sold</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card__label">Ticket Revenue</div>
+                    <div class="stat-card__value">$${s.totalEventRevenueUsd}</div>
+                    <div class="stat-card__sub">After Stripe fees: est. $${(parseFloat(s.totalEventRevenueUsd) * 0.971 - s.totalEventOrders * 0.30).toFixed(2)}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card__label">Snow Escape</div>
+                    <div class="stat-card__value">${s.snowEscapeBookings}</div>
+                    <div class="stat-card__sub">bookings · $${s.snowEscapeRevenueUsd} deposits</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card__label">Combined Revenue</div>
+                    <div class="stat-card__value">$${s.combinedRevenueUsd}</div>
+                    <div class="stat-card__sub">All Makena PA sales</div>
+                </div>
+            `;
+
+            // By type breakdown
+            const byTypeEl = document.getElementById('byTypeList');
+            if (data.byTicketType && data.byTicketType.length > 0) {
+                byTypeEl.innerHTML = data.byTicketType.map(t => `
+                    <div class="breakdown-card">
+                        <div>
+                            <div class="breakdown-card__name">${t.eventName}</div>
+                            <div class="breakdown-card__meta">${t.orderCount} orders · ${t.ticketCount} tickets</div>
+                        </div>
+                        <div class="breakdown-card__right">
+                            <div class="breakdown-card__revenue">${fmt(t.revenueCents)}</div>
+                            <div class="breakdown-card__count">avg ${t.ticketCount > 0 ? fmt(Math.round(t.revenueCents / t.ticketCount)) : '—'} / ticket</div>
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                byTypeEl.innerHTML = '<div class="empty-state">No sales yet.</div>';
+            }
+
+            // Orders table
+            const tbody = document.getElementById('ordersBody');
+            const orders = data.eventOrders || [];
+            if (orders.length > 0) {
+                tbody.innerHTML = orders.map(o => `
+                    <tr>
+                        <td style="white-space:nowrap;">${fmtDate(o.purchased_at)}</td>
+                        <td>${o.customer_name || '—'}</td>
+                        <td style="font-size:0.8rem; opacity:0.7;">${o.customer_email || '—'}</td>
+                        <td style="font-size:0.8rem;">${o.event_name.replace('Afriskii x Makena — ', '')}</td>
+                        <td style="text-align:center;">${o.quantity}</td>
+                        <td style="font-weight:700;">${fmt(o.amount_total)}</td>
+                        <td><span class="badge badge--green">Paid</span></td>
+                    </tr>
+                `).join('');
+                document.getElementById('ordersEmpty').style.display = 'none';
+            } else {
+                tbody.innerHTML = '';
+                document.getElementById('ordersEmpty').style.display = 'block';
+            }
+
+            // Snow Escape
+            const snows = data.snowEscapeBookings || [];
+            if (snows.length > 0) {
+                document.getElementById('snowSection').style.display = 'block';
+                document.getElementById('snowBody').innerHTML = snows.map(b => `
+                    <tr>
+                        <td style="font-size:0.8rem; font-family:monospace;">${b.booking_ref}</td>
+                        <td>${b.primary_first_name} ${b.primary_last_name || ''}</td>
+                        <td style="font-size:0.8rem; opacity:0.7;">${b.primary_email}</td>
+                        <td style="text-transform:capitalize;">${b.room_type}</td>
+                        <td style="text-align:center;">${b.guest_count}</td>
+                        <td>${b.deposit_total ? fmt(b.deposit_total) : '—'}</td>
+                        <td>${b.balance_total ? fmt(b.balance_total) : '—'}</td>
+                        <td><span class="badge ${b.payment_status === 'paid' ? 'badge--green' : 'badge--yellow'}">${b.payment_status}</span></td>
+                    </tr>
+                `).join('');
+            }
+
+            document.getElementById('generatedAt').textContent = 'Data as of ' + fmtDate(data.generatedAt);
+        }
+
+        // CSV export
+        exportBtn.addEventListener('click', function() {
+            if (!lastData) return;
+
+            const rows = [['Date', 'Customer Name', 'Email', 'Ticket Type', 'Quantity', 'Amount (USD)', 'Status']];
+            for (const o of (lastData.eventOrders || [])) {
+                rows.push([
+                    new Date(o.purchased_at).toISOString(),
+                    o.customer_name || '',
+                    o.customer_email || '',
+                    o.event_name,
+                    o.quantity,
+                    (o.amount_total / 100).toFixed(2),
+                    o.payment_status
+                ]);
+            }
+
+            const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `afriskii-makena-sales-${new Date().toISOString().slice(0,10)}.csv`;
+            a.click();
+            URL.revokeObjectURL(url);
+        });
+    </script>
+</body>
+</html>

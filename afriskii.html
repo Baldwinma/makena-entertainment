@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <title>Afriskii x Makena | Pennsylvania Snow Weekend 2027</title>
+    <meta name="description" content="Makena x Afriskii Fest — Pennsylvania Snow Weekend at Camelback Resort. All White Affair, All Access Pass, and the Makena Snow Escape. February 4–7, 2027.">
+    <link rel="canonical" href="https://makenaevents.com/afriskii">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    <script src="theme-init.js"></script>
+    <style>
+        .afriskii-hero-badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.12);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: #fff;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            padding: 0.35rem 1rem;
+            border-radius: 100px;
+            margin-bottom: 1.25rem;
+        }
+        .afriskii-cta-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin-top: 1.75rem;
+        }
+        .afriskii-partner-logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .afriskii-partner-logo span {
+            color: rgba(255,255,255,0.5);
+            font-size: 1.5rem;
+            font-weight: 300;
+        }
+        .afriskii-partner-logo img {
+            height: 40px;
+            object-fit: contain;
+        }
+        .afriskii-divider {
+            border: none;
+            border-top: 1px solid rgba(255,255,255,0.08);
+            margin: 2.5rem 0;
+        }
+        .afriskii-option-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin: 2.5rem 0;
+        }
+        .afriskii-option-card {
+            background: var(--card-bg, rgba(255,255,255,0.04));
+            border: 1px solid var(--border-color, rgba(255,255,255,0.1));
+            border-radius: 16px;
+            padding: 2rem 1.75rem 1.75rem;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+        .afriskii-option-card.featured {
+            border-color: var(--accent, #fff);
+            box-shadow: 0 0 0 1px var(--accent, #fff);
+        }
+        .afriskii-option-card .best-value {
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--accent, #fff);
+            color: var(--bg, #000);
+            font-size: 0.65rem;
+            font-weight: 800;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            padding: 0.3rem 1rem;
+            border-radius: 100px;
+            white-space: nowrap;
+        }
+        .afriskii-option-card__label {
+            font-size: 0.65rem;
+            font-weight: 700;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            opacity: 0.5;
+            margin-bottom: 0.5rem;
+        }
+        .afriskii-option-card__title {
+            font-size: 1.25rem;
+            font-weight: 800;
+            margin: 0 0 0.5rem;
+            line-height: 1.2;
+        }
+        .afriskii-option-card__price {
+            font-size: 2rem;
+            font-weight: 900;
+            line-height: 1;
+            margin: 0.75rem 0 0.25rem;
+        }
+        .afriskii-option-card__price-note {
+            font-size: 0.8rem;
+            opacity: 0.55;
+            margin-bottom: 1.25rem;
+        }
+        .afriskii-option-card__includes {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 1.5rem;
+            font-size: 0.85rem;
+            flex: 1;
+        }
+        .afriskii-option-card__includes li {
+            padding: 0.35rem 0;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+        .afriskii-option-card__includes li:last-child {
+            border-bottom: none;
+        }
+        .afriskii-option-card__includes li::before {
+            content: '✓';
+            color: var(--accent, #fff);
+            font-weight: 700;
+            flex-shrink: 0;
+            margin-top: 0.05rem;
+        }
+        .afriskii-option-card__coming-soon {
+            text-align: center;
+            padding: 0.9rem;
+            border: 1px dashed rgba(255,255,255,0.2);
+            border-radius: 8px;
+            font-size: 0.8rem;
+            opacity: 0.6;
+            letter-spacing: 0.05em;
+        }
+        .afriskii-includes-section {
+            background: var(--card-bg, rgba(255,255,255,0.03));
+            border: 1px solid var(--border-color, rgba(255,255,255,0.08));
+            border-radius: 16px;
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+        .afriskii-includes-section h3 {
+            font-size: 0.7rem;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            opacity: 0.5;
+            margin: 0 0 1.25rem;
+        }
+        .afriskii-includes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 0.85rem;
+        }
+        .afriskii-includes-item {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            font-size: 0.9rem;
+        }
+        .afriskii-includes-item .icon {
+            font-size: 1.1rem;
+            width: 1.5rem;
+            text-align: center;
+            flex-shrink: 0;
+        }
+        .afriskii-faq {
+            margin: 2rem 0;
+        }
+        .afriskii-faq details {
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            padding: 1rem 0;
+        }
+        .afriskii-faq details summary {
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.95rem;
+            list-style: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .afriskii-faq details summary::after {
+            content: '+';
+            font-size: 1.25rem;
+            opacity: 0.4;
+            transition: transform 0.2s;
+        }
+        .afriskii-faq details[open] summary::after {
+            transform: rotate(45deg);
+        }
+        .afriskii-faq details p {
+            margin: 0.75rem 0 0;
+            font-size: 0.9rem;
+            opacity: 0.75;
+            line-height: 1.7;
+        }
+        .afriskii-notice {
+            background: rgba(255,255,255,0.04);
+            border-left: 3px solid rgba(255,255,255,0.25);
+            border-radius: 0 8px 8px 0;
+            padding: 1rem 1.25rem;
+            font-size: 0.85rem;
+            opacity: 0.8;
+            margin: 1.5rem 0;
+        }
+        @media (max-width: 600px) {
+            .afriskii-option-grid {
+                grid-template-columns: 1fr;
+            }
+            .afriskii-partner-logo img {
+                height: 30px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar" id="navbar">
+        <div class="container">
+            <div class="nav-content">
+                <div class="logo">
+                    <a href="index.html">
+                        <img loading="lazy" src="images/logo-transparent.png" alt="Makena Logo">
+                    </a>
+                </div>
+                <button class="mobile-menu-toggle" id="mobileMenuToggle">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+                <ul class="nav-links" id="navLinks">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="index.html#links">Connect</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- HERO -->
+    <!-- Replace the background URL below with your ski photo once uploaded to images/afriskii-hero.jpg -->
+    <section class="page-header" style="background: linear-gradient(160deg, rgba(5,10,25,0.85) 0%, rgba(10,20,50,0.8) 60%, rgba(0,0,0,0.9) 100%), url('images/afriskii-hero.jpg') center/cover no-repeat; min-height: 90vh; display: flex; align-items: center;">
+        <div class="hero-overlay"></div>
+        <div class="container" style="padding-top: 5rem;">
+            <div class="afriskii-partner-logo">
+                <img loading="lazy" src="images/logo-transparent.png" alt="Makena">
+                <span>×</span>
+                <span style="color:#fff; font-weight:800; font-size:1.1rem; letter-spacing:0.05em;">AFRISKII</span>
+            </div>
+            <div class="afriskii-hero-badge">Pennsylvania Snow Weekend · 21+</div>
+            <h1 class="page-title" style="font-size: clamp(2.5rem, 6vw, 4.5rem); line-height: 1.05; max-width: 700px;">
+                The Slopes.<br>The Vibes.<br>The Community.
+            </h1>
+            <p class="page-subtitle" style="max-width: 520px; margin-top: 1rem; opacity: 0.85;">
+                Makena joins Afriskii Fest at Camelback Resort, Pennsylvania — February 4–7, 2027. Pool parties, bonfire nights, and the events that make it unforgettable.
+            </p>
+            <div class="afriskii-cta-row">
+                <a href="#tickets" class="btn btn-primary">Get Tickets</a>
+                <a href="#all-access" class="btn btn-secondary">All Access Pass — $255</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ABOUT THE PARTNERSHIP -->
+    <section class="event-detail" style="padding-top: 4rem;">
+        <div class="container">
+            <div class="event-detail__layout">
+                <div class="event-detail__content">
+                    <span class="event-detail__eyebrow">About the Event</span>
+                    <h2>Afriskii Fest x Makena</h2>
+                    <p>Makena has partnered with <strong>Afriskii Fest</strong> to bring our signature events to Pennsylvania. This is more than a winter weekend — it's a cultural experience where music, movement, and community come together at one of the best mountain resorts on the East Coast.</p>
+                    <p>Camelback Resort in Tannersville, PA hosts a full weekend of pool parties, bonfire nights, après ski, and Makena's own curated events — headlined by our signature <strong>All White Affair</strong>.</p>
+                    <div class="event-detail__facts" style="margin-top: 1.5rem;">
+                        <span>Feb 4 – 7, 2027</span>
+                        <span>Camelback Resort, PA</span>
+                        <span>21+ Only</span>
+                    </div>
+                    <div class="afriskii-notice">
+                        Afriskii Fest tickets and lodging packages are sold separately through Afriskii. Makena tickets cover our curated events and experiences layered on top of the Afriskii Fest weekend.
+                    </div>
+                </div>
+                <div class="event-detail__aside">
+                    <div class="event-detail__tickets event-detail__tickets--aside">
+                        <h3>Event Details</h3>
+                        <ul style="list-style:none; padding:0; margin:0; font-size:0.9rem; line-height:2;">
+                            <li><strong>Dates:</strong> February 4–7, 2027</li>
+                            <li><strong>Venue:</strong> Camelback Resort</li>
+                            <li><strong>Location:</strong> Tannersville, PA</li>
+                            <li><strong>Age:</strong> 21+ with valid ID</li>
+                            <li><strong>Vibe:</strong> Cultural winter weekend</li>
+                            <li><strong>Dress:</strong> All White (Sat night)</li>
+                        </ul>
+                        <a href="https://www.google.com/maps/search/?api=1&query=Camelback+Resort+Tannersville+PA" target="_blank" rel="noopener" class="btn btn-secondary btn-small" style="margin-top:1rem; display:inline-block;">
+                            View on Map
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- TICKET OPTIONS -->
+    <section class="event-detail" id="tickets">
+        <div class="container">
+            <span class="event-detail__eyebrow">Choose Your Experience</span>
+            <h2>Makena Pennsylvania Packages</h2>
+            <p style="max-width: 580px; opacity: 0.75; margin-bottom: 2rem;">Three ways to do the weekend. Tiers update automatically as spots sell.</p>
+
+            <!-- ── Event Tickets ── -->
+            <p style="font-size:0.65rem; font-weight:700; letter-spacing:0.15em; text-transform:uppercase; opacity:0.4; margin-bottom:1rem;">Event Tickets — No accommodation</p>
+            <div class="afriskii-option-grid" id="all-access" style="margin-bottom:2.5rem;">
+
+                <!-- ALL WHITE AFFAIR -->
+                <div class="afriskii-option-card">
+                    <div class="afriskii-option-card__label">Saturday Night · Feb 7</div>
+                    <h3 class="afriskii-option-card__title">All White Affair</h3>
+                    <p style="font-size:0.75rem; font-weight:700; letter-spacing:0.08em; color:rgba(255,255,255,0.35); text-transform:uppercase; margin:0 0 0.5rem;">Rich Party · Makena Signature</p>
+                    <p style="font-size:0.85rem; opacity:0.7; margin: 0 0 0.75rem; line-height:1.6;">Our signature event of the weekend. All white dress code, premium sound, and a crowd that shows out. This is the night everyone will be talking about.</p>
+                    <div class="afriskii-option-card__price">from $25</div>
+                    <div class="afriskii-option-card__price-note">Tier 1 · 10 spots only</div>
+                    <ul class="afriskii-option-card__includes">
+                        <li>Entry to the All White Affair (Sat, Feb 7)</li>
+                        <li>All white dress code — no exceptions</li>
+                        <li>DJs, live energy, mountain setting</li>
+                        <li>Limited capacity — early tier fills fastest</li>
+                    </ul>
+                    <div class="ticket-actions">
+                        <button class="btn btn-secondary stripe-ticket-button" type="button" data-ticket-id="afriskii_all_white_affair" style="width:100%;">
+                            Buy Tickets from $25
+                        </button>
+                    </div>
+                    <p class="package-card__note" style="margin-top:0.75rem;">Tier 1: $25 (10 spots) · Tier 2: $35 · Tier 3: $45 · Final: $55</p>
+                </div>
+
+                <!-- ALL ACCESS PASS -->
+                <div class="afriskii-option-card featured">
+                    <div class="best-value">All Events · Best Value</div>
+                    <div class="afriskii-option-card__label">Feb 4 – 7 · No accommodation</div>
+                    <h3 class="afriskii-option-card__title">All Access Pass</h3>
+                    <p style="font-size:0.85rem; opacity:0.7; margin: 0.5rem 0 0.75rem; line-height:1.6;">Every event across the weekend — our All White Affair plus all four Afriskii-hosted events. No room, just the full experience.</p>
+                    <div class="afriskii-option-card__price">from $255</div>
+                    <div class="afriskii-option-card__price-note">Per person · Tier 1 — limited spots</div>
+                    <ul class="afriskii-option-card__includes">
+                        <li><strong>All White Affair</strong> — Makena's signature event</li>
+                        <li>Indoor Pool Party — Afriskii</li>
+                        <li>Bonfire Party — Afriskii</li>
+                        <li>Après Party, Friday — Afriskii</li>
+                        <li>Après Party, Saturday — Afriskii</li>
+                        <li>The Makena Atmosphere all weekend</li>
+                    </ul>
+                    <div class="ticket-actions">
+                        <button class="btn btn-primary stripe-ticket-button" type="button" data-ticket-id="afriskii_all_access_pass" style="width:100%;">
+                            Get All Access Pass from $255
+                        </button>
+                    </div>
+                    <p class="package-card__note" style="margin-top:0.75rem; text-align:center;">Tier 1: $255 · Tier 2: $305 · Tier 3: $355 · Final: $405</p>
+                </div>
+
+            </div>
+
+            <!-- ── Stay & Slay Packages ── -->
+            <p style="font-size:0.65rem; font-weight:700; letter-spacing:0.15em; text-transform:uppercase; opacity:0.4; margin-bottom:1rem;">Stay &amp; Slay — Accommodation + All Events</p>
+            <div class="afriskii-option-grid" style="margin-bottom:2.5rem;">
+
+                <!-- STAY & SLAY SHARED -->
+                <div class="afriskii-option-card featured">
+                    <div class="best-value">Most Popular</div>
+                    <div class="afriskii-option-card__label">Feb 4 – 8 · Shared King Room</div>
+                    <h3 class="afriskii-option-card__title">Stay &amp; Slay</h3>
+                    <p style="font-size:0.85rem; opacity:0.7; margin: 0.5rem 0 0.75rem; line-height:1.6;">Shared king bed accommodation plus every event of the weekend. Arrive together, experience it all. The full package at the best price.</p>
+                    <div class="afriskii-option-card__price">$800</div>
+                    <div class="afriskii-option-card__price-note">Per person · Shared king room · 5 nights</div>
+                    <ul class="afriskii-option-card__includes">
+                        <li>Shared king bed room (Feb 4–8)</li>
+                        <li><strong>All White Affair</strong> — Makena's signature Rich Party</li>
+                        <li>Indoor Pool Party — Afriskii</li>
+                        <li>Bonfire Party — Afriskii</li>
+                        <li>Après Party, Friday — Afriskii</li>
+                        <li>Après Party, Saturday — Afriskii</li>
+                        <li>Legendary Sunday Group Dinner</li>
+                        <li>The full Makena Atmosphere</li>
+                    </ul>
+                    <a href="afriskii-snow-escape.html?room=shared" class="btn btn-primary" style="width:100%; text-align:center; display:block; box-sizing:border-box;">
+                        Book Stay &amp; Slay — $800/person
+                    </a>
+                    <p style="font-size:0.75rem; opacity:0.45; text-align:center; margin-top:0.6rem;">$200 non-refundable deposit · balance due Jan 1, 2027</p>
+                </div>
+
+                <!-- STAY & SLAY SOLO -->
+                <div class="afriskii-option-card">
+                    <div class="afriskii-option-card__label">Feb 4 – 8 · Private Room</div>
+                    <h3 class="afriskii-option-card__title">Stay &amp; Slay Solo</h3>
+                    <p style="font-size:0.85rem; opacity:0.7; margin: 0.5rem 0 0.75rem; line-height:1.6;">Your own private room, plus every event of the weekend. No compromises, no shared space. Your trip, your rules.</p>
+                    <div class="afriskii-option-card__price">$1,200</div>
+                    <div class="afriskii-option-card__price-note">Per person · Private room · 5 nights</div>
+                    <ul class="afriskii-option-card__includes">
+                        <li>Private room — just for you (Feb 4–8)</li>
+                        <li><strong>All White Affair</strong> — Makena's signature Rich Party</li>
+                        <li>Indoor Pool Party — Afriskii</li>
+                        <li>Bonfire Party — Afriskii</li>
+                        <li>Après Party, Friday — Afriskii</li>
+                        <li>Après Party, Saturday — Afriskii</li>
+                        <li>Legendary Sunday Group Dinner</li>
+                        <li>The full Makena Atmosphere</li>
+                    </ul>
+                    <a href="afriskii-snow-escape.html?room=private" class="btn btn-secondary" style="width:100%; text-align:center; display:block; box-sizing:border-box;">
+                        Book Stay &amp; Slay Solo — $1,200/person
+                    </a>
+                    <p style="font-size:0.75rem; opacity:0.45; text-align:center; margin-top:0.6rem;">$200 non-refundable deposit · balance due Jan 1, 2027</p>
+                </div>
+
+            </div>
+
+            <!-- ── Optional Add-On ── -->
+            <p style="font-size:0.65rem; font-weight:700; letter-spacing:0.15em; text-transform:uppercase; opacity:0.4; margin-bottom:1rem;">Optional Add-On</p>
+            <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:16px; padding:1.75rem; display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:1.5rem;">
+                <div style="flex:1; min-width:220px;">
+                    <p style="font-size:0.65rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; opacity:0.4; margin:0 0 0.4rem;">Ski &amp; Snowboard Day Pass</p>
+                    <p style="font-size:1.15rem; font-weight:800; margin:0 0 0.4rem; color:#fff;">$275 <span style="font-size:0.8rem; font-weight:400; opacity:0.5;">/ person</span></p>
+                    <p style="font-size:0.85rem; opacity:0.65; margin:0; line-height:1.6;">One full day on the mountain — skiing or snowboarding. Equipment rental, lift ticket, and a private lesson all included. Add it to any package.</p>
+                    <p style="font-size:0.75rem; opacity:0.4; margin:0.5rem 0 0;">Equipment rental · Lift ticket · Private lesson</p>
+                </div>
+                <div style="flex-shrink:0;">
+                    <button class="btn btn-secondary stripe-ticket-button" type="button" data-ticket-id="afriskii_ski_pass">
+                        Add Ski Pass — $275
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- WHAT'S INCLUDED BREAKDOWN -->
+    <section class="event-detail" style="padding-top:1rem;">
+        <div class="container">
+            <div class="afriskii-includes-section">
+                <h3>Stay &amp; Slay — Everything Included</h3>
+                <div class="afriskii-includes-grid">
+                    <div class="afriskii-includes-item">
+                        <span class="icon">🛏️</span>
+                        <span>5-star accommodation (Feb 4–8)</span>
+                    </div>
+                    <div class="afriskii-includes-item">
+                        <span class="icon">🤍</span>
+                        <span><strong>All White Affair</strong> — Makena's Rich Party</span>
+                    </div>
+                    <div class="afriskii-includes-item">
+                        <span class="icon">🏊</span>
+                        <span>Indoor Pool Party — Afriskii</span>
+                    </div>
+                    <div class="afriskii-includes-item">
+                        <span class="icon">🔥</span>
+                        <span>Bonfire Party — Afriskii</span>
+                    </div>
+                    <div class="afriskii-includes-item">
+                        <span class="icon">🥂</span>
+                        <span>Après Party, Friday — Afriskii</span>
+                    </div>
+                    <div class="afriskii-includes-item">
+                        <span class="icon">🥂</span>
+                        <span>Après Party, Saturday — Afriskii</span>
+                    </div>
+                    <div class="afriskii-includes-item">
+                        <span class="icon">🍽️</span>
+                        <span>Legendary Sunday Group Dinner</span>
+                    </div>
+                    <div class="afriskii-includes-item">
+                        <span class="icon">✨</span>
+                        <span>The full Makena Atmosphere</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="event-detail" style="padding-top:1rem; padding-bottom: 5rem;">
+        <div class="container" style="max-width: 720px;">
+            <span class="event-detail__eyebrow">FAQs</span>
+            <h2>Common Questions</h2>
+            <div class="afriskii-faq">
+                <details>
+                    <summary>What is Afriskii Fest?</summary>
+                    <p>Afriskii Fest is an annual winter getaway that brings together Black culture lovers for a full resort weekend of parties, pool events, and unforgettable nights. The 2027 event is at Camelback Resort in Tannersville, Pennsylvania — February 4–7. Makena has partnered with Afriskii to bring our own curated events to the weekend.</p>
+                </details>
+                <details>
+                    <summary>Do I need to buy Afriskii tickets separately?</summary>
+                    <p>For the Afriskii Fest admission and main resort access, you'll need to book through Afriskii directly. The Makena All Access Pass covers our signature All White Affair plus all Afriskii-hosted events (pool party, bonfire, both après ski nights). The Makena Snow Escape is the only fully all-in-one option — accommodation included.</p>
+                </details>
+                <details>
+                    <summary>What's included in the All Access Pass?</summary>
+                    <p>The All Access Pass (from $255) covers Makena's signature All White Affair on Saturday, plus the Afriskii-hosted Indoor Pool Party, Bonfire Party, and Après Ski parties on both Friday and Saturday nights — along with the full Makena atmosphere across all four days.</p>
+                </details>
+                <details>
+                    <summary>What's the All White Affair dress code?</summary>
+                    <p>All white, no exceptions. Head-to-toe white attire is required for entry to the All White Affair on Saturday, February 7. This is the Makena standard — we keep it tight.</p>
+                </details>
+                <details>
+                    <summary>What's the age requirement?</summary>
+                    <p>21+ only. A valid government-issued photo ID is required for entry to all events.</p>
+                </details>
+                <details>
+                    <summary>When does the Makena Snow Escape go on sale?</summary>
+                    <p>Pricing and dates are being finalized. Drop your email in the interest form above and you'll be the first to know when bookings open. Spots will be limited — early interest gets early access.</p>
+                </details>
+            </div>
+
+            <hr class="afriskii-divider">
+            <p style="font-size:0.85rem; opacity:0.55; text-align:center;">
+                Questions? Connect with us on Instagram or via the site. <a href="index.html#links" style="opacity:1; text-decoration:underline;">Contact Makena</a>
+            </p>
+        </div>
+    </section>
+
+    <script src="script.js"></script>
+    <script>
+        // Snow Escape interest form — stores in Supabase app_settings or just sends to trip-interest
+        const form = document.getElementById('afriskiiInterestForm');
+        const msg = document.getElementById('afriskiiInterestMsg');
+
+        if (form) {
+            form.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                const name = document.getElementById('afriskiiInterestName').value.trim();
+                const email = document.getElementById('afriskiiInterestEmail').value.trim();
+                const btn = form.querySelector('button[type="submit"]');
+                btn.disabled = true;
+                btn.textContent = 'Saving...';
+
+                try {
+                    const res = await fetch('/.netlify/functions/trip-interest', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            name,
+                            email,
+                            trip: 'Makena Snow Escape — Afriskii 2027',
+                            message: 'Interest in Makena Snow Escape (Feb 4-8, 2027)'
+                        })
+                    });
+
+                    msg.style.display = 'block';
+                    if (res.ok) {
+                        msg.textContent = "You're on the list. We'll reach out as soon as pricing drops.";
+                        msg.style.color = 'var(--accent, #fff)';
+                        form.reset();
+                    } else {
+                        msg.textContent = "Something went wrong — send us a DM to get on the list.";
+                        msg.style.opacity = '0.6';
+                    }
+                } catch {
+                    msg.style.display = 'block';
+                    msg.textContent = "Couldn't connect — DM us on Instagram to join the list.";
+                    msg.style.opacity = '0.6';
+                } finally {
+                    btn.disabled = false;
+                    btn.textContent = 'Notify Me';
+                }
+            });
+        }
+
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(a => {
+            a.addEventListener('click', function(e) {
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    e.preventDefault();
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

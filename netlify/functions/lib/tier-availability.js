@@ -13,7 +13,10 @@ const ACTIVE_TICKET_IDS = new Set([
     'dc_group_chat_linkup',
     'dc_last_last_after_party',
     'dc_all_white_boat_party',
-    'dc_all_white_closing_party'
+    'dc_all_white_closing_party',
+    'afriskii_all_white_affair',
+    'afriskii_all_access_pass',
+    'afriskii_ski_pass'
 ]);
 
 function getNowIso() {

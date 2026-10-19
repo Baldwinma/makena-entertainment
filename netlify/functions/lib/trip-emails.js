@@ -1,7 +1,58 @@
+const TRIP_EMAIL_CONFIG = {
+    PC2026: {
+        tripName: 'Punta Cana 2026',
+        destination: 'Punta Cana, Dominican Republic',
+        resort: 'Adults-Only 5-Star All-Inclusive',
+        dates: 'Nov 11–15, 2026 · 5 Days',
+        closingEmoji: '🌴',
+        closingText: 'See you in Punta Cana.',
+        whatsappLink: 'https://chat.whatsapp.com/JNc6URa4lsh5qwROm2Inxn?mode=gi_t',
+        whatsappConfirmText: 'Join the official Makena Punta Cana group chat. All trip updates, logistics, balance payment info, and coordination happen here.',
+        whatsappRoommateText: 'Join the official group chat now. This is where your roommate intro will happen, plus all trip updates, logistics, and balance payment info.',
+        whatsappBalanceText: 'All trip updates, itinerary details, and logistics will be shared in the WhatsApp group. Make sure you\'re in there.',
+        returnPage: 'trips.html',
+        roomLabels: {
+            triple: (isRoommate) => isRoommate ? 'Triple Share Room (Roommate Matching)' : 'Triple Share Room (3 guests)',
+            double: (isRoommate) => isRoommate ? 'Double Share Room (Roommate Matching)' : 'Double Share Room (2 guests)',
+            single: () => 'Single Private Room'
+        },
+        depositPerPerson: 250,
+        depositFee: 7.77
+    },
+    AS2027: {
+        tripName: 'Stay & Slay 2027 · Afriskii x Makena',
+        destination: 'Camelback Resort, Tannersville, PA',
+        resort: 'Camelback Mountain Resort',
+        dates: 'Feb 4–8, 2027 · 5 Days',
+        closingEmoji: '❄️',
+        closingText: 'See you at Camelback.',
+        whatsappLink: null,
+        whatsappConfirmText: 'All Stay & Slay trip updates, logistics, and balance payment details will be sent directly to this email. We\'ll share the group chat link soon.',
+        whatsappRoommateText: 'All Stay & Slay trip updates, logistics, and balance payment details will be sent directly to this email. We\'ll share the group chat link soon.',
+        whatsappBalanceText: 'All trip updates, itinerary details, and logistics will be sent directly to this email. We\'ll be in touch with everything you need.',
+        returnPage: 'afriskii-snow-escape.html',
+        roomLabels: {
+            shared: () => 'Stay & Slay — Shared King Room',
+            private: () => 'Stay & Slay Solo — Private Room'
+        },
+        depositPerPerson: 200,
+        depositFee: 6.29
+    }
+};
+
+function getTripConfig(tripId) {
+    return TRIP_EMAIL_CONFIG[tripId] || TRIP_EMAIL_CONFIG.PC2026;
+}
+
+function getRoomLabel(config, roomType, isRoommate) {
+    const labelFn = config.roomLabels[roomType];
+    if (!labelFn) return roomType;
+    return labelFn(isRoommate);
+}
+
 async function sendTripConfirmationEmail(supabase, bookingId) {
     if (!process.env.RESEND_API_KEY || !process.env.TICKET_FROM_EMAIL) return;
 
-    // Fetch booking + guests
     const { data: booking } = await supabase
         .from('trip_bookings')
         .select('*')
@@ -10,6 +61,7 @@ async function sendTripConfirmationEmail(supabase, bookingId) {
 
     if (!booking) return;
 
+    const config = getTripConfig(booking.trip_id);
     const bookingRef = booking.booking_ref;
 
     const { data: guests } = await supabase
@@ -19,17 +71,10 @@ async function sendTripConfirmationEmail(supabase, bookingId) {
         .order('guest_number');
 
     const isRoommate = booking.needs_roommate === true;
-
-    const ROOM_LABELS = {
-        triple: isRoommate ? 'Triple Share Room (Roommate Matching)' : 'Triple Share Room (3 guests)',
-        double: isRoommate ? 'Double Share Room (Roommate Matching)' : 'Double Share Room (2 guests)',
-        single: 'Single Private Room'
-    };
-    const PROCESSING_FEE_PP = 7.77;
-    const depositPerPerson = (booking.deposit_per_person || 25000) / 100;
-    const chargedPerPerson = depositPerPerson + PROCESSING_FEE_PP;
+    const depositPerPerson = (booking.deposit_per_person || config.depositPerPerson * 100) / 100;
+    const chargedPerPerson = depositPerPerson + config.depositFee;
     const chargedTotal = (chargedPerPerson * booking.guest_count).toFixed(2);
-    const roomLabel = ROOM_LABELS[booking.room_type] || booking.room_type;
+    const roomLabel = getRoomLabel(config, booking.room_type, isRoommate);
 
     const guestRows = (guests || []).map((g, i) =>
         `<tr style="border-bottom:1px solid #2a2a2a">
@@ -49,16 +94,28 @@ async function sendTripConfirmationEmail(supabase, bookingId) {
     const heroEmoji   = isRoommate ? '🤝' : '🎉';
     const heroTitle   = isRoommate ? "You're on the List!" : 'Deposit Confirmed!';
     const heroSubtext = isRoommate
-        ? `Your deposit is confirmed for <strong style="color:#fff">Punta Cana 2026</strong>.<br>Makena will personally match you with compatible roommate(s) and make introductions before the trip.`
-        : `You're locked in for <strong style="color:#fff">Punta Cana 2026</strong>.<br>Your spot is secured — here's everything you need.`;
+        ? `Your deposit is confirmed for <strong style="color:#fff">${config.tripName}</strong>.<br>Makena will personally match you with compatible roommate(s) and make introductions before the trip.`
+        : `You're locked in for <strong style="color:#fff">${config.tripName}</strong>.<br>Your spot is secured — here's everything you need.`;
 
-    const whatsappSubtext = isRoommate
-        ? 'Join the official group chat now. This is where your roommate intro will happen, plus all trip updates, logistics, and balance payment info.'
-        : 'Join the official Makena Punta Cana group chat. All trip updates, logistics, balance payment info, and coordination happen here.';
+    const whatsappSubtext = isRoommate ? config.whatsappRoommateText : config.whatsappConfirmText;
 
     const legalText = isRoommate
         ? `<strong style="color:rgba(251,191,36,0.9)">Reminder:</strong> Your $${chargedTotal} deposit is <strong>non-refundable and non-transferable</strong>. Makena will match you with compatible roommate(s) — if no match is possible we will contact you directly. The remaining balance will be communicated closer to the travel date. Flights not included. Keep your reference <strong style="color:#fff">${bookingRef}</strong> for your records.`
         : `<strong style="color:rgba(251,191,36,0.9)">Reminder:</strong> Your $${(depositPerPerson * booking.guest_count).toFixed(0)} deposit is <strong>non-refundable and non-transferable</strong>. The remaining balance will be communicated by Makena Entertainment closer to the travel date. Flights are not included. Keep your booking reference <strong style="color:#fff">${bookingRef}</strong> for your records.`;
+
+    const whatsappBlock = config.whatsappLink
+        ? `<div style="background:linear-gradient(135deg,#0b2a1a,#0a1612);border:1px solid rgba(134,239,172,0.2);border-radius:14px;padding:24px;text-align:center;margin-bottom:16px">
+    <div style="font-size:10px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:#86EFA9;margin-bottom:10px">Next Step</div>
+    <p style="color:rgba(255,255,255,0.65);font-size:13px;margin:0 0 18px;line-height:1.65">${whatsappSubtext}</p>
+    <a href="${config.whatsappLink}"
+       style="display:inline-block;background:#86EFA9;color:#060d07;font-size:14px;font-weight:800;padding:13px 28px;border-radius:10px;text-decoration:none">
+      Join the WhatsApp Group
+    </a>
+  </div>`
+        : `<div style="background:linear-gradient(135deg,#0b2a1a,#0a1612);border:1px solid rgba(134,239,172,0.2);border-radius:14px;padding:24px;text-align:center;margin-bottom:16px">
+    <div style="font-size:10px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:#86EFA9;margin-bottom:10px">What's Next</div>
+    <p style="color:rgba(255,255,255,0.65);font-size:13px;margin:0;line-height:1.65">${whatsappSubtext}</p>
+  </div>`;
 
     const html = `<!DOCTYPE html>
 <html lang="en">
@@ -111,15 +168,15 @@ async function sendTripConfirmationEmail(supabase, bookingId) {
       </tr>
       <tr style="border-bottom:1px solid #222">
         <td style="padding:10px 0;color:rgba(255,255,255,0.45);font-size:13px">Destination</td>
-        <td style="padding:10px 0;color:#fff;font-size:13px;text-align:right;font-weight:600">Punta Cana, Dominican Republic</td>
+        <td style="padding:10px 0;color:#fff;font-size:13px;text-align:right;font-weight:600">${config.destination}</td>
       </tr>
       <tr style="border-bottom:1px solid #222">
         <td style="padding:10px 0;color:rgba(255,255,255,0.45);font-size:13px">Resort</td>
-        <td style="padding:10px 0;color:#fff;font-size:13px;text-align:right;font-weight:600">Adults-Only 5-Star All-Inclusive</td>
+        <td style="padding:10px 0;color:#fff;font-size:13px;text-align:right;font-weight:600">${config.resort}</td>
       </tr>
       <tr style="border-bottom:1px solid #222">
         <td style="padding:10px 0;color:rgba(255,255,255,0.45);font-size:13px">Travel Dates</td>
-        <td style="padding:10px 0;color:#fff;font-size:13px;text-align:right;font-weight:600">Nov 11–15, 2026 · 5 Days</td>
+        <td style="padding:10px 0;color:#fff;font-size:13px;text-align:right;font-weight:600">${config.dates}</td>
       </tr>
       <tr style="border-bottom:1px solid #222">
         <td style="padding:10px 0;color:rgba(255,255,255,0.45);font-size:13px">Deposit paid</td>
@@ -147,15 +204,7 @@ async function sendTripConfirmationEmail(supabase, bookingId) {
     </table>
   </div>
 
-  <!-- WhatsApp CTA -->
-  <div style="background:linear-gradient(135deg,#0b2a1a,#0a1612);border:1px solid rgba(134,239,172,0.2);border-radius:14px;padding:24px;text-align:center;margin-bottom:16px">
-    <div style="font-size:10px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:#86EFA9;margin-bottom:10px">Next Step</div>
-    <p style="color:rgba(255,255,255,0.65);font-size:13px;margin:0 0 18px;line-height:1.65">${whatsappSubtext}</p>
-    <a href="https://chat.whatsapp.com/JNc6URa4lsh5qwROm2Inxn?mode=gi_t"
-       style="display:inline-block;background:#86EFA9;color:#060d07;font-size:14px;font-weight:800;padding:13px 28px;border-radius:10px;text-decoration:none">
-      Join the WhatsApp Group
-    </a>
-  </div>
+  ${whatsappBlock}
 
   <!-- Legal reminder -->
   <div style="background:rgba(251,191,36,0.06);border:1px solid rgba(251,191,36,0.2);border-radius:10px;padding:16px 18px;margin-bottom:24px">
@@ -174,10 +223,9 @@ async function sendTripConfirmationEmail(supabase, bookingId) {
 </html>`;
 
     const subject = isRoommate
-        ? `🤝 You're on the List — Punta Cana 2026 · ${bookingRef}`
-        : `🎉 Deposit Confirmed — Punta Cana 2026 · ${bookingRef}`;
+        ? `🤝 You're on the List — ${config.tripName} · ${bookingRef}`
+        : `🎉 Deposit Confirmed — ${config.tripName} · ${bookingRef}`;
 
-    // Collect all unique guest emails so every person in the group gets a copy
     const allEmails = [...new Set(
         [booking.primary_email, ...(guests || []).map(g => g.email)]
             .filter(Boolean)
@@ -211,18 +259,14 @@ async function sendTripConfirmationEmail(supabase, bookingId) {
 async function sendAbandonedBookingEmail(booking) {
     if (!process.env.RESEND_API_KEY || !process.env.TICKET_FROM_EMAIL) return;
 
+    const config = getTripConfig(booking.trip_id);
     const firstName = booking.primary_first_name || booking.first_name || 'there';
     const siteUrl = process.env.SITE_URL || 'https://makenaevents.com';
-
-    const ROOM_LABELS = {
-        triple: 'Triple Share Room',
-        double: 'Double Share Room',
-        single: 'Single Private Room'
-    };
-    const roomLabel = ROOM_LABELS[booking.room_type] || booking.room_type || 'N/A';
+    const roomLabel = getRoomLabel(config, booking.room_type, false);
     const pricePerPerson = booking.price_per_person
         ? `$${(booking.price_per_person / 100).toLocaleString()}`
         : 'Contact us';
+    const depositDisplay = `$${config.depositPerPerson} + $${config.depositFee.toFixed(2)} fee = $${(config.depositPerPerson + config.depositFee).toFixed(2)}`;
 
     const html = `<!DOCTYPE html>
 <html lang="en">
@@ -258,7 +302,7 @@ async function sendAbandonedBookingEmail(booking) {
   <div style="background:linear-gradient(135deg,#0b2a1a,#0a1612);border:1px solid rgba(134,239,172,0.2);border-radius:16px;padding:32px 28px;text-align:center;margin-bottom:24px">
     <div style="font-size:36px;margin-bottom:12px">👀</div>
     <h1 style="color:#86EFA9;font-size:22px;font-weight:800;margin:0 0 12px">Hey ${firstName}, you left something behind</h1>
-    <p style="color:rgba(255,255,255,0.65);font-size:14px;margin:0;line-height:1.65">You started booking <strong style="color:#fff">Punta Cana 2026</strong> but never completed your deposit.<br>Your spot is <strong style="color:#ff6b6b">NOT</strong> reserved yet.</p>
+    <p style="color:rgba(255,255,255,0.65);font-size:14px;margin:0;line-height:1.65">You started booking <strong style="color:#fff">${config.tripName}</strong> but never completed your deposit.<br>Your spot is <strong style="color:#ff6b6b">NOT</strong> reserved yet.</p>
   </div>
 
   <!-- Details card -->
@@ -275,11 +319,11 @@ async function sendAbandonedBookingEmail(booking) {
       </tr>
       <tr style="border-bottom:1px solid #222">
         <td style="padding:10px 0;color:rgba(255,255,255,0.45);font-size:13px">Deposit needed</td>
-        <td style="padding:10px 0;color:#86EFA9;font-size:13px;text-align:right;font-weight:800">$250 + $7.77 fee = $257.77</td>
+        <td style="padding:10px 0;color:#86EFA9;font-size:13px;text-align:right;font-weight:800">${depositDisplay}</td>
       </tr>
       <tr>
         <td style="padding:10px 0;color:rgba(255,255,255,0.45);font-size:13px">Travel Dates</td>
-        <td style="padding:10px 0;color:#fff;font-size:13px;text-align:right;font-weight:600">Nov 11–15, 2026</td>
+        <td style="padding:10px 0;color:#fff;font-size:13px;text-align:right;font-weight:600">${config.dates}</td>
       </tr>
     </table>
   </div>
@@ -287,28 +331,15 @@ async function sendAbandonedBookingEmail(booking) {
   <!-- Urgency note -->
   <div style="background:rgba(251,191,36,0.06);border:1px solid rgba(251,191,36,0.2);border-radius:10px;padding:16px 18px;margin-bottom:24px">
     <p style="color:rgba(255,255,255,0.65);font-size:13px;line-height:1.7;margin:0">
-      <strong style="color:rgba(251,191,36,0.9)">Heads up:</strong> Spots are filling up fast — especially Triple Share rooms.
+      <strong style="color:rgba(251,191,36,0.9)">Heads up:</strong> Spots are filling up fast — don't lose yours.
     </p>
   </div>
 
   <!-- Primary CTA -->
   <div style="text-align:center;margin-bottom:16px">
-    <a href="${siteUrl}/trips.html"
+    <a href="${siteUrl}/${config.returnPage}"
        style="display:inline-block;background:#86EFA9;color:#060d07;font-size:15px;font-weight:800;padding:15px 36px;border-radius:10px;text-decoration:none;letter-spacing:-0.2px">
       Complete My Booking →
-    </a>
-  </div>
-
-  <!-- Secondary CTAs -->
-  <div style="text-align:center;margin-bottom:24px">
-    <a href="${siteUrl}/punta-cana-deck.html"
-       style="color:#86EFA9;font-size:13px;text-decoration:underline">
-      View the Trip Deck
-    </a>
-    <span style="color:rgba(255,255,255,0.2);margin:0 10px">·</span>
-    <a href="https://chat.whatsapp.com/JNc6URa4lsh5qwROm2Inxn?mode=gi_t"
-       style="color:#86EFA9;font-size:13px;text-decoration:underline">
-      Message us on WhatsApp
     </a>
   </div>
 
@@ -322,7 +353,7 @@ async function sendAbandonedBookingEmail(booking) {
 </body>
 </html>`;
 
-    const subject = `${firstName}, your Punta Cana 2026 spot isn't reserved yet ✈`;
+    const subject = `${firstName}, your ${config.tripName} spot isn't reserved yet`;
 
     const res = await fetch('https://api.resend.com/emails', {
         method: 'POST',
@@ -357,20 +388,17 @@ async function sendBalanceConfirmationEmail(supabase, bookingId) {
 
     if (!booking) return;
 
+    const config = getTripConfig(booking.trip_id);
+    const bookingRef = booking.booking_ref;
+
     const { data: guests } = await supabase
         .from('trip_booking_guests')
         .select('*')
         .eq('booking_id', bookingId)
         .order('guest_number');
 
-    const ROOM_LABELS = {
-        triple: 'Triple Share Room (3 guests)',
-        double: 'Double Share Room (2 guests)',
-        single: 'Single Private Room'
-    };
-    const roomLabel = ROOM_LABELS[booking.room_type] || booking.room_type;
+    const roomLabel = getRoomLabel(config, booking.room_type, false);
     const totalPaid = (booking.price_per_person * booking.guest_count) / 100;
-    const bookingRef = booking.booking_ref;
 
     const guestRows = (guests || []).map((g, i) =>
         `<tr style="border-bottom:1px solid #2a2a2a">
@@ -379,6 +407,20 @@ async function sendBalanceConfirmationEmail(supabase, bookingId) {
             <td style="padding:10px 12px;color:#aaa;font-size:13px">${g.email}</td>
         </tr>`
     ).join('');
+
+    const whatsappBlock = config.whatsappLink
+        ? `<div style="background:linear-gradient(135deg,#0b2a1a,#0a1612);border:1px solid rgba(134,239,172,0.2);border-radius:14px;padding:24px;text-align:center;margin-bottom:16px">
+    <div style="font-size:10px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:#86EFA9;margin-bottom:10px">Stay Connected</div>
+    <p style="color:rgba(255,255,255,0.65);font-size:13px;margin:0 0 18px;line-height:1.65">${config.whatsappBalanceText}</p>
+    <a href="${config.whatsappLink}"
+       style="display:inline-block;background:#86EFA9;color:#060d07;font-size:14px;font-weight:800;padding:13px 28px;border-radius:10px;text-decoration:none">
+      Join the WhatsApp Group
+    </a>
+  </div>`
+        : `<div style="background:linear-gradient(135deg,#0b2a1a,#0a1612);border:1px solid rgba(134,239,172,0.2);border-radius:14px;padding:24px;text-align:center;margin-bottom:16px">
+    <div style="font-size:10px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:#86EFA9;margin-bottom:10px">Stay Connected</div>
+    <p style="color:rgba(255,255,255,0.65);font-size:13px;margin:0;line-height:1.65">${config.whatsappBalanceText}</p>
+  </div>`;
 
     const html = `<!DOCTYPE html>
 <html lang="en">
@@ -415,7 +457,7 @@ async function sendBalanceConfirmationEmail(supabase, bookingId) {
     <h1 style="color:#86EFA9;font-size:24px;font-weight:900;margin:0 0 10px;letter-spacing:-0.5px">You're Fully Paid!</h1>
     <p style="color:rgba(255,255,255,0.65);font-size:14px;margin:0 0 22px;line-height:1.65">
       Your payment is complete — you are <strong style="color:#fff">100% confirmed</strong> for<br>
-      <strong style="color:#fff">Punta Cana 2026</strong>. We can't wait to see you there.
+      <strong style="color:#fff">${config.tripName}</strong>. We can't wait to see you there.
     </p>
     <div style="display:inline-block;background:rgba(134,239,172,0.1);border:1px solid rgba(134,239,172,0.3);border-radius:10px;padding:10px 24px">
       <div style="font-size:10px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:rgba(134,239,172,0.7);margin-bottom:4px">Booking Reference</div>
@@ -433,11 +475,11 @@ async function sendBalanceConfirmationEmail(supabase, bookingId) {
       </tr>
       <tr style="border-bottom:1px solid #222">
         <td style="padding:10px 0;color:rgba(255,255,255,0.45);font-size:13px">Destination</td>
-        <td style="padding:10px 0;color:#fff;font-size:13px;text-align:right;font-weight:600">Punta Cana, Dominican Republic</td>
+        <td style="padding:10px 0;color:#fff;font-size:13px;text-align:right;font-weight:600">${config.destination}</td>
       </tr>
       <tr style="border-bottom:1px solid #222">
         <td style="padding:10px 0;color:rgba(255,255,255,0.45);font-size:13px">Travel Dates</td>
-        <td style="padding:10px 0;color:#fff;font-size:13px;text-align:right;font-weight:600">Nov 11–15, 2026 · 5 Days</td>
+        <td style="padding:10px 0;color:#fff;font-size:13px;text-align:right;font-weight:600">${config.dates}</td>
       </tr>
       <tr>
         <td style="padding:10px 0;color:rgba(255,255,255,0.45);font-size:13px">Total Paid</td>
@@ -461,22 +503,14 @@ async function sendBalanceConfirmationEmail(supabase, bookingId) {
     </table>
   </div>
 
-  <!-- WhatsApp CTA -->
-  <div style="background:linear-gradient(135deg,#0b2a1a,#0a1612);border:1px solid rgba(134,239,172,0.2);border-radius:14px;padding:24px;text-align:center;margin-bottom:16px">
-    <div style="font-size:10px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:#86EFA9;margin-bottom:10px">Stay Connected</div>
-    <p style="color:rgba(255,255,255,0.65);font-size:13px;margin:0 0 18px;line-height:1.65">All trip updates, itinerary details, and logistics will be shared in the WhatsApp group. Make sure you're in there.</p>
-    <a href="https://chat.whatsapp.com/JNc6URa4lsh5qwROm2Inxn?mode=gi_t"
-       style="display:inline-block;background:#86EFA9;color:#060d07;font-size:14px;font-weight:800;padding:13px 28px;border-radius:10px;text-decoration:none">
-      Join the WhatsApp Group
-    </a>
-  </div>
+  ${whatsappBlock}
 
   <!-- Thank you note -->
   <div style="background:rgba(134,239,172,0.05);border:1px solid rgba(134,239,172,0.15);border-radius:10px;padding:18px 20px;margin-bottom:24px;text-align:center">
     <p style="color:rgba(255,255,255,0.7);font-size:13px;line-height:1.75;margin:0">
       Thank you for trusting Makena Entertainment to curate this experience.<br>
       We've put everything into making this trip unforgettable — and it's going to be exactly that.<br>
-      <strong style="color:#86EFA9">See you in Punta Cana. 🌴</strong>
+      <strong style="color:#86EFA9">${config.closingText} ${config.closingEmoji}</strong>
     </p>
   </div>
 
@@ -491,7 +525,7 @@ async function sendBalanceConfirmationEmail(supabase, bookingId) {
 </body>
 </html>`;
 
-    const subject = `🎊 You're Fully Paid — Punta Cana 2026 · ${bookingRef}`;
+    const subject = `🎊 You're Fully Paid — ${config.tripName} · ${bookingRef}`;
 
     const allEmails = [...new Set(
         [booking.primary_email, ...(guests || []).map(g => g.email)]

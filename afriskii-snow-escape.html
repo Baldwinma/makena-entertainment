@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <title>Stay & Slay 2027 | Afriskii x Makena</title>
+    <meta name="description" content="Book Stay & Slay — 5-star accommodation + every event at Afriskii Fest 2027. Shared king room $800 or private room $1,200. Camelback Resort, Pennsylvania. February 4–8, 2027.">
+    <link rel="canonical" href="https://makenaevents.com/afriskii-snow-escape">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        html[data-theme="light"], html:not([data-theme="dark"]) {
+            --dark-bg: #080c14; --dark-bg-alt: #0d1220; --dark-bg-card: #111827;
+            --text-primary: #ffffff; --text-secondary: rgba(255,255,255,0.75);
+            --text-muted: rgba(255,255,255,0.45);
+            --navbar-bg: rgba(8,12,20,0.95); --navbar-bg-scrolled: rgba(8,12,20,0.98);
+            --mobile-nav-bg: rgba(8,12,20,0.98);
+        }
+        @media (prefers-color-scheme: light) {
+            html:not([data-theme]) {
+                --dark-bg: #080c14; --dark-bg-alt: #0d1220; --dark-bg-card: #111827;
+                --text-primary: #ffffff; --text-secondary: rgba(255,255,255,0.75);
+                --text-muted: rgba(255,255,255,0.45);
+                --navbar-bg: rgba(8,12,20,0.95); --navbar-bg-scrolled: rgba(8,12,20,0.98);
+                --mobile-nav-bg: rgba(8,12,20,0.98);
+            }
+        }
+        body { background-color: #080c14 !important; color: #ffffff !important; }
+        .nav-links a { color: rgba(255,255,255,0.85) !important; }
+        .nav-links a:hover { color: #86EFA9 !important; }
+
+        /* ── Hero ── */
+        .se-hero {
+            position: relative;
+            min-height: 480px;
+            display: flex;
+            align-items: center;
+            background: linear-gradient(160deg, rgba(5,10,25,0.92) 0%, rgba(8,16,40,0.88) 60%, rgba(0,0,0,0.95) 100%),
+                        url('images/afriskii-hero.jpg') center/cover no-repeat;
+            padding: 8rem 1rem 4rem;
+            text-align: center;
+        }
+        .se-hero .container { position: relative; z-index: 2; }
+        .se-hero__eyebrow {
+            display: inline-block;
+            background: rgba(134,239,172,0.12);
+            border: 1px solid rgba(134,239,172,0.3);
+            color: #86EFA9;
+            font-size: 0.7rem; font-weight: 700; letter-spacing: 0.18em;
+            text-transform: uppercase; padding: 0.3rem 1rem; border-radius: 100px;
+            margin-bottom: 1rem;
+        }
+        .se-hero h1 {
+            font-size: clamp(2rem, 5.5vw, 3.5rem); font-weight: 900;
+            color: #fff; line-height: 1.1; margin-bottom: 0.75rem;
+        }
+        .se-hero h1 span { color: #86EFA9; }
+        .se-hero p {
+            font-size: 1rem; color: rgba(255,255,255,0.7);
+            max-width: 500px; margin: 0 auto 0.5rem; line-height: 1.65;
+        }
+
+        /* ── Pricing Section ── */
+        .se-pricing {
+            padding: 4rem 0;
+        }
+        .se-pricing-card {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 2.5rem 2rem;
+            max-width: 680px;
+            margin: 0 auto;
+            position: relative;
+        }
+        .se-pricing-card__badge {
+            position: absolute; top: -13px; left: 50%; transform: translateX(-50%);
+            background: #86EFA9; color: #060d07;
+            font-size: 0.62rem; font-weight: 800; letter-spacing: 0.1em;
+            text-transform: uppercase; padding: 0.22rem 1rem;
+            border-radius: 100px; white-space: nowrap;
+        }
+        .se-price-row {
+            display: flex; align-items: flex-end; justify-content: center; gap: 0.5rem;
+            margin: 0.5rem 0 0.25rem;
+        }
+        .se-price-row .amount {
+            font-size: 3.5rem; font-weight: 900; color: #fff; line-height: 1;
+        }
+        .se-price-row .per { font-size: 0.9rem; color: rgba(255,255,255,0.4); margin-bottom: 0.6rem; }
+        .se-deposit-note {
+            text-align: center; font-size: 0.82rem;
+            color: rgba(245,200,66,0.85); margin-bottom: 2rem;
+        }
+        .se-includes {
+            display: grid; grid-template-columns: 1fr 1fr;
+            gap: 0.6rem; margin-bottom: 2rem;
+        }
+        .se-includes__item {
+            display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem;
+        }
+        .se-includes__item::before {
+            content: '✓'; color: #86EFA9; font-weight: 700; flex-shrink: 0;
+        }
+        @media (max-width: 480px) {
+            .se-includes { grid-template-columns: 1fr; }
+        }
+
+        /* ── Guest Count Picker ── */
+        .se-count-grid {
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.75rem;
+            margin: 1.5rem 0;
+        }
+        .se-count-card {
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 12px; padding: 1rem 0.5rem; text-align: center;
+            cursor: pointer; transition: all 0.2s; background: rgba(255,255,255,0.03);
+        }
+        .se-count-card:hover { border-color: rgba(134,239,172,0.4); }
+        .se-count-card.selected {
+            border-color: #86EFA9; background: rgba(134,239,172,0.07);
+            box-shadow: 0 0 0 1px #86EFA9;
+        }
+        .se-count-card__num { font-size: 1.6rem; font-weight: 900; color: #fff; line-height: 1; }
+        .se-count-card__label { font-size: 0.65rem; color: rgba(255,255,255,0.4); margin-top: 0.25rem; letter-spacing: 0.05em; }
+        .se-count-card.selected .se-count-card__num { color: #86EFA9; }
+        @media (max-width: 400px) { .se-count-grid { grid-template-columns: repeat(2, 1fr); } }
+
+        /* ── Booking Modal ── */
+        .booking-modal__backdrop {
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,0.82); z-index: 9999;
+            align-items: center; justify-content: center; padding: 1rem;
+            backdrop-filter: blur(4px);
+        }
+        .booking-modal__backdrop.is-open { display: flex; }
+        .booking-modal__card {
+            background: #111827; border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 20px; padding: 2rem 1.75rem; width: 100%; max-width: 480px;
+            max-height: 90vh; overflow-y: auto; position: relative;
+        }
+        .booking-modal__close {
+            position: absolute; top: 1rem; right: 1rem;
+            background: rgba(255,255,255,0.08); border: none;
+            color: #fff; border-radius: 50%; width: 32px; height: 32px;
+            cursor: pointer; font-size: 0.8rem; display: flex;
+            align-items: center; justify-content: center;
+        }
+        .booking-modal__close:hover { background: rgba(255,255,255,0.15); }
+        .booking-steps {
+            display: flex; gap: 6px; justify-content: center; margin-bottom: 1.5rem;
+        }
+        .booking-step-dot {
+            width: 6px; height: 6px; border-radius: 50%;
+            background: rgba(255,255,255,0.18); transition: background 0.2s;
+        }
+        .booking-step-dot.active { background: #86EFA9; width: 20px; border-radius: 3px; }
+        .booking-step { display: none; }
+        .booking-step.active { display: block; }
+        .booking-form { display: flex; flex-direction: column; gap: 0.85rem; }
+        .booking-form input, .booking-form select {
+            width: 100%; padding: 0.75rem 1rem; border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.05);
+            color: #fff; font-family: inherit; font-size: 0.9rem; box-sizing: border-box;
+        }
+        .booking-form input::placeholder { color: rgba(255,255,255,0.3); }
+        .booking-form .guest-divider {
+            font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase;
+            color: rgba(255,255,255,0.3); padding: 0.5rem 0 0.25rem;
+            border-top: 1px solid rgba(255,255,255,0.06); margin-top: 0.5rem;
+        }
+        .booking-nav {
+            display: flex; gap: 0.75rem; margin-top: 1.5rem; justify-content: flex-end;
+        }
+        .btn-next {
+            background: #86EFA9; color: #060d07;
+            border: none; border-radius: 8px; padding: 0.75rem 1.5rem;
+            font-weight: 700; font-size: 0.9rem; cursor: pointer; font-family: inherit;
+        }
+        .btn-next:hover { opacity: 0.88; }
+        .btn-next:disabled { opacity: 0.4; cursor: not-allowed; }
+        .btn-back {
+            background: transparent; border: 1px solid rgba(255,255,255,0.18);
+            color: rgba(255,255,255,0.7); border-radius: 8px; padding: 0.75rem 1.25rem;
+            font-size: 0.85rem; cursor: pointer; font-family: inherit;
+        }
+        .btn-back:hover { border-color: rgba(255,255,255,0.35); }
+        .booking-error {
+            color: #f87171; font-size: 0.8rem; margin-top: 0.5rem; display: none;
+        }
+        .review-summary {
+            background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px; padding: 1.25rem; margin-bottom: 1.25rem;
+            font-size: 0.88rem; line-height: 1.9;
+        }
+        .review-summary strong { color: #fff; }
+        .payment-toggle {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+        .payment-toggle__opt {
+            border: 1px solid rgba(255,255,255,0.12);
+            background: rgba(255,255,255,0.03); border-radius: 10px;
+            padding: 0.85rem 1rem; cursor: pointer; text-align: left;
+            color: #fff; font-family: inherit; transition: all 0.15s;
+        }
+        .payment-toggle__opt.active {
+            border-color: #86EFA9; background: rgba(134,239,172,0.06);
+        }
+        .payment-toggle__name { font-size: 0.8rem; font-weight: 700; display: block; }
+        .payment-toggle__price { font-size: 1.05rem; font-weight: 800; color: #86EFA9; display: block; }
+        .payment-toggle__sub { font-size: 0.68rem; color: rgba(255,255,255,0.4); display: block; }
+        .deposit-notice {
+            background: rgba(245,200,66,0.07); border: 1px solid rgba(245,200,66,0.2);
+            border-radius: 10px; padding: 0.9rem 1rem; font-size: 0.76rem;
+            color: rgba(255,255,255,0.65); line-height: 1.65; margin-bottom: 1rem;
+        }
+        .legal-checkbox {
+            display: flex; align-items: flex-start; gap: 0.6rem;
+            font-size: 0.8rem; color: rgba(255,255,255,0.6); cursor: pointer;
+            margin-bottom: 0.5rem;
+        }
+        .legal-checkbox input { margin-top: 0.1rem; flex-shrink: 0; }
+        .booking-success { text-align: center; padding: 1rem 0; }
+        .booking-success .tick { font-size: 2.5rem; margin-bottom: 0.75rem; }
+        .booking-success h3 { font-size: 1.4rem; font-weight: 800; color: #fff; margin-bottom: 0.5rem; }
+        .booking-success p { font-size: 0.88rem; color: rgba(255,255,255,0.65); margin-bottom: 0.75rem; }
+        .booking-ref-badge {
+            background: rgba(134,239,172,0.1); border: 1px solid rgba(134,239,172,0.3);
+            color: #86EFA9; font-size: 1.1rem; font-weight: 800; letter-spacing: 0.1em;
+            padding: 0.6rem 1.5rem; border-radius: 10px; display: inline-block;
+            margin: 0.5rem auto 1.25rem; font-family: monospace;
+        }
+        #se-stripe-container { min-height: 200px; }
+    </style>
+    <script src="theme-init.js"></script>
+    <script>document.documentElement.setAttribute('data-theme','dark');</script>
+</head>
+<body>
+    <nav class="navbar" id="navbar">
+        <div class="container">
+            <div class="nav-content">
+                <div class="logo">
+                    <a href="index.html">
+                        <img loading="lazy" src="images/logo-transparent.png" alt="Makena Logo">
+                    </a>
+                </div>
+                <button class="mobile-menu-toggle" id="mobileMenuToggle">
+                    <span></span><span></span><span></span>
+                </button>
+                <ul class="nav-links" id="navLinks">
+                    <li><a href="afriskii.html">← Afriskii</a></li>
+                    <li><a href="index.html#links">Connect</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <section class="se-hero">
+        <div class="container">
+            <div class="se-hero__eyebrow">Afriskii x Makena · Feb 4–8, 2027</div>
+            <h1>Stay &amp; <span>Slay.</span></h1>
+            <p>5-star accommodation at Camelback Resort plus every event of the weekend. Arrive Tuesday, leave Sunday. Everything handled. Just show up.</p>
+            <a href="afriskii.html" style="font-size:0.82rem; color:rgba(255,255,255,0.4); text-decoration:none; display:inline-block; margin-top:0.75rem;">← Back to Afriskii</a>
+        </div>
+    </section>
+
+    <!-- Pricing + Booking -->
+    <section class="se-pricing">
+        <div class="container">
+
+            <!-- Room type selector -->
+            <p style="text-align:center; font-size:0.68rem; letter-spacing:0.14em; text-transform:uppercase; opacity:0.4; margin-bottom:1.25rem;">Choose your room</p>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; max-width:680px; margin:0 auto 2rem;" id="seRoomGrid">
+
+                <!-- Shared -->
+                <div class="se-pricing-card" id="seCardShared" onclick="selectRoom('shared')" style="cursor:pointer; padding:1.75rem 1.5rem;">
+                    <p style="font-size:0.62rem; letter-spacing:0.14em; text-transform:uppercase; opacity:0.4; margin:0 0 0.4rem;">Shared King Room</p>
+                    <div class="se-price-row" style="justify-content:flex-start; margin:0 0 0.2rem;">
+                        <div class="amount" style="font-size:2.5rem;">$800</div>
+                        <div class="per">/person</div>
+                    </div>
+                    <div class="se-deposit-note" style="text-align:left; margin-bottom:1rem;">$200 deposit · balance $600</div>
+                    <div class="se-includes" style="grid-template-columns:1fr; gap:0.4rem;">
+                        <div class="se-includes__item" style="font-size:0.8rem;">Shared king bed room</div>
+                        <div class="se-includes__item" style="font-size:0.8rem;">All White Affair (Makena)</div>
+                        <div class="se-includes__item" style="font-size:0.8rem;">Pool Party + Bonfire (Afriskii)</div>
+                        <div class="se-includes__item" style="font-size:0.8rem;">Both Après Parties (Afriskii)</div>
+                        <div class="se-includes__item" style="font-size:0.8rem;">Sunday Group Dinner</div>
+                        <div class="se-includes__item" style="font-size:0.8rem;">Full Makena Atmosphere</div>
+                    </div>
+                </div>
+
+                <!-- Solo / Private -->
+                <div class="se-pricing-card" id="seCardPrivate" onclick="selectRoom('private')" style="cursor:pointer; padding:1.75rem 1.5rem;">
+                    <p style="font-size:0.62rem; letter-spacing:0.14em; text-transform:uppercase; opacity:0.4; margin:0 0 0.4rem;">Private Room · Solo</p>
+                    <div class="se-price-row" style="justify-content:flex-start; margin:0 0 0.2rem;">
+                        <div class="amount" style="font-size:2.5rem;">$1,200</div>
+                        <div class="per">/person</div>
+                    </div>
+                    <div class="se-deposit-note" style="text-align:left; margin-bottom:1rem;">$200 deposit · balance $1,000</div>
+                    <div class="se-includes" style="grid-template-columns:1fr; gap:0.4rem;">
+                        <div class="se-includes__item" style="font-size:0.8rem;">Private room — just for you</div>
+                        <div class="se-includes__item" style="font-size:0.8rem;">All White Affair (Makena)</div>
+                        <div class="se-includes__item" style="font-size:0.8rem;">Pool Party + Bonfire (Afriskii)</div>
+                        <div class="se-includes__item" style="font-size:0.8rem;">Both Après Parties (Afriskii)</div>
+                        <div class="se-includes__item" style="font-size:0.8rem;">Sunday Group Dinner</div>
+                        <div class="se-includes__item" style="font-size:0.8rem;">Full Makena Atmosphere</div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Guest count (shared only) -->
+            <div id="seSharedCountWrap" style="max-width:680px; margin:0 auto 1.5rem; display:none;">
+                <p style="font-size:0.75rem; opacity:0.5; text-align:center; margin-bottom:0.75rem;">How many people are you booking for?</p>
+                <div class="se-count-grid" style="grid-template-columns:repeat(2,1fr); max-width:280px; margin:0 auto;" id="seCountGrid">
+                    <div class="se-count-card" data-count="1" onclick="selectCount(1)">
+                        <div class="se-count-card__num">1</div>
+                        <div class="se-count-card__label">just me</div>
+                    </div>
+                    <div class="se-count-card" data-count="2" onclick="selectCount(2)">
+                        <div class="se-count-card__num">2</div>
+                        <div class="se-count-card__label">people</div>
+                    </div>
+                </div>
+                <p style="font-size:0.72rem; opacity:0.35; text-align:center; margin-top:0.6rem;">Booking for 1? Makena will match you with a roommate.</p>
+            </div>
+
+            <div style="max-width:680px; margin:0 auto; text-align:center;">
+                <button class="btn-next" id="seBookBtn" onclick="openBookingModal()" disabled style="padding: 1rem 2.5rem; font-size:1rem; border-radius:12px; min-width:280px;" id="seBookBtn">
+                    Reserve My Spot →
+                </button>
+                <p style="font-size:0.72rem; opacity:0.35; margin-top:0.6rem;">21+ · Non-refundable deposit · Limited spots</p>
+            </div>
+
+            <!-- What Happens Next -->
+            <div style="max-width:680px; margin: 3rem auto 0; display:grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap:1rem;">
+                <div style="text-align:center; padding:1.25rem; background:rgba(255,255,255,0.03); border-radius:12px; border:1px solid rgba(255,255,255,0.06);">
+                    <div style="font-size:1.5rem; margin-bottom:0.5rem;">1</div>
+                    <strong style="font-size:0.82rem; display:block; margin-bottom:0.25rem;">Reserve</strong>
+                    <p style="font-size:0.75rem; opacity:0.55; margin:0;">$200/person deposit locks your spot today</p>
+                </div>
+                <div style="text-align:center; padding:1.25rem; background:rgba(255,255,255,0.03); border-radius:12px; border:1px solid rgba(255,255,255,0.06);">
+                    <div style="font-size:1.5rem; margin-bottom:0.5rem;">2</div>
+                    <strong style="font-size:0.82rem; display:block; margin-bottom:0.25rem;">Coordinate</strong>
+                    <p style="font-size:0.75rem; opacity:0.55; margin:0;">Makena handles room assignments and logistics</p>
+                </div>
+                <div style="text-align:center; padding:1.25rem; background:rgba(255,255,255,0.03); border-radius:12px; border:1px solid rgba(255,255,255,0.06);">
+                    <div style="font-size:1.5rem; margin-bottom:0.5rem;">3</div>
+                    <strong style="font-size:0.82rem; display:block; margin-bottom:0.25rem;">Pay Balance</strong>
+                    <p style="font-size:0.75rem; opacity:0.55; margin:0;" id="seBalanceStep">Balance due by Jan 1, 2027</p>
+                </div>
+                <div style="text-align:center; padding:1.25rem; background:rgba(255,255,255,0.03); border-radius:12px; border:1px solid rgba(255,255,255,0.06);">
+                    <div style="font-size:1.5rem; margin-bottom:0.5rem;">4</div>
+                    <strong style="font-size:0.82rem; display:block; margin-bottom:0.25rem;">Show Up</strong>
+                    <p style="font-size:0.75rem; opacity:0.55; margin:0;">Feb 4, 2027 · Camelback Resort, PA</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Booking Modal -->
+    <div class="booking-modal__backdrop" id="seBookingModal" role="dialog" aria-modal="true">
+        <div class="booking-modal__card">
+            <button class="booking-modal__close" id="seCloseModal">✕</button>
+            <div class="booking-steps" id="seStepDots">
+                <div class="booking-step-dot active"></div>
+                <div class="booking-step-dot"></div>
+                <div class="booking-step-dot"></div>
+                <div class="booking-step-dot"></div>
+            </div>
+
+            <!-- Step 1: Confirm Selection -->
+            <div class="booking-step active" id="seStep1">
+                <h3 style="font-size:1.2rem;font-weight:800;color:#fff;margin-bottom:0.25rem;">Confirm Your Booking</h3>
+                <p style="font-size:0.8rem;color:rgba(255,255,255,0.4);margin-bottom:1.25rem;">Makena Snow Escape · Camelback Resort, PA · Feb 4–8, 2027</p>
+                <div class="review-summary" id="seStep1Summary"></div>
+                <div class="booking-error" id="seErr1"></div>
+                <div class="booking-nav">
+                    <button class="btn-next" onclick="goSeStep(2)">Enter Guest Details →</button>
+                </div>
+            </div>
+
+            <!-- Step 2: Guest Details -->
+            <div class="booking-step" id="seStep2">
+                <h3 style="font-size:1.2rem;font-weight:800;color:#fff;margin-bottom:0.25rem;" id="seStep2Title">Guest Details</h3>
+                <p style="font-size:0.8rem;color:rgba(255,255,255,0.4);margin-bottom:1rem;" id="seStep2Sub"></p>
+                <div class="booking-form" id="seGuestForms"></div>
+                <div class="booking-error" id="seErr2">Please fill in all required fields.</div>
+                <div class="booking-nav">
+                    <button class="btn-back" onclick="goSeStep(1)">← Back</button>
+                    <button class="btn-next" onclick="goSeStep(3)">Review →</button>
+                </div>
+            </div>
+
+            <!-- Step 3: Review + Payment Type -->
+            <div class="booking-step" id="seStep3">
+                <h3 style="font-size:1.2rem;font-weight:800;color:#fff;margin-bottom:1rem;">Review & Confirm</h3>
+                <div class="review-summary" id="seReviewSummary"></div>
+                <div class="payment-toggle" id="sePaymentToggle">
+                    <button class="payment-toggle__opt active" id="sePayDeposit" onclick="setSePayType('deposit')">
+                        <span class="payment-toggle__name">Deposit Only</span>
+                        <span class="payment-toggle__price" id="seDepositPrice"></span>
+                        <span class="payment-toggle__sub">Pay balance later</span>
+                    </button>
+                    <button class="payment-toggle__opt" id="sePayFull" onclick="setSePayType('full')">
+                        <span class="payment-toggle__name">Pay in Full</span>
+                        <span class="payment-toggle__price" id="seFullPrice"></span>
+                        <span class="payment-toggle__sub">No balance due</span>
+                    </button>
+                </div>
+                <div class="deposit-notice">
+                    <strong>⚠ $200 Non-Refundable Deposit Required</strong><br>
+                    By proceeding, you acknowledge that: (i) this deposit is partial payment toward your total; (ii) the deposit is strictly non-refundable and non-transferable; (iii) the remaining balance is due by January 1, 2027; (iv) failure to pay the balance may result in forfeiture of your reservation. Rooms are assigned and coordinated by Makena Entertainment.
+                </div>
+                <label class="legal-checkbox">
+                    <input type="checkbox" id="seLegalCheck">
+                    <span>I have read and agree to the deposit terms and cancellation policy above.</span>
+                </label>
+                <div class="booking-error" id="seErr3">Please accept the terms to continue.</div>
+                <div class="booking-nav">
+                    <button class="btn-back" onclick="goSeStep(2)">← Back</button>
+                    <button class="btn-next" id="sePayBtn" onclick="startSePayment()">Proceed to Payment →</button>
+                </div>
+            </div>
+
+            <!-- Step 4: Stripe -->
+            <div class="booking-step" id="seStep4">
+                <h3 style="font-size:1.2rem;font-weight:800;color:#fff;margin-bottom:0.4rem;">Secure Your Spot</h3>
+                <p style="font-size:0.8rem;color:rgba(255,255,255,0.4);margin-bottom:1.2rem;" id="sePaySubtitle"></p>
+                <div id="se-stripe-container"></div>
+                <div class="booking-error" id="seErr4"></div>
+            </div>
+
+            <!-- Step 5: Success -->
+            <div class="booking-step" id="seStep5">
+                <div class="booking-success">
+                    <div class="tick">🎉</div>
+                    <h3>You're locked in!</h3>
+                    <p>Your deposit was received. Your booking reference is:</p>
+                    <div class="booking-ref-badge" id="seSuccessRef"></div>
+                    <p>We'll be in touch with room coordination and next steps before the trip. Get in the group chat in the meantime.</p>
+                    <a href="https://chat.whatsapp.com/JNc6URa4lsh5qwROm2Inxn?mode=gi_t" target="_blank" rel="noopener"
+                        style="display:inline-block; background:#25D366; color:#fff; font-weight:700; padding:0.85rem 2rem; border-radius:10px; text-decoration:none; margin-top:0.5rem; font-size:0.9rem;">
+                        Join the Group Chat
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-bottom">
+                <p>&copy; 2027 Makena Entertainment. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+    <script>
+    (function () {
+        var ROOM_TYPES = {
+            shared:  { label: 'Stay & Slay — Shared King Room', price: 800,  deposit: 200, balance: 600,  maxGuests: 2, feeFull: 24.22, feeDeposit: 6.29, roomType: 'shared'  },
+            private: { label: 'Stay & Slay Solo — Private Room', price: 1200, deposit: 200, balance: 1000, maxGuests: 1, feeFull: 36.37, feeDeposit: 6.29, roomType: 'private' }
+        };
+
+        var selectedRoom = null;
+        var selectedCount = 1;
+        var sePayType = 'deposit';
+        var currentSeStep = 1;
+        var seStripeInstance = null;
+        var seStripeElements = null;
+        var seBookingRef = null;
+
+        var modal = document.getElementById('seBookingModal');
+
+        // Auto-select room from URL param (?room=shared or ?room=private)
+        var urlParams = new URLSearchParams(window.location.search);
+        var urlRoom = urlParams.get('room');
+        if (urlRoom === 'shared' || urlRoom === 'private') {
+            selectRoom(urlRoom);
+        }
+
+        // Check for success redirect
+        if (urlParams.get('booking') === 'success' && urlParams.get('ref')) {
+            document.getElementById('seSuccessRef').textContent = urlParams.get('ref');
+            activateSeStep(5);
+            modal.classList.add('is-open');
+            document.body.style.overflow = 'hidden';
+        }
+
+        window.selectRoom = function(type) {
+            selectedRoom = type;
+            var cfg = ROOM_TYPES[type];
+            selectedCount = cfg.maxGuests === 1 ? 1 : 0; // private auto-sets to 1, shared needs picker
+
+            // Highlight selected card
+            document.getElementById('seCardShared').style.borderColor = type === 'shared' ? '#86EFA9' : '';
+            document.getElementById('seCardShared').style.boxShadow = type === 'shared' ? '0 0 0 1px #86EFA9' : '';
+            document.getElementById('seCardPrivate').style.borderColor = type === 'private' ? '#86EFA9' : '';
+            document.getElementById('seCardPrivate').style.boxShadow = type === 'private' ? '0 0 0 1px #86EFA9' : '';
+
+            // Show guest count only for shared
+            var countWrap = document.getElementById('seSharedCountWrap');
+            countWrap.style.display = type === 'shared' ? 'block' : 'none';
+
+            // Update balance step text
+            document.getElementById('seBalanceStep').textContent =
+                '$' + cfg.balance.toLocaleString() + '/person due by Jan 1, 2027';
+
+            var btn = document.getElementById('seBookBtn');
+            if (type === 'private') {
+                btn.textContent = 'Reserve Private Room — $200 deposit →';
+                btn.disabled = false;
+            } else {
+                btn.textContent = 'Reserve My Spot →';
+                btn.disabled = true; // enable after count pick
+            }
+
+            // Reset count cards
+            document.querySelectorAll('.se-count-card').forEach(function(c) { c.classList.remove('selected'); });
+        };
+
+        window.selectCount = function(n) {
+            selectedCount = n;
+            document.querySelectorAll('.se-count-card').forEach(function(c) {
+                c.classList.toggle('selected', parseInt(c.dataset.count) === n);
+            });
+            var cfg = ROOM_TYPES[selectedRoom];
+            var btn = document.getElementById('seBookBtn');
+            var dep = '$' + (cfg.deposit * n).toLocaleString();
+            btn.textContent = 'Reserve ' + n + (n === 1 ? ' Spot' : ' Spots') + ' — ' + dep + ' deposit →';
+            btn.disabled = false;
+        };
+
+        window.openBookingModal = function() {
+            if (!selectedRoom) return;
+            var cfg = ROOM_TYPES[selectedRoom];
+            if (selectedRoom === 'shared' && !selectedCount) return;
+
+            sePayType = 'deposit';
+            currentSeStep = 1;
+            updateSeDots(1);
+
+            var count = selectedRoom === 'private' ? 1 : selectedCount;
+            var dep = (cfg.deposit * count).toLocaleString();
+
+            document.getElementById('seStep1Summary').innerHTML =
+                '<strong>' + cfg.label + '</strong><br>' +
+                'Camelback Resort · Tannersville, PA<br>' +
+                'Feb 4–8, 2027 · 5 nights · 21+<br><br>' +
+                (selectedRoom === 'shared'
+                    ? '<strong>' + count + (count === 1 ? ' person' : ' people') + '</strong> · '
+                    : '') +
+                '$' + (cfg.price * count).toLocaleString() + ' total<br>' +
+                '<span style="color:rgba(245,200,66,0.85)">Deposit today: $' + dep + '</span> · ' +
+                'Balance: $' + (cfg.balance * count).toLocaleString();
+
+            buildSeGuestForms();
+            activateSeStep(1);
+            modal.classList.add('is-open');
+            document.body.style.overflow = 'hidden';
+        };
+
+        document.getElementById('seCloseModal').addEventListener('click', closeSeModal);
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) closeSeModal();
+        });
+
+        function closeSeModal() {
+            modal.classList.remove('is-open');
+            document.body.style.overflow = '';
+            if (seStripeElements) seStripeElements.unmount && seStripeElements.unmount();
+            seStripeElements = null;
+            seStripeInstance = null;
+        }
+
+        function buildSeGuestForms() {
+            var COUNTRIES = ['United States','United Kingdom','Canada','France','Germany','Nigeria','Ghana','Cameroon','Ivory Coast','Senegal','South Africa','Kenya','Jamaica','Trinidad and Tobago','Barbados','Dominican Republic','Brazil','Colombia','Spain','Portugal','Netherlands','Belgium','Switzerland','Italy','Other'];
+            var count = selectedRoom === 'private' ? 1 : selectedCount;
+            var title = document.getElementById('seStep2Title');
+            var sub = document.getElementById('seStep2Sub');
+            title.textContent = 'Guest Details';
+            sub.textContent = count + (count === 1 ? ' person' : ' people') + ' — fill in details for each guest';
+            selectedCount = count; // normalise so collectSeGuests uses the right count
+
+            var container = document.getElementById('seGuestForms');
+            container.innerHTML = '';
+
+            for (var i = 0; i < selectedCount; i++) {
+                var isPrimary = i === 0;
+                var div = document.createElement('div');
+                div.innerHTML = '<div class="guest-divider">Guest ' + (i + 1) + (isPrimary ? ' (Primary Contact)' : '') + '</div>' +
+                    '<input type="text" placeholder="First name *" data-guest="' + i + '" data-field="firstName" required>' +
+                    '<input type="text" placeholder="Last name" data-guest="' + i + '" data-field="lastName">' +
+                    '<input type="email" placeholder="Email address *" data-guest="' + i + '" data-field="email" required>' +
+                    (isPrimary ? '<input type="tel" placeholder="Phone number *" data-guest="0" data-field="phone" required>' : '') +
+                    (isPrimary ? '<select data-guest="0" data-field="country"><option value="">Country *</option>' + COUNTRIES.map(function(c){ return '<option>' + c + '</option>'; }).join('') + '</select>' : '');
+                container.appendChild(div);
+            }
+        }
+
+        function collectSeGuests() {
+            var guests = [];
+            var ok = true;
+            for (var i = 0; i < selectedCount; i++) {
+                var fn = document.querySelector('[data-guest="' + i + '"][data-field="firstName"]');
+                var ln = document.querySelector('[data-guest="' + i + '"][data-field="lastName"]');
+                var em = document.querySelector('[data-guest="' + i + '"][data-field="email"]');
+                var ph = document.querySelector('[data-guest="' + i + '"][data-field="phone"]');
+                var co = document.querySelector('[data-guest="' + i + '"][data-field="country"]');
+                if (!fn || !fn.value.trim() || !em || !em.value.includes('@')) { ok = false; break; }
+                if (i === 0 && (!ph || !ph.value.trim() || !co || !co.value)) { ok = false; break; }
+                guests.push({
+                    firstName: fn.value.trim(), lastName: ln ? ln.value.trim() : '',
+                    email: em.value.trim(),
+                    phone: ph ? ph.value.trim() : '',
+                    country: co ? co.value : ''
+                });
+            }
+            return ok ? guests : null;
+        }
+
+        window.goSeStep = function(step) {
+            if (step === 3) {
+                var guests = collectSeGuests();
+                if (!guests) {
+                    document.getElementById('seErr2').style.display = 'block';
+                    return;
+                }
+                document.getElementById('seErr2').style.display = 'none';
+                buildSeReview();
+            }
+            activateSeStep(step);
+        };
+
+        function buildSeReview() {
+            var guests = collectSeGuests();
+            if (!guests) return;
+            var cfg = ROOM_TYPES[selectedRoom];
+            var count = selectedRoom === 'private' ? 1 : selectedCount;
+
+            document.getElementById('seReviewSummary').innerHTML =
+                '<strong>' + cfg.label + '</strong><br>' +
+                (count > 1 ? count + ' people · ' : '') + 'Feb 4–8, 2027<br>' +
+                'Camelback Resort, Tannersville, PA<br><br>' +
+                '<strong>Primary:</strong> ' + guests[0].firstName + ' ' + guests[0].lastName + ' — ' + guests[0].email;
+
+            document.getElementById('seDepositPrice').textContent = '$' + ((cfg.deposit + cfg.feeDeposit) * count).toFixed(2);
+            document.getElementById('seFullPrice').textContent = '$' + ((cfg.price + cfg.feeFull) * count).toFixed(2);
+        }
+
+        window.setSePayType = function(type) {
+            sePayType = type;
+            document.getElementById('sePayDeposit').classList.toggle('active', type === 'deposit');
+            document.getElementById('sePayFull').classList.toggle('active', type === 'full');
+        };
+
+        window.startSePayment = function() {
+            if (!document.getElementById('seLegalCheck').checked) {
+                document.getElementById('seErr3').style.display = 'block';
+                return;
+            }
+            document.getElementById('seErr3').style.display = 'none';
+
+            var guests = collectSeGuests();
+            if (!guests) return;
+
+            var cfg = ROOM_TYPES[selectedRoom];
+            var count = selectedRoom === 'private' ? 1 : selectedCount;
+
+            document.getElementById('sePaySubtitle').textContent =
+                sePayType === 'deposit'
+                ? 'Paying $' + (cfg.deposit * count).toLocaleString() + ' deposit + $' + (cfg.feeDeposit * count).toFixed(2) + ' processing fee'
+                : 'Paying $' + (cfg.price * count).toLocaleString() + ' in full + $' + (cfg.feeFull * count).toFixed(2) + ' processing fee';
+
+            var btn = document.getElementById('sePayBtn');
+            btn.disabled = true;
+            btn.textContent = 'Loading...';
+
+            activateSeStep(4);
+
+            fetch('/.netlify/functions/trip-booking-checkout', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    tripId: 'AS2027',
+                    roomType: cfg.roomType,
+                    guestCount: count,
+                    guests: guests,
+                    paymentType: sePayType,
+                    needsRoommate: false
+                })
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                btn.disabled = false; btn.textContent = 'Proceed to Payment →';
+                if (data.error) {
+                    document.getElementById('seErr4').textContent = data.error;
+                    document.getElementById('seErr4').style.display = 'block';
+                    activateSeStep(3);
+                    return;
+                }
+                seBookingRef = data.bookingRef;
+                mountSeStripe(data.clientSecret, data.publishableKey);
+            })
+            .catch(function() {
+                btn.disabled = false; btn.textContent = 'Proceed to Payment →';
+                document.getElementById('seErr4').textContent = 'Connection error — please try again.';
+                document.getElementById('seErr4').style.display = 'block';
+                activateSeStep(3);
+            });
+        };
+
+        function mountSeStripe(clientSecret, publishableKey) {
+            var container = document.getElementById('se-stripe-container');
+            container.innerHTML = '';
+            seStripeInstance = Stripe(publishableKey);
+            seStripeElements = seStripeInstance.elements({ clientSecret: clientSecret, appearance: { theme: 'night', variables: { colorPrimary: '#86EFA9', colorBackground: '#111827', colorText: '#ffffff', borderRadius: '8px' } } });
+            var paymentElement = seStripeElements.create('payment');
+            paymentElement.mount(container);
+
+            var form = document.createElement('form');
+            form.id = 'seStripeForm';
+            form.style.marginTop = '1rem';
+            var submitBtn = document.createElement('button');
+            submitBtn.type = 'submit';
+            submitBtn.className = 'btn-next';
+            submitBtn.style.width = '100%';
+            submitBtn.style.padding = '1rem';
+            submitBtn.style.borderRadius = '10px';
+            submitBtn.style.fontSize = '0.95rem';
+            submitBtn.textContent = 'Complete Payment';
+            form.appendChild(submitBtn);
+            container.after(form);
+
+            form.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Processing...';
+                var result = await seStripeElements.submit();
+                if (result.error) {
+                    document.getElementById('seErr4').textContent = result.error.message;
+                    document.getElementById('seErr4').style.display = 'block';
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Complete Payment';
+                    return;
+                }
+                var confirmResult = await seStripeInstance.confirmPayment({
+                    elements: seStripeElements,
+                    clientSecret: clientSecret,
+                    confirmParams: {
+                        return_url: window.location.origin + '/afriskii-snow-escape.html?booking=success&ref=' + seBookingRef + '&session_id={CHECKOUT_SESSION_ID}'
+                    },
+                    redirect: 'if_required'
+                });
+                if (confirmResult.error) {
+                    document.getElementById('seErr4').textContent = confirmResult.error.message;
+                    document.getElementById('seErr4').style.display = 'block';
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Complete Payment';
+                } else {
+                    document.getElementById('seSuccessRef').textContent = seBookingRef;
+                    activateSeStep(5);
+                }
+            });
+        }
+
+        function activateSeStep(step) {
+            currentSeStep = step;
+            for (var s = 1; s <= 5; s++) {
+                var el = document.getElementById('seStep' + s);
+                if (el) el.classList.toggle('active', s === step);
+            }
+            updateSeDots(step);
+        }
+
+        function updateSeDots(step) {
+            var dots = document.querySelectorAll('#seStepDots .booking-step-dot');
+            dots.forEach(function(d, i) { d.classList.toggle('active', i + 1 === step); });
+        }
+
+        function showSeStep(step) { activateSeStep(step); }
+
+    })();
+    </script>
+</body>
+</html>

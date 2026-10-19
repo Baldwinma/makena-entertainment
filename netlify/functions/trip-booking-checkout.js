@@ -16,15 +16,34 @@ function getBaseUrl(event) {
     return host ? `${proto}://${host}` : '';
 }
 
-const ROOM_CONFIG = {
-    triple: { label: 'Triple Share Room (3 guests)', guestCount: 3, pricePerPerson: 65000 },
-    double: { label: 'Double Share Room (2 guests)', guestCount: 2, pricePerPerson: 79900 },
-    single: { label: 'Single Private Room', guestCount: 1, pricePerPerson: 139900 }
+const TRIP_CONFIGS = {
+    PC2026: {
+        refPrefix: 'PC2026',
+        depositPerPerson: 25000,
+        returnPage: 'trips.html',
+        productName: 'Punta Cana 2026',
+        rooms: {
+            triple: { label: 'Triple Share Room (3 guests)', guestCount: 3, pricePerPerson: 65000 },
+            double: { label: 'Double Share Room (2 guests)', guestCount: 2, pricePerPerson: 79900 },
+            single: { label: 'Single Private Room', guestCount: 1, pricePerPerson: 139900 }
+        }
+    },
+    AS2027: {
+        refPrefix: 'AS2027',
+        depositPerPerson: 20000,
+        returnPage: 'afriskii-snow-escape.html',
+        productName: 'Makena Snow Escape 2027',
+        rooms: {
+            shared:  { label: 'Stay & Slay — Shared King Room',  guestCount: null, pricePerPerson: 80000 },
+            private: { label: 'Stay & Slay Solo — Private Room', guestCount: 1,    pricePerPerson: 120000 }
+        }
+    }
 };
 
+// Legacy alias kept for backwards compat with existing PC2026 bookings
+const ROOM_CONFIG = TRIP_CONFIGS.PC2026.rooms;
 const DEPOSIT_PER_PERSON = 25000;
-// Gross up so we net exactly $250 after Stripe's 2.9% + $0.30 flat fee
-const PROCESSING_FEE_PER_PERSON = Math.ceil((DEPOSIT_PER_PERSON + 30) / (1 - 0.029)) - DEPOSIT_PER_PERSON; // $7.77
+const PROCESSING_FEE_PER_PERSON = Math.ceil((DEPOSIT_PER_PERSON + 30) / (1 - 0.029)) - DEPOSIT_PER_PERSON;
 
 exports.handler = async function (event) {
     if (event.httpMethod !== 'POST') return json(405, { error: 'Method not allowed' });
@@ -41,13 +60,23 @@ exports.handler = async function (event) {
         return json(400, { error: 'Invalid request body.' });
     }
 
-    const { roomType, guests, needsRoommate, paymentType } = payload;
+    const { tripId, roomType, guestCount: explicitGuestCount, guests, needsRoommate, paymentType } = payload;
     const isFullPayment = paymentType === 'full';
-    const roomConfig = ROOM_CONFIG[roomType];
-    if (!roomConfig) return json(400, { error: 'Invalid room type. Must be triple, double, or single.' });
 
-    // Roommate requests only need the single person booking themselves
-    const effectiveGuestCount = needsRoommate ? 1 : roomConfig.guestCount;
+    // Select the right trip config — default to PC2026 for backwards compat
+    const tripKey = tripId === 'AS2027' ? 'AS2027' : 'PC2026';
+    const tripConfig = TRIP_CONFIGS[tripKey];
+
+    const roomConfig = tripConfig.rooms[roomType];
+    if (!roomConfig) {
+        const valid = Object.keys(tripConfig.rooms).join(', ');
+        return json(400, { error: `Invalid room type for ${tripKey}. Must be: ${valid}.` });
+    }
+
+    // AS2027 Snow Escape: guest count is sent explicitly (1-4 people)
+    const effectiveGuestCount = tripKey === 'AS2027'
+        ? Math.max(1, Math.min(4, parseInt(explicitGuestCount) || 1))
+        : (needsRoommate ? 1 : roomConfig.guestCount);
 
     if (!Array.isArray(guests) || guests.length !== effectiveGuestCount) {
         return json(400, { error: `${effectiveGuestCount} guest(s) required for this booking.` });
@@ -62,25 +91,31 @@ exports.handler = async function (event) {
     if (!String(primaryGuest.phone || '').trim()) return json(400, { error: 'Primary guest phone is required.' });
     if (!String(primaryGuest.country || '').trim()) return json(400, { error: 'Primary guest country is required.' });
 
-    const depositTotal = DEPOSIT_PER_PERSON * effectiveGuestCount;
+    const depositAmountPerPerson = tripConfig.depositPerPerson;
+    const depositTotal = depositAmountPerPerson * effectiveGuestCount;
 
-    // For full payment: gross-up processing fee per person so we net the full price
+    const processingFeePerPerson = Math.ceil((depositAmountPerPerson + 30) / (1 - 0.029)) - depositAmountPerPerson;
+
     const fullProcessingFeePerPerson = isFullPayment
         ? Math.ceil((roomConfig.pricePerPerson + 30) / (1 - 0.029)) - roomConfig.pricePerPerson
         : 0;
 
-    const bookingRef = 'PC2026-' + Date.now().toString(36).toUpperCase().slice(-6);
+    const bookingRef = tripConfig.refPrefix + '-' + Date.now().toString(36).toUpperCase().slice(-6);
+
+    const balanceTotal = roomConfig.pricePerPerson * effectiveGuestCount - depositTotal;
 
     const { data: booking, error: bookingError } = await supabase
         .from('trip_bookings')
         .insert({
             booking_ref: bookingRef,
+            trip_id: tripKey,
             room_type: roomType,
             price_per_person: roomConfig.pricePerPerson,
             guest_count: effectiveGuestCount,
-            deposit_per_person: DEPOSIT_PER_PERSON,
+            deposit_per_person: depositAmountPerPerson,
             deposit_total: depositTotal,
-            needs_roommate: needsRoommate ? true : false,
+            balance_total: isFullPayment ? 0 : balanceTotal,
+            needs_roommate: tripKey === 'PC2026' && needsRoommate ? true : false,
             payment_type: isFullPayment ? 'full' : 'deposit',
             payment_status: 'pending',
             primary_first_name: String(primaryGuest.firstName).trim(),
@@ -125,8 +160,8 @@ exports.handler = async function (event) {
                     price_data: {
                         currency: 'usd',
                         product_data: {
-                            name: `Punta Cana 2026 — ${roomConfig.label}`,
-                            description: `Full trip cost per person. No balance due after this payment.`
+                            name: `${tripConfig.productName} — ${roomConfig.label}`,
+                            description: `Full cost per person. No balance due after this payment.`
                         },
                         unit_amount: roomConfig.pricePerPerson
                     },
@@ -149,10 +184,10 @@ exports.handler = async function (event) {
                     price_data: {
                         currency: 'usd',
                         product_data: {
-                            name: `Punta Cana 2026 — ${roomConfig.label}`,
+                            name: `${tripConfig.productName} — ${roomConfig.label}`,
                             description: `Non-refundable deposit per person. Balance due as communicated by Makena Entertainment.`
                         },
-                        unit_amount: DEPOSIT_PER_PERSON
+                        unit_amount: depositAmountPerPerson
                     },
                     quantity: effectiveGuestCount
                 },
@@ -163,7 +198,7 @@ exports.handler = async function (event) {
                             name: 'Processing fee',
                             description: 'Card processing fee (2.9% + $0.30 per person)'
                         },
-                        unit_amount: PROCESSING_FEE_PER_PERSON
+                        unit_amount: processingFeePerPerson
                     },
                     quantity: effectiveGuestCount
                 }
@@ -173,7 +208,7 @@ exports.handler = async function (event) {
             mode: 'payment',
             ui_mode: 'embedded',
             line_items: lineItems,
-            return_url: `${baseUrl}/trips.html?booking=success&ref=${bookingRef}&session_id={CHECKOUT_SESSION_ID}`,
+            return_url: `${baseUrl}/${tripConfig.returnPage}?booking=success&ref=${bookingRef}&session_id={CHECKOUT_SESSION_ID}`,
             metadata: {
                 booking_type: 'trip',
                 booking_id: booking.id,

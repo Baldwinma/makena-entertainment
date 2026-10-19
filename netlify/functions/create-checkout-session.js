@@ -189,6 +189,21 @@ exports.handler = async function(event) {
         sessionMetadata.referral_code = payload.referralCode.toUpperCase().slice(0, 50);
     }
 
+    // Gross-up: add processing fee so Makena receives the full ticket amount after Stripe's cut
+    const subtotal = lineItems.reduce((sum, item) => sum + item.price_data.unit_amount * item.quantity, 0);
+    const processingFee = Math.ceil((subtotal + 30) / (1 - 0.029)) - subtotal;
+    lineItems.push({
+        price_data: {
+            currency: 'usd',
+            product_data: {
+                name: 'Processing fee',
+                description: 'Card processing fee (2.9% + $0.30)'
+            },
+            unit_amount: processingFee
+        },
+        quantity: 1
+    });
+
     try {
         const session = await stripe.checkout.sessions.create({
             mode: 'payment',

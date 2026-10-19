@@ -285,7 +285,7 @@
                         <div class="amount" style="font-size:2.5rem;">$800</div>
                         <div class="per">/person</div>
                     </div>
-                    <div class="se-deposit-note" style="text-align:left; margin-bottom:1rem;">$200 deposit · balance $600</div>
+                    <div class="se-deposit-note" style="text-align:left; margin-bottom:1rem;">$206.29 to reserve · $618.23 balance</div>
                     <div class="se-includes" style="grid-template-columns:1fr; gap:0.4rem;">
                         <div class="se-includes__item" style="font-size:0.8rem;">Shared king bed room</div>
                         <div class="se-includes__item" style="font-size:0.8rem;">All White Affair (Makena)</div>
@@ -303,7 +303,7 @@
                         <div class="amount" style="font-size:2.5rem;">$1,200</div>
                         <div class="per">/person</div>
                     </div>
-                    <div class="se-deposit-note" style="text-align:left; margin-bottom:1rem;">$200 deposit · balance $1,000</div>
+                    <div class="se-deposit-note" style="text-align:left; margin-bottom:1rem;">$206.29 to reserve · $1,030.18 balance</div>
                     <div class="se-includes" style="grid-template-columns:1fr; gap:0.4rem;">
                         <div class="se-includes__item" style="font-size:0.8rem;">Private room — just for you</div>
                         <div class="se-includes__item" style="font-size:0.8rem;">All White Affair (Makena)</div>
@@ -467,8 +467,8 @@
     <script>
     (function () {
         var ROOM_TYPES = {
-            shared:  { label: 'Stay & Slay — Shared King Room', price: 800,  deposit: 200, balance: 600,  maxGuests: 2, feeFull: 24.22, feeDeposit: 6.29, roomType: 'shared'  },
-            private: { label: 'Stay & Slay Solo — Private Room', price: 1200, deposit: 200, balance: 1000, maxGuests: 1, feeFull: 36.37, feeDeposit: 6.29, roomType: 'private' }
+            shared:  { label: 'Stay & Slay — Shared King Room', price: 800,  deposit: 200, balance: 600,  maxGuests: 2, feeFull: 24.21, feeDeposit: 6.29, roomType: 'shared'  },
+            private: { label: 'Stay & Slay Solo — Private Room', price: 1200, deposit: 200, balance: 1000, maxGuests: 1, feeFull: 36.15, feeDeposit: 6.29, roomType: 'private' }
         };
 
         var selectedRoom = null;
@@ -502,7 +502,7 @@
 
             var btn = document.getElementById('seBookBtn');
             if (type === 'private') {
-                btn.textContent = 'Reserve Private Room — $200 deposit →';
+                btn.textContent = 'Reserve Private Room — $' + (cfg.deposit + cfg.feeDeposit).toFixed(2) + ' deposit →';
                 btn.disabled = false;
             } else {
                 btn.textContent = 'Reserve My Spot →';
@@ -520,8 +520,8 @@
             });
             var cfg = ROOM_TYPES[selectedRoom];
             var btn = document.getElementById('seBookBtn');
-            var dep = '$' + (cfg.deposit * n).toLocaleString();
-            btn.textContent = 'Reserve ' + n + (n === 1 ? ' Spot' : ' Spots') + ' — ' + dep + ' deposit →';
+            var depTotal = ((cfg.deposit + cfg.feeDeposit) * n).toFixed(2);
+            btn.textContent = 'Reserve ' + n + (n === 1 ? ' Spot' : ' Spots') + ' — $' + depTotal + ' deposit →';
             btn.disabled = false;
         };
 
@@ -544,9 +544,9 @@
                 (selectedRoom === 'shared'
                     ? '<strong>' + count + (count === 1 ? ' person' : ' people') + '</strong> · '
                     : '') +
-                '$' + (cfg.price * count).toLocaleString() + ' total<br>' +
-                '<span style="color:rgba(245,200,66,0.85)">Deposit today: $' + dep + '</span> · ' +
-                'Balance: $' + (cfg.balance * count).toLocaleString();
+                '$' + (cfg.price * count).toLocaleString() + ' trip cost<br>' +
+                '<span style="color:rgba(245,200,66,0.85)">Charged today: $' + ((cfg.deposit + cfg.feeDeposit) * count).toFixed(2) + '</span> · ' +
+                'Balance: ~$' + (cfg.balance * count).toLocaleString() + ' (+ processing fee when due)';
 
             buildSeGuestForms();
             activateSeStep(1);
@@ -650,7 +650,9 @@
 
         window.startSePayment = function() {
             if (!document.getElementById('seLegalCheck').checked) {
-                document.getElementById('seErr3').style.display = 'block';
+                var e3 = document.getElementById('seErr3');
+                e3.textContent = 'Please accept the terms to continue.';
+                e3.style.display = 'block';
                 return;
             }
             document.getElementById('seErr3').style.display = 'none';
@@ -684,25 +686,35 @@
                     needsRoommate: false
                 })
             })
-            .then(function(r) { return r.json(); })
+            .then(function(r) {
+                if (!r.ok && r.status !== 200) {
+                    return r.json().catch(function() {
+                        throw new Error('Server error (' + r.status + '). Please try again.');
+                    });
+                }
+                return r.json();
+            })
             .then(function(data) {
                 btn.disabled = false; btn.textContent = 'Proceed to Payment →';
                 if (data.error) {
-                    document.getElementById('seErr4').textContent = data.error;
-                    document.getElementById('seErr4').style.display = 'block';
-                    activateSeStep(3);
+                    showSeBookingError(data.error);
                     return;
                 }
                 seBookingRef = data.bookingRef;
                 mountSeStripe(data.clientSecret, data.publishableKey);
             })
-            .catch(function() {
+            .catch(function(err) {
                 btn.disabled = false; btn.textContent = 'Proceed to Payment →';
-                document.getElementById('seErr4').textContent = 'Connection error — please try again.';
-                document.getElementById('seErr4').style.display = 'block';
-                activateSeStep(3);
+                showSeBookingError(err && err.message ? err.message : 'Connection error — please try again.');
             });
         };
+
+        function showSeBookingError(msg) {
+            var err3 = document.getElementById('seErr3');
+            err3.textContent = msg;
+            err3.style.display = 'block';
+            activateSeStep(3);
+        }
 
         function mountSeStripe(clientSecret, publishableKey) {
             var container = document.getElementById('se-stripe-container');

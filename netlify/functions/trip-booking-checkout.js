@@ -60,6 +60,16 @@ exports.handler = async function (event) {
         return json(400, { error: 'Invalid request body.' });
     }
 
+    try {
+        return await handleBooking(event, supabase, payload);
+    } catch (err) {
+        console.error('Unhandled trip-booking-checkout error:', err);
+        return json(500, { error: 'Something went wrong. Please try again.' });
+    }
+};
+
+async function handleBooking(event, supabase, payload) {
+
     const { tripId, roomType, guestCount: explicitGuestCount, guests, needsRoommate, paymentType } = payload;
     const isFullPayment = paymentType === 'full';
 
@@ -238,4 +248,4 @@ exports.handler = async function (event) {
         }
         return json(500, { error: 'Unable to start checkout. Please try again.' });
     }
-};
+}

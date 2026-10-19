@@ -420,6 +420,11 @@ document.addEventListener('keydown', (e) => {
         }, 0);
     }
 
+    function calcProcessingFee(subtotalCents) {
+        if (!subtotalCents) return 0;
+        return Math.ceil((subtotalCents + 30) / (1 - 0.029)) - subtotalCents;
+    }
+
     function getCartCurrency(cart) {
         cart = cart || getCart();
         var firstTicket = cart.map(function (item) { return TICKETS[item.ticketId]; }).find(Boolean);
@@ -470,8 +475,13 @@ document.addEventListener('keydown', (e) => {
             '</div>';
         }).join('');
 
+        var subtotal = cartTotal();
+        var fee = calcProcessingFee(subtotal);
+        var currency = getCartCurrency(cart);
         var totalEl = document.getElementById('makena-cart-total');
-        if (totalEl) totalEl.textContent = fmt(cartTotal(), getCartCurrency(cart));
+        if (totalEl) totalEl.textContent = fmt(subtotal + fee, currency);
+        var feeEl = document.getElementById('makena-cart-fee');
+        if (feeEl) feeEl.textContent = fmt(fee, currency);
 
         var referralSection = document.getElementById('makena-referral-section');
         if (referralSection) {
@@ -552,6 +562,7 @@ document.addEventListener('keydown', (e) => {
             '</div>' +
             '<div class="cart-panel__items" id="makena-cart-items"></div>' +
             '<div class="cart-panel__footer" id="makena-cart-footer" hidden>' +
+                '<div class="cart-panel__total-row" style="opacity:0.55;font-size:0.82rem"><span>Processing fee</span><span id="makena-cart-fee">—</span></div>' +
                 '<div class="cart-panel__total-row"><span>Total</span><span id="makena-cart-total">$0.00</span></div>' +
                 '<div class="cart-panel__referral" id="makena-referral-section" hidden>' +
                     '<p class="cart-panel__referral-notice">Package passes are not eligible for price discounts. Enter a referral code to credit your ambassador.</p>' +

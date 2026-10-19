@@ -858,7 +858,7 @@ const ticketCatalog = {
     },
     afriskii_all_access_pass: {
         name: 'Apres Ski All Access — Local Vibes',
-        description: 'Full access to all Makena events at Snow Weekend 2027. Includes Indoor Pool Party, Bonfire Party, Après Ski parties Fri & Sat — plus the full Makena atmosphere. No skiing or snowtubing included. February 4–7, 2027.',
+        description: 'Full access to all Makena events at Snow Weekend 2027. Includes Rich All White Party, Indoor Pool Party, Bonfire Party, Après Ski parties Fri & Sat — plus the full Makena atmosphere. No skiing or snowtubing included. February 4–7, 2027.',
         amount: 25500,
         currency: 'usd',
         date: 'February 4, 2027',

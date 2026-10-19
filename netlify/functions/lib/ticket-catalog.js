@@ -857,20 +857,16 @@ const ticketCatalog = {
         ]
     },
     afriskii_all_access_pass: {
-        name: 'Afriskii x Makena — All Access Pass',
-        description: 'Full access to all Makena & Afriskii events at Afriskii Fest 2027. Includes our signature All White Affair (Makena), Indoor Pool Party, Bonfire Party, Après Ski parties Fri & Sat — all hosted by Afriskii — plus the full Makena atmosphere. February 4–7, 2027.',
+        name: 'Apres Ski All Access — Local Vibes',
+        description: 'Full access to all Makena events at Snow Weekend 2027. Includes Indoor Pool Party, Bonfire Party, Après Ski parties Fri & Sat — plus the full Makena atmosphere. No skiing or snowtubing included. February 4–7, 2027.',
         amount: 25500,
         currency: 'usd',
         date: 'February 4, 2027',
         time: 'February 4 – 7, 2027',
         location: 'Camelback Resort, Tannersville, PA',
         tiers: [
-            { id: 'tier_1', name: 'Tier 1', amount: 25500, capacity: 20, lowInventoryThreshold: 5 },
-            { id: 'tier_2', name: 'Tier 2', amount: 30500, capacity: 20, lowInventoryThreshold: 5 },
-            { id: 'tier_3', name: 'Tier 3', amount: 35500, capacity: 20, lowInventoryThreshold: 5 },
-            { id: 'tier_4', name: 'Final Tier', amount: 40500, capacity: null, lowInventoryThreshold: 10 }
-        ],
-        includedEventIds: ['afriskii_all_white_affair']
+            { id: 'tier_1', name: 'General Admission', amount: 25500, capacity: null, lowInventoryThreshold: 10 }
+        ]
     },
     afriskii_ski_pass: {
         name: 'Afriskii x Makena — Ski & Snowboard Day Pass',

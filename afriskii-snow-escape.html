@@ -564,8 +564,7 @@
         function closeSeModal() {
             modal.classList.remove('is-open');
             document.body.style.overflow = '';
-            if (seStripeElements) seStripeElements.unmount && seStripeElements.unmount();
-            seStripeElements = null;
+            if (seStripeElements) { seStripeElements.destroy(); seStripeElements = null; }
             seStripeInstance = null;
         }
 
@@ -703,7 +702,7 @@
                     return;
                 }
                 seBookingRef = data.bookingRef;
-                mountSeStripe(data.clientSecret, data.publishableKey);
+                mountSeStripe(data.publishableKey, data.clientSecret);
             })
             .catch(function(err) {
                 btn.disabled = false; btn.textContent = 'Proceed to Payment →';
@@ -718,58 +717,34 @@
             activateSeStep(3);
         }
 
-        function mountSeStripe(clientSecret, publishableKey) {
+        function mountSeStripe(pubKey, clientSecret) {
             var container = document.getElementById('se-stripe-container');
-            container.innerHTML = '';
-            seStripeInstance = Stripe(publishableKey);
-            seStripeElements = seStripeInstance.elements({ clientSecret: clientSecret, appearance: { theme: 'night', variables: { colorPrimary: '#86EFA9', colorBackground: '#111827', colorText: '#ffffff', borderRadius: '8px' } } });
-            var paymentElement = seStripeElements.create('payment');
-            paymentElement.mount(container);
+            container.innerHTML = '<div style="text-align:center;padding:2rem;color:rgba(255,255,255,.4);font-size:.85rem">Loading payment form…</div>';
 
-            var form = document.createElement('form');
-            form.id = 'seStripeForm';
-            form.style.marginTop = '1rem';
-            var submitBtn = document.createElement('button');
-            submitBtn.type = 'submit';
-            submitBtn.className = 'btn-next';
-            submitBtn.style.width = '100%';
-            submitBtn.style.padding = '1rem';
-            submitBtn.style.borderRadius = '10px';
-            submitBtn.style.fontSize = '0.95rem';
-            submitBtn.textContent = 'Complete Payment';
-            form.appendChild(submitBtn);
-            container.after(form);
+            function init() {
+                if (seStripeElements) { seStripeElements.destroy(); seStripeElements = null; }
+                seStripeInstance = window.Stripe(pubKey);
+                seStripeInstance.initEmbeddedCheckout({ clientSecret: clientSecret })
+                    .then(function(checkout) {
+                        seStripeElements = checkout;
+                        container.innerHTML = '';
+                        checkout.mount(container);
+                    })
+                    .catch(function(err) {
+                        document.getElementById('seErr4').textContent = err.message || 'Failed to load payment form. Please try again.';
+                        document.getElementById('seErr4').style.display = 'block';
+                        container.innerHTML = '';
+                    });
+            }
 
-            form.addEventListener('submit', async function(e) {
-                e.preventDefault();
-                submitBtn.disabled = true;
-                submitBtn.textContent = 'Processing...';
-                var result = await seStripeElements.submit();
-                if (result.error) {
-                    document.getElementById('seErr4').textContent = result.error.message;
-                    document.getElementById('seErr4').style.display = 'block';
-                    submitBtn.disabled = false;
-                    submitBtn.textContent = 'Complete Payment';
-                    return;
-                }
-                var confirmResult = await seStripeInstance.confirmPayment({
-                    elements: seStripeElements,
-                    clientSecret: clientSecret,
-                    confirmParams: {
-                        return_url: window.location.origin + '/afriskii-snow-escape.html?booking=success&ref=' + seBookingRef + '&session_id={CHECKOUT_SESSION_ID}'
-                    },
-                    redirect: 'if_required'
-                });
-                if (confirmResult.error) {
-                    document.getElementById('seErr4').textContent = confirmResult.error.message;
-                    document.getElementById('seErr4').style.display = 'block';
-                    submitBtn.disabled = false;
-                    submitBtn.textContent = 'Complete Payment';
-                } else {
-                    document.getElementById('seSuccessRef').textContent = seBookingRef;
-                    activateSeStep(5);
-                }
-            });
+            if (!window.Stripe) {
+                var s = document.createElement('script');
+                s.src = 'https://js.stripe.com/v3/';
+                s.onload = init;
+                document.head.appendChild(s);
+            } else {
+                init();
+            }
         }
 
         function activateSeStep(step) {

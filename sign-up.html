@@ -5,18 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-    <title>Get 10% Off Tickets | Makena Events</title>
-    <meta name="description" content="Get 10% off Makena Events tickets. Sign up to receive your discount code for Afronation after parties, pool parties, and Paris events.">
-    <meta name="keywords" content="Makena Events discount, 10% off tickets, Afronation after parties tickets, Paris events discount">
+    <title>Get Your Discount Code | Makena Events</title>
+    <meta name="description" content="Stay in the loop with Makena Events. Sign up to be the first to know about upcoming events, early access, and exclusive first-buyer offers.">
+    <meta name="keywords" content="Makena Events, event notifications, Afronation after parties, Paris events, early access">
     <link rel="canonical" href="https://makenaevents.com/get-discount">
-    <meta property="og:title" content="Get 10% Off Tickets | Makena Events">
-    <meta property="og:description" content="Get 10% off Makena Events tickets. Sign up to receive your discount code for Afronation after parties, pool parties, and Paris events.">
+    <meta property="og:title" content="Stay in the Loop | Makena Events">
+    <meta property="og:description" content="Stay in the loop with Makena Events. Sign up to be the first to know about upcoming events, early access, and exclusive first-buyer offers.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://makenaevents.com/get-discount">
     <meta property="og:image" content="https://makenaevents.com/images/logo-transparent.png">
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Get 10% Off Tickets | Makena Events">
-    <meta name="twitter:description" content="Get 10% off Makena Events tickets. Sign up to receive your discount code for Afronation after parties, pool parties, and Paris events.">
+    <meta name="twitter:title" content="Stay in the Loop | Makena Events">
+    <meta name="twitter:description" content="Stay in the loop with Makena Events. Sign up to be the first to know about upcoming events, early access, and exclusive first-buyer offers.">
     <meta name="twitter:image" content="https://makenaevents.com/images/logo-transparent.png">
     <link rel="stylesheet" href="styles.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -90,8 +90,8 @@
             </div>
 
             <div class="discount-page-header">
-                <h1>🎁 Get 10% Off!</h1>
-                <p>Sign up and receive your exclusive discount code instantly</p>
+                <h1>Stay in the Loop!</h1>
+                <p>Sign up to be the first to know about upcoming events and early-access offers</p>
             </div>
 
             <div id="discountFormContainer">
@@ -130,20 +130,15 @@
                             <input type="tel" id="phone" name="phone" required pattern="[0-9]{6,15}" title="Please enter 6-15 digits only" placeholder="612345678">
                         </div>
                     </div>
-                    <button type="submit" class="btn btn-primary" style="width: 100%;">Get My 10% Discount</button>
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">Sign Me Up</button>
                 </form>
             </div>
 
             <div id="discountCodeContainer" style="display: none;">
                 <div class="discount-success">
-                    <h3>🎉 Your Discount Code</h3>
-                    <p>Here's your exclusive 10% discount code:</p>
-                    <div class="discount-code-display">
-                        <span id="discountCodeText">MAKENA10</span>
-                        <button id="copyCodeBtn" class="btn btn-secondary btn-small">Copy Code</button>
-                    </div>
-                    <p class="discount-instructions">Use this code at checkout on Eventbrite to get 10% off your tickets!</p>
-                    <p class="discount-note">💡 Click "Copy Code" to copy and be redirected to browse events!</p>
+                    <h3>🎉 You're on the list!</h3>
+                    <p>We'll notify you about upcoming events and early-access opportunities.</p>
+                    <p class="discount-note">First-time buyers may receive exclusive offers — stay tuned!</p>
                 </div>
             </div>
         </div>
@@ -229,14 +224,14 @@
             const emailHash = await hashEmail(email);
             const submittedHashes = JSON.parse(localStorage.getItem('makenaSubmittedHashes') || '[]');
             if (submittedHashes.includes(emailHash)) {
-                alert('This email has already been used to claim a discount code. Each email can only be used once.');
+                alert('This email is already signed up. Each email can only be used once.');
                 return;
             }
 
             // Show loading state
             const submitBtn = discountForm.querySelector('button[type="submit"]');
             const originalText = submitBtn.textContent;
-            submitBtn.textContent = 'Processing...';
+            submitBtn.textContent = 'Signing up...';
             submitBtn.disabled = true;
 
             try {
@@ -249,12 +244,12 @@
                 // Simulate API call
                 await new Promise(resolve => setTimeout(resolve, 1000));
 
-                // Hide form, show code
+                // Hide form, show confirmation
                 document.getElementById('discountFormContainer').style.display = 'none';
                 document.getElementById('discountCodeContainer').style.display = 'block';
 
                 // Store in localStorage to prevent duplicate submissions
-                localStorage.setItem('makenaDiscountClaimed', 'true');
+                localStorage.setItem('makenaSignedUp', 'true');
 
                 // Store the hashed email to prevent duplicate submissions
                 const submittedHashes = JSON.parse(localStorage.getItem('makenaSubmittedHashes') || '[]');
@@ -279,30 +274,16 @@
             return hashHex;
         }
 
-        // Copy discount code and redirect to home page
-        const copyCodeBtn = document.getElementById('copyCodeBtn');
-        if (copyCodeBtn) {
-            copyCodeBtn.addEventListener('click', () => {
-                const codeText = document.getElementById('discountCodeText').textContent;
-                navigator.clipboard.writeText(codeText).then(() => {
-                    copyCodeBtn.textContent = 'Copied! Redirecting...';
-                    setTimeout(() => {
-                        window.location.href = 'index.html';
-                    }, 1000);
-                });
-            });
-        }
-
-        // Check if user already claimed discount and show code directly
-        function checkAndShowExistingDiscount() {
-            if (localStorage.getItem('makenaDiscountClaimed')) {
+        // Show confirmation if already signed up
+        function checkAndShowExistingSignup() {
+            if (localStorage.getItem('makenaSignedUp')) {
                 document.getElementById('discountFormContainer').style.display = 'none';
                 document.getElementById('discountCodeContainer').style.display = 'block';
             }
         }
 
         // Run on page load
-        checkAndShowExistingDiscount();
+        checkAndShowExistingSignup();
     </script>
 </body>
 </html>

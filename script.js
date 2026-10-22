@@ -1204,7 +1204,7 @@ async function handleDiscountFormSubmit(form, formContainerId, codeContainerId) 
     const emailHash = await hashEmail(email);
     const submittedHashes = JSON.parse(localStorage.getItem('makenaSubmittedHashes') || '[]');
     if (submittedHashes.includes(emailHash)) {
-        alert('This email has already been used to claim a discount code. Each email can only be used once.');
+        alert('This email is already signed up. Each email can only be used once.');
         log('Duplicate email detected');
         return;
     }
@@ -1215,7 +1215,7 @@ async function handleDiscountFormSubmit(form, formContainerId, codeContainerId) 
     // Show loading state
     const submitBtn = form.querySelector('button[type="submit"]');
     const originalText = submitBtn.textContent;
-    submitBtn.textContent = 'Processing...';
+    submitBtn.textContent = 'Signing up...';
     submitBtn.disabled = true;
 
     try {
@@ -1243,14 +1243,14 @@ async function handleDiscountFormSubmit(form, formContainerId, codeContainerId) 
         document.getElementById(codeContainerId).style.display = 'block';
 
         // Store in localStorage to prevent duplicate submissions
-        localStorage.setItem('makenaDiscountClaimed', 'true');
+        localStorage.setItem('makenaSignedUp', 'true');
 
         // Store the hashed email to prevent duplicate submissions (privacy-preserving)
         const submittedHashes = JSON.parse(localStorage.getItem('makenaSubmittedHashes') || '[]');
         submittedHashes.push(emailHash);
         localStorage.setItem('makenaSubmittedHashes', JSON.stringify(submittedHashes));
 
-        log('✅ Discount code displayed');
+        log('✅ Sign-up confirmed');
 
     } catch (error) {
         console.error('Error submitting form'); // Only log generic error, not details
@@ -1270,42 +1270,14 @@ async function hashEmail(email) {
     return hashHex;
 }
 
-// Copy discount code functionality
-const copyCodeBtn = document.getElementById('copyCodeBtn');
-const copyCodeBtn2 = document.getElementById('copyCodeBtn2');
-
-if (copyCodeBtn) {
-    copyCodeBtn.addEventListener('click', () => {
-        copyDiscountCode('discountCodeText', copyCodeBtn);
-    });
-}
-
-if (copyCodeBtn2) {
-    copyCodeBtn2.addEventListener('click', () => {
-        copyDiscountCode('discountCodeText2', copyCodeBtn2);
-    });
-}
-
-function copyDiscountCode(textElementId, button) {
-    const codeText = document.getElementById(textElementId).textContent;
-    navigator.clipboard.writeText(codeText).then(() => {
-        const originalText = button.textContent;
-        button.textContent = 'Copied!';
-        setTimeout(() => {
-            button.textContent = originalText;
-        }, 2000);
-    });
-}
-
-// Check if user already claimed discount and show code directly
+// Show confirmation if already signed up
 function checkAndShowExistingDiscount() {
-    if (localStorage.getItem('makenaDiscountClaimed')) {
-        log('User has already claimed discount, showing code directly');
+    if (localStorage.getItem('makenaSignedUp')) {
+        log('User already signed up, showing confirmation directly');
 
-        // Don't show popup if already claimed
+        // Don't show popup if already signed up
         sessionStorage.setItem('discountPopupShown', 'true');
 
-        // Hide forms and show discount codes in both locations
         const formContainer1 = document.getElementById('discountFormContainer');
         const codeContainer1 = document.getElementById('discountCodeContainer');
         const formContainer2 = document.getElementById('discountFormContainer2');

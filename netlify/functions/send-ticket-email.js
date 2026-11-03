@@ -77,7 +77,7 @@ function buildBundleEmailHtml({ tickets, ticketData, holderName }) {
 
     return `
         <div style="font-family: Arial, sans-serif; color: #111827; line-height: 1.5;">
-            <h1 style="margin-bottom: 4px;">Your AfroPlusFest DC Pass</h1>
+            <h1 style="margin-bottom: 4px;">Your Makena Pass</h1>
             <p style="margin-top: 0; margin-bottom: 24px;">Hey ${escapeHtml(holderName || 'there')} — you're all set. Below are your individual tickets for each event. Show the QR code at the door for the event you're attending.</p>
             ${ticketBlocks}
             <p style="font-size: 13px; color: #6b7280;">Questions? Contact us at <a href="mailto:admin@makenaevents.com">admin@makenaevents.com</a></p>
@@ -152,7 +152,7 @@ async function sendBundleTicketEmail({ event, tickets, to }) {
         body: JSON.stringify({
             from: process.env.TICKET_FROM_EMAIL,
             to,
-            subject: `Your AfroPlusFest DC tickets — ${tickets.length} events`,
+            subject: `Your Makena tickets — ${tickets.length} events`,
             html: buildBundleEmailHtml({ ticketData, holderName }),
             attachments
         })

@@ -17,7 +17,10 @@ async function saveTicketsToSupabase(session, lineItems) {
     const supabase = getSupabase();
     if (!supabase) return { stored: false, reason: 'Supabase is not configured.' };
 
-    const totalQuantity = lineItems.reduce((s, li) => s + li.quantity, 0);
+    const isProcessingFee = li => /^processing\s+fee$/i.test((li.description || '').trim());
+    const realLineItems = lineItems.filter(li => !isProcessingFee(li));
+
+    const totalQuantity = realLineItems.reduce((s, li) => s + li.quantity, 0);
     const orderPayload = {
         stripe_session_id: session.id,
         stripe_payment_intent_id: typeof session.payment_intent === 'string'
@@ -33,7 +36,7 @@ async function saveTicketsToSupabase(session, lineItems) {
         updated_at: new Date().toISOString()
     };
 
-    const purchasedItems = lineItems.map(lineItem => {
+    const purchasedItems = realLineItems.map(lineItem => {
         const product = lineItem.price && lineItem.price.product && typeof lineItem.price.product === 'object'
             ? lineItem.price.product : null;
         const metadata = product && product.metadata ? product.metadata : {};
@@ -74,7 +77,7 @@ async function saveTicketsToSupabase(session, lineItems) {
     const holderName = (session.customer_details && session.customer_details.name) || 'Guest';
     const holderEmail = session.customer_details && session.customer_details.email;
 
-    const ticketPayloads = lineItems.flatMap(lineItem => (() => {
+    const ticketPayloads = realLineItems.flatMap(lineItem => (() => {
         const product = lineItem.price && lineItem.price.product && typeof lineItem.price.product === 'object'
             ? lineItem.price.product : null;
         const metadata = product && product.metadata ? product.metadata : {};

@@ -21,8 +21,8 @@ const TRIP_EMAIL_CONFIG = {
     },
     AS2027: {
         tripName: 'Stay & Slay 2027 · Afriskii x Makena',
-        destination: 'Camelback Resort, Tannersville, PA',
-        resort: 'Camelback Mountain Resort',
+        destination: 'Tannersville, PA',
+        resort: 'Private Airbnb',
         dates: 'Feb 4–8, 2027 · 5 Days',
         closingEmoji: '❄️',
         closingText: 'See you at Camelback.',
@@ -171,7 +171,7 @@ async function sendTripConfirmationEmail(supabase, bookingId) {
         <td style="padding:10px 0;color:#fff;font-size:13px;text-align:right;font-weight:600">${config.destination}</td>
       </tr>
       <tr style="border-bottom:1px solid #222">
-        <td style="padding:10px 0;color:rgba(255,255,255,0.45);font-size:13px">Resort</td>
+        <td style="padding:10px 0;color:rgba(255,255,255,0.45);font-size:13px">Accommodation</td>
         <td style="padding:10px 0;color:#fff;font-size:13px;text-align:right;font-weight:600">${config.resort}</td>
       </tr>
       <tr style="border-bottom:1px solid #222">

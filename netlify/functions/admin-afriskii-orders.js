@@ -40,11 +40,11 @@ exports.handler = async function(event) {
     const supabase = getSupabase();
     if (!supabase) return json(500, { error: 'Database not configured.' });
 
-    // All Afriskii event ticket orders (All White Affair + All Access Pass)
+    // All Afriskii event ticket orders (All White Affair + All Access Pass + Apres Ski)
     const { data: eventOrders, error: eventError } = await supabase
         .from('event_orders')
         .select('id, customer_name, customer_email, amount_total, currency, payment_status, event_name, quantity, ticket_tier_summary, purchased_at')
-        .ilike('event_name', 'Afriskii%')
+        .or('event_name.ilike.Afriskii%,event_name.ilike.Apres Ski%')
         .eq('payment_status', 'paid')
         .order('purchased_at', { ascending: false });
 
@@ -57,7 +57,7 @@ exports.handler = async function(event) {
     const { data: tickets, error: ticketError } = await supabase
         .from('event_tickets')
         .select('ticket_code, event_name, ticket_tier_name, ticket_tier_amount, holder_name, holder_email, status, checked_in, checked_in_at, created_at')
-        .ilike('event_name', 'Afriskii%')
+        .or('event_name.ilike.Afriskii%,event_name.ilike.Apres Ski%')
         .order('created_at', { ascending: false });
 
     if (ticketError) {
